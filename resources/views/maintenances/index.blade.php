@@ -53,13 +53,7 @@
                 <option value="{{ $i }}" {{ (isset($month) && $month == $i) ? 'selected' : '' }}>{{ \Carbon\Carbon::create()->month($i)->translatedFormat('F') }}</option>
             @endfor
         </select>
-        <select name="year" class="form-control" style="width:100px;">
-            <option value="">Semua Tahun</option>
-            @php $currentYear = date('Y'); @endphp
-            @for($i = $currentYear - 2; $i <= $currentYear + 2; $i++)
-                <option value="{{ $i }}" {{ (isset($year) && $year == $i) ? 'selected' : '' }}>{{ $i }}</option>
-            @endfor
-        </select>
+        <input type="number" name="year" class="form-control" style="width:90px;" value="{{ request('year') }}" placeholder="Tahun">
         <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-search"></i> Filter</button>
         <a href="{{ route('maintenances.index') }}" class="btn btn-secondary btn-sm">Reset</a>
     </form>

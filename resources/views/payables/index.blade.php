@@ -63,13 +63,7 @@
             </div>
             <div>
                 <label class="text-xs text-muted" style="display:block; margin-bottom:4px;">Tahun</label>
-                <select name="year" class="form-control" style="width:100px;">
-                    <option value="">Semua Tahun</option>
-                    @php $currentYear = date('Y'); @endphp
-                    @for($i = $currentYear - 2; $i <= $currentYear + 2; $i++)
-                        <option value="{{ $i }}" {{ (isset($year) && $year == $i) ? 'selected' : '' }}>{{ $i }}</option>
-                    @endfor
-                </select>
+                <input type="number" name="year" class="form-control" style="width:100px;" value="{{ request('year') }}" placeholder="Contoh: 2026">
             </div>
             <div style="display:flex; gap:8px;">
                 <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Filter</button>
