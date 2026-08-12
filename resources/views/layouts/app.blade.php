@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Admin Dashboard Kost Malang - Manajemen Kamar, Penyewa, dan Keuangan">
+    <title>@yield('title', 'Dashboard') — Admin Kost Malang</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+
+    @stack('styles')
+</head>
+<body>
+<div class="layout">
+
+    {{-- ===== SIDEBAR ===== --}}
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <a href="{{ route('dashboard') }}" class="brand-logo">
+                <div class="brand-icon">🏠</div>
+                <div class="brand-text">
+                    <div class="brand-name">Kost Malang</div>
+                    <div class="brand-sub">Admin Panel</div>
+                </div>
+            </a>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-section-label">Utama</div>
+
+            <a href="{{ route('dashboard') }}"
+               class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                <i class="bi bi-grid-1x2"></i>
+                Dashboard
+            </a>
+
+            <div class="nav-section-label" style="margin-top:8px;">Kamar & Penyewa</div>
+
+            <a href="{{ route('rooms.index') }}"
+               class="nav-item {{ request()->routeIs('rooms.*') ? 'active' : '' }}">
+                <i class="bi bi-door-open"></i>
+                Database Kamar
+            </a>
+
+            <a href="{{ route('tenants.index') }}"
+               class="nav-item {{ request()->routeIs('tenants.*') ? 'active' : '' }}">
+                <i class="bi bi-person-badge"></i>
+                Data Penyewa
+            </a>
+
+            <div class="nav-section-label" style="margin-top:8px;">Keuangan</div>
+
+            <a href="{{ route('payments.index') }}"
+               class="nav-item {{ request()->routeIs('payments.*') ? 'active' : '' }}">
+                <i class="bi bi-cash-coin"></i>
+                Omzet & Pembayaran
+            </a>
+
+            <a href="{{ route('maintenances.index') }}"
+               class="nav-item {{ request()->routeIs('maintenances.*') ? 'active' : '' }}">
+                <i class="bi bi-tools"></i>
+                Maintenance Kamar
+            </a>
+
+            <a href="{{ route('expenses.index') }}"
+               class="nav-item {{ request()->routeIs('expenses.*') ? 'active' : '' }}">
+                <i class="bi bi-receipt-cutoff"></i>
+                Pengeluaran Kost
+            </a>
+
+            <a href="{{ route('other-incomes.index') }}" class="nav-item {{ request()->routeIs('other-incomes.*') ? 'active' : '' }}">
+                <i class="bi bi-wallet-fill"></i> Pendapatan Lain-lain
+            </a>
+            <a href="{{ route('receivables.index') }}" class="nav-item {{ request()->routeIs('receivables.*') ? 'active' : '' }}">
+                <i class="bi bi-box-arrow-in-down-left"></i> Piutang Kost
+            </a>
+            <a href="{{ route('payables.index') }}" class="nav-item {{ request()->routeIs('payables.*') ? 'active' : '' }}">
+                <i class="bi bi-box-arrow-up-right"></i> Hutang Kost
+            </a>
+
+            <div class="nav-section-label" style="margin-top:8px;">Lainnya</div>
+
+            <a href="{{ route('lodgings.index') }}"
+               class="nav-item {{ request()->routeIs('lodgings.*') ? 'active' : '' }}">
+                <i class="bi bi-moon-stars"></i>
+                Penginapan
+            </a>
+
+            <a href="{{ route('settings.index') }}"
+               class="nav-item {{ request()->routeIs('settings.*') ? 'active' : '' }}">
+                <i class="bi bi-sliders2"></i>
+                Opsi & Pengaturan
+            </a>
+        </nav>
+
+        {{-- Sidebar Footer --}}
+        <div style="padding:16px 20px; border-top:1px solid var(--border-color);">
+            <div style="font-size:11px; color:var(--text-muted); text-align:center;">
+                Admin Kost v1.0 • {{ date('Y') }}
+            </div>
+        </div>
+    </aside>
+
+    {{-- ===== MAIN CONTENT ===== --}}
+    <div class="main-content">
+
+        {{-- Topbar --}}
+        <header class="topbar">
+            <div>
+                <div class="topbar-title">@yield('page-title', 'Dashboard')</div>
+                @hasSection('page-subtitle')
+                    <div class="topbar-subtitle">@yield('page-subtitle')</div>
+                @endif
+            </div>
+            <div class="topbar-actions">
+                <span class="topbar-date">
+                    <i class="bi bi-calendar3" style="margin-right:4px;"></i>
+                    {{ now()->translatedFormat('l, d F Y') }}
+                </span>
+                @yield('topbar-actions')
+            </div>
+        </header>
+
+        {{-- Page Content --}}
+        <main class="page-content">
+            {{-- Flash Messages --}}
+            @if (session('success'))
+                <div class="alert alert-success" id="flash-msg">
+                    <i class="bi bi-check-circle-fill"></i>
+                    {{ session('success') }}
+                </div>
+            @endif
+            @if (session('error'))
+                <div class="alert alert-danger" id="flash-msg">
+                    <i class="bi bi-exclamation-circle-fill"></i>
+                    {{ session('error') }}
+                </div>
+            @endif
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <div>
+                        <strong>Terdapat kesalahan input:</strong>
+                        <ul style="margin:6px 0 0 16px; font-size:12px;">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            @endif
+
+            @yield('content')
+        </main>
+    </div>
+</div>
+
+<script>
+// Auto dismiss flash message
+setTimeout(() => {
+    const flash = document.getElementById('flash-msg');
+    if (flash) {
+        flash.style.transition = 'opacity 0.5s';
+        flash.style.opacity = '0';
+        setTimeout(() => flash.remove(), 500);
+    }
+}, 4000);
+
+// Facility checkbox visual
+document.querySelectorAll('.facility-item input[type="checkbox"]').forEach(cb => {
+    const item = cb.closest('.facility-item');
+    if (cb.checked) item.classList.add('checked');
+    cb.addEventListener('change', () => {
+        item.classList.toggle('checked', cb.checked);
+    });
+});
+
+// Confirm delete
+document.querySelectorAll('form[data-confirm]').forEach(form => {
+    form.addEventListener('submit', (e) => {
+        if (!confirm(form.dataset.confirm || 'Yakin ingin menghapus data ini?')) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+
+@stack('scripts')
+</body>
+</html>

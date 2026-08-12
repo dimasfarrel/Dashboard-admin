@@ -1,0 +1,126 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\RoomMaintenance;
+use App\Models\Room;
+use App\Models\MaintenanceCategory;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+
+class RoomMaintenanceController extends Controller
+{
+    public function index(Request $request)
+    {
+        $query = RoomMaintenance::with('room');
+
+        if ($request->filled('room_id'))   $query->where('room_id', $request->room_id);
+        if ($request->filled('category'))  $query->where('category', $request->category);
+        if ($request->filled('status'))    $query->where('status', $request->status);
+
+        $maintenances = $query->orderByDesc('report_date')->paginate(15);
+        $rooms        = Room::orderBy('room_number')->get();
+        $categories   = MaintenanceCategory::orderBy('name')->get();
+
+        $totalCost    = RoomMaintenance::sum('cost');
+        $pending      = RoomMaintenance::where('status', 'pending')->count();
+        $inProgress   = RoomMaintenance::where('status', 'in_progress')->count();
+
+        return view('maintenances.index', compact('maintenances', 'rooms', 'categories', 'totalCost', 'pending', 'inProgress'));
+    }
+
+    public function create()
+    {
+        $rooms = Room::orderBy('room_number')->get();
+        $categories = MaintenanceCategory::orderBy('name')->get();
+        return view('maintenances.create', compact('rooms', 'categories'));
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'room_id'       => 'required|exists:rooms,id',
+            'category'      => 'required|exists:maintenance_categories,slug',
+            'item_name'     => 'required|string|max:255',
+            'description'   => 'required|string',
+            'cost'          => 'nullable|numeric|min:0',
+            'vendor'        => 'nullable|string|max:255',
+            'vendor_phone'  => 'nullable|string|max:20',
+            'report_date'   => 'required|date',
+            'done_date'     => 'nullable|date|after_or_equal:report_date',
+            'before_photo'  => 'nullable|image|max:2048',
+            'after_photo'   => 'nullable|image|max:2048',
+            'status'        => 'required|in:pending,in_progress,done,cancelled',
+            'notes'         => 'nullable|string',
+        ]);
+
+        if ($request->hasFile('before_photo')) {
+            $validated['before_photo'] = $request->file('before_photo')->store('maintenance', 'public');
+        }
+        if ($request->hasFile('after_photo')) {
+            $validated['after_photo'] = $request->file('after_photo')->store('maintenance', 'public');
+        }
+
+        $validated['cost'] = $validated['cost'] ?? 0;
+        RoomMaintenance::create($validated);
+
+        return redirect()->route('maintenances.index')
+            ->with('success', "Data maintenance berhasil dicatat!");
+    }
+
+    public function show(RoomMaintenance $maintenance)
+    {
+        $maintenance->load('room');
+        return view('maintenances.show', compact('maintenance'));
+    }
+
+    public function edit(RoomMaintenance $maintenance)
+    {
+        $rooms = Room::orderBy('room_number')->get();
+        $categories = MaintenanceCategory::orderBy('name')->get();
+        return view('maintenances.edit', compact('maintenance', 'rooms', 'categories'));
+    }
+
+    public function update(Request $request, RoomMaintenance $maintenance)
+    {
+        $validated = $request->validate([
+            'room_id'       => 'required|exists:rooms,id',
+            'category'      => 'required|exists:maintenance_categories,slug',
+            'item_name'     => 'required|string|max:255',
+            'description'   => 'required|string',
+            'cost'          => 'nullable|numeric|min:0',
+            'vendor'        => 'nullable|string|max:255',
+            'vendor_phone'  => 'nullable|string|max:20',
+            'report_date'   => 'required|date',
+            'done_date'     => 'nullable|date|after_or_equal:report_date',
+            'before_photo'  => 'nullable|image|max:2048',
+            'after_photo'   => 'nullable|image|max:2048',
+            'status'        => 'required|in:pending,in_progress,done,cancelled',
+            'notes'         => 'nullable|string',
+        ]);
+
+        if ($request->hasFile('before_photo')) {
+            if ($maintenance->before_photo) Storage::disk('public')->delete($maintenance->before_photo);
+            $validated['before_photo'] = $request->file('before_photo')->store('maintenance', 'public');
+        }
+        if ($request->hasFile('after_photo')) {
+            if ($maintenance->after_photo) Storage::disk('public')->delete($maintenance->after_photo);
+            $validated['after_photo'] = $request->file('after_photo')->store('maintenance', 'public');
+        }
+
+        $validated['cost'] = $validated['cost'] ?? 0;
+        $maintenance->update($validated);
+
+        return redirect()->route('maintenances.show', $maintenance)
+            ->with('success', "Data maintenance berhasil diperbarui!");
+    }
+
+    public function destroy(RoomMaintenance $maintenance)
+    {
+        if ($maintenance->before_photo) Storage::disk('public')->delete($maintenance->before_photo);
+        if ($maintenance->after_photo)  Storage::disk('public')->delete($maintenance->after_photo);
+        $maintenance->delete();
+        return redirect()->route('maintenances.index')
+            ->with('success', "Data maintenance berhasil dihapus.");
+    }
+}
