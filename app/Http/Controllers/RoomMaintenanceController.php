@@ -17,16 +17,37 @@ class RoomMaintenanceController extends Controller
         if ($request->filled('room_id'))   $query->where('room_id', $request->room_id);
         if ($request->filled('category'))  $query->where('category', $request->category);
         if ($request->filled('status'))    $query->where('status', $request->status);
+        if ($request->filled('month'))     $query->whereMonth('report_date', $request->month);
+        if ($request->filled('year'))      $query->whereYear('report_date', $request->year);
 
         $maintenances = $query->orderByDesc('report_date')->paginate(15);
         $rooms        = Room::orderBy('room_number')->get();
         $categories   = MaintenanceCategory::orderBy('name')->get();
 
-        $totalCost    = RoomMaintenance::sum('cost');
-        $pending      = RoomMaintenance::where('status', 'pending')->count();
-        $inProgress   = RoomMaintenance::where('status', 'in_progress')->count();
+        $totalCostQuery = RoomMaintenance::query();
+        if ($request->filled('month')) $totalCostQuery->whereMonth('report_date', $request->month);
+        if ($request->filled('year'))  $totalCostQuery->whereYear('report_date', $request->year);
+        $totalCost = $totalCostQuery->sum('cost');
 
-        return view('maintenances.index', compact('maintenances', 'rooms', 'categories', 'totalCost', 'pending', 'inProgress'));
+        $pendingQuery = RoomMaintenance::where('status', 'pending');
+        if ($request->filled('month')) $pendingQuery->whereMonth('report_date', $request->month);
+        if ($request->filled('year'))  $pendingQuery->whereYear('report_date', $request->year);
+        $pending = $pendingQuery->count();
+
+        $inProgressQuery = RoomMaintenance::where('status', 'in_progress');
+        if ($request->filled('month')) $inProgressQuery->whereMonth('report_date', $request->month);
+        if ($request->filled('year'))  $inProgressQuery->whereYear('report_date', $request->year);
+        $inProgress = $inProgressQuery->count();
+
+        $resolvedCount = RoomMaintenance::where('status', 'resolved');
+        if ($request->filled('month')) $resolvedCount->whereMonth('report_date', $request->month);
+        if ($request->filled('year'))  $resolvedCount->whereYear('report_date', $request->year);
+        $resolvedCount = $resolvedCount->count();
+
+        $month = $request->input('month');
+        $year = $request->input('year');
+
+        return view('maintenances.index', compact('maintenances', 'rooms', 'categories', 'totalCost', 'pending', 'inProgress', 'resolvedCount', 'month', 'year'));
     }
 
     public function create()

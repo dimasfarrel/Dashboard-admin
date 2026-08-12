@@ -10,6 +10,8 @@ class PayableController extends Controller
     public function index(Request $request)
     {
         $status = $request->input('status');
+        $month = $request->input('month');
+        $year = $request->input('year');
 
         $query = Loan::where('type', 'payable');
 
@@ -17,6 +19,13 @@ class PayableController extends Controller
             $query->where('is_paid', true);
         } elseif ($status === 'unpaid') {
             $query->where('is_paid', false);
+        }
+
+        if ($month) {
+            $query->whereMonth('loan_date', $month);
+        }
+        if ($year) {
+            $query->whereYear('loan_date', $year);
         }
 
         $loans = $query->orderBy('loan_date', 'desc')->paginate(15);
@@ -38,8 +47,7 @@ class PayableController extends Controller
         })->orWhere(function($q) {
             $q->where('type', 'payable')->whereNull('loan_id');
         })->sum('amount');
-        
-        return view('payables.index', compact('loans', 'activeLoans', 'unlinkedRepayments', 'totalLoansCount', 'paidLoansCount', 'unpaidLoansCount', 'totalLoansAmount', 'paidAmount', 'status'));
+        return view('payables.index', compact('loans', 'activeLoans', 'unlinkedRepayments', 'totalLoansCount', 'paidLoansCount', 'unpaidLoansCount', 'totalLoansAmount', 'paidAmount', 'status', 'month', 'year'));
     }
 
     public function store(Request $request)

@@ -47,6 +47,19 @@
             <option value="done"        {{ request('status') == 'done'        ? 'selected' : '' }}>✅ Selesai</option>
             <option value="cancelled"   {{ request('status') == 'cancelled'   ? 'selected' : '' }}>❌ Batal</option>
         </select>
+        <select name="month" class="form-control" style="width:130px;">
+            <option value="">Semua Bulan</option>
+            @for($i=1; $i<=12; $i++)
+                <option value="{{ $i }}" {{ (isset($month) && $month == $i) ? 'selected' : '' }}>{{ \Carbon\Carbon::create()->month($i)->translatedFormat('F') }}</option>
+            @endfor
+        </select>
+        <select name="year" class="form-control" style="width:100px;">
+            <option value="">Semua Tahun</option>
+            @php $currentYear = date('Y'); @endphp
+            @for($i = $currentYear - 2; $i <= $currentYear + 2; $i++)
+                <option value="{{ $i }}" {{ (isset($year) && $year == $i) ? 'selected' : '' }}>{{ $i }}</option>
+            @endfor
+        </select>
         <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-search"></i> Filter</button>
         <a href="{{ route('maintenances.index') }}" class="btn btn-secondary btn-sm">Reset</a>
     </form>
