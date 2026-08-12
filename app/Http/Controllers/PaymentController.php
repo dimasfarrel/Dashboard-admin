@@ -39,10 +39,10 @@ class PaymentController extends Controller
         // Auto-mark overdue on every page visit
         $this->autoMarkOverdue();
 
-        $selectedPeriodMonth = $request->input('period_month');
-        $selectedPeriodYear  = $request->input('period_year');
-        $selectedPayMonth    = $request->input('pay_month');
-        $selectedPayYear     = $request->input('pay_year');
+        $selectedPeriodMonth = $request->input('period_month') ? (int) $request->input('period_month') : null;
+        $selectedPeriodYear  = $request->input('period_year') ? (int) $request->input('period_year') : null;
+        $selectedPayMonth    = $request->input('pay_month') ? (int) $request->input('pay_month') : null;
+        $selectedPayYear     = $request->input('pay_year') ? (int) $request->input('pay_year') : null;
         $selectedStatus      = $request->input('status');
         $selectedRoomId      = $request->input('room_id');
         $selectedType        = $request->input('type');
@@ -106,7 +106,7 @@ class PaymentController extends Controller
                         continue; // Virtual unpaid have no pay date
                     }
 
-                    $monthName = Carbon::create()->month($selectedPeriodMonth)->translatedFormat('F');
+                    $monthName = Carbon::create()->setMonth((int)$selectedPeriodMonth)->translatedFormat('F');
                     
                     $virtualUnpaidList->push([
                         'type'      => 'rental',
@@ -182,7 +182,7 @@ class PaymentController extends Controller
                 'amount'    => $o->amount,
                 'method'    => '—',
                 'status'    => 'paid',
-                'period'    => \Carbon\Carbon::create()->month($o->period_month)->translatedFormat('F') . ' ' . $o->period_year,
+                'period'    => \Carbon\Carbon::now()->setMonth((int)$o->period_month)->translatedFormat('F') . ' ' . $o->period_year,
                 'date'      => $o->income_date,
                 'created_at'=> $o->created_at,
                 'due_date'  => null,

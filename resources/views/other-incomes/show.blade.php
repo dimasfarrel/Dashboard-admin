@@ -34,7 +34,7 @@
             </div>
             <div>
                 <div class="text-muted text-sm">Periode</div>
-                <div>{{ \Carbon\Carbon::create()->month($otherIncome->period_month)->translatedFormat('F') }} {{ $otherIncome->period_year }}</div>
+                <div>{{ \Carbon\Carbon::now()->setMonth((int)($otherIncome->period_month))->translatedFormat('F') }} {{ $otherIncome->period_year }}</div>
             </div>
         </div>
 

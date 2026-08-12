@@ -50,7 +50,7 @@
         <select name="month" class="form-control" style="width:130px;">
             <option value="">Semua Bulan</option>
             @for($i=1; $i<=12; $i++)
-                <option value="{{ $i }}" {{ (isset($month) && $month == $i) ? 'selected' : '' }}>{{ \Carbon\Carbon::create()->month($i)->translatedFormat('F') }}</option>
+                <option value="{{ $i }}" {{ (isset($month) && $month == $i) ? 'selected' : '' }}>{{ \Carbon\Carbon::now()->setMonth((int)($i))->translatedFormat('F') }}</option>
             @endfor
         </select>
         <input type="number" name="year" class="form-control" style="width:90px;" value="{{ request('year') }}" placeholder="Tahun">

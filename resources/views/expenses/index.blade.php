@@ -18,7 +18,7 @@
                 <select name="month" class="form-control" style="width:120px;" onchange="this.form.submit()">
                     @foreach(range(1,12) as $m)
                     <option value="{{ $m }}" {{ $currentMonth == $m ? 'selected' : '' }}>
-                        {{ \Carbon\Carbon::create()->month($m)->translatedFormat('M') }}
+                        {{ \Carbon\Carbon::now()->setMonth((int)($m))->translatedFormat('M') }}
                     </option>
                     @endforeach
                 </select>
@@ -80,7 +80,7 @@
             <option value="">Semua Bulan</option>
             @foreach(range(1,12) as $m)
             <option value="{{ $m }}" {{ request('month') == $m ? 'selected' : '' }}>
-                {{ \Carbon\Carbon::create()->month($m)->translatedFormat('F') }}
+                {{ \Carbon\Carbon::now()->setMonth((int)($m))->translatedFormat('F') }}
             </option>
             @endforeach
         </select>
@@ -118,7 +118,7 @@
                         <strong>{{ $exp->title }}</strong>
                         @if($exp->description)<br><span class="text-muted text-sm">{{ Str::limit($exp->description, 40) }}</span>@endif
                     </td>
-                    <td class="text-sm fw-600">{{ \Carbon\Carbon::create()->month($exp->period_month)->translatedFormat('F') }} {{ $exp->period_year }}</td>
+                    <td class="text-sm fw-600">{{ \Carbon\Carbon::now()->setMonth((int)($exp->period_month))->translatedFormat('F') }} {{ $exp->period_year }}</td>
                     <td class="money-text fw-600" style="color:var(--accent-red);">Rp {{ number_format($exp->amount, 0, ',', '.') }}</td>
                     <td>
                         <div class="flex gap-2">

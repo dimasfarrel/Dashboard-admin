@@ -77,7 +77,7 @@
                         <option value="">Semua Bulan</option>
                         @foreach(range(1,12) as $m)
                         <option value="{{ $m }}" {{ request('period_month') == $m ? 'selected' : '' }}>
-                            {{ \Carbon\Carbon::create()->month($m)->translatedFormat('F') }}
+                            {{ \Carbon\Carbon::now()->setMonth((int)($m))->translatedFormat('F') }}
                         </option>
                         @endforeach
                     </select>
@@ -94,7 +94,7 @@
                         <option value="">Semua Bulan</option>
                         @foreach(range(1,12) as $m)
                         <option value="{{ $m }}" {{ request('pay_month') == $m ? 'selected' : '' }}>
-                            {{ \Carbon\Carbon::create()->month($m)->translatedFormat('F') }}
+                            {{ \Carbon\Carbon::now()->setMonth((int)($m))->translatedFormat('F') }}
                         </option>
                         @endforeach
                     </select>

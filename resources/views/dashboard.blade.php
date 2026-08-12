@@ -9,7 +9,7 @@
         <select name="month" class="form-control" style="width:130px; padding:6px 10px; font-size:13px;" onchange="document.getElementById('dashMonthForm').submit()">
             @foreach(range(1,12) as $m)
             <option value="{{ $m }}" {{ $currentMonth == $m ? 'selected' : '' }}>
-                {{ \Carbon\Carbon::create()->month($m)->translatedFormat('F') }}
+                {{ \Carbon\Carbon::now()->setMonth((int)($m))->translatedFormat('F') }}
             </option>
             @endforeach
         </select>

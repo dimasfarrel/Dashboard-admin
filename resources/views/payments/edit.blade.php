@@ -29,7 +29,7 @@
                 <select name="period_month" class="form-control" required>
                     @foreach(range(1,12) as $m)
                     <option value="{{ $m }}" {{ old('period_month', $payment->period_month) == $m ? 'selected' : '' }}>
-                        {{ \Carbon\Carbon::create()->month($m)->translatedFormat('F') }}
+                        {{ \Carbon\Carbon::now()->setMonth((int)($m))->translatedFormat('F') }}
                     </option>
                     @endforeach
                 </select>
