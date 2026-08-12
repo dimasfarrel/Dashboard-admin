@@ -116,7 +116,14 @@
                     <td>
                         <div class="flex gap-2">
                             <a href="{{ route('receivables.show', $loan) }}" class="btn btn-info btn-sm btn-icon"><i class="bi bi-eye"></i></a>
-                            <button type="button" class="btn btn-warning btn-sm btn-icon" onclick="openEditLoanModal({{ $loan->id }}, '{{ addslashes($loan->name) }}', '{{ addslashes($loan->purpose) }}', '{{ $loan->loan_date->format('Y-m-d') }}', {{ $loan->total_amount }}, '{{ addslashes($loan->notes) }}')">
+                            <button type="button" class="btn btn-warning btn-sm btn-icon" 
+                                data-id="{{ $loan->id }}" 
+                                data-name="{{ $loan->name }}" 
+                                data-purpose="{{ $loan->purpose }}" 
+                                data-date="{{ $loan->loan_date->format('Y-m-d') }}" 
+                                data-amount="{{ $loan->total_amount }}" 
+                                data-notes="{{ $loan->notes }}" 
+                                onclick="openEditLoanModal(this)">
                                 <i class="bi bi-pencil"></i>
                             </button>
                             <form action="{{ route('receivables.destroy', $loan) }}" method="POST" data-confirm="Hapus data piutang ini? Semua riwayat pelunasan terkait juga akan terhapus.">
@@ -361,14 +368,14 @@ function openModal(id) {
 function closeModal(id) {
     document.getElementById(id).classList.add('d-none');
 }
-function openEditLoanModal(id, name, purpose, date, amount, notes) {
+function openEditLoanModal(btn) {
     const form = document.getElementById('editLoanForm');
-    form.action = `/receivables/${id}`;
-    document.getElementById('editLoanName').value = name;
-    document.getElementById('editLoanPurpose').value = purpose;
-    document.getElementById('editLoanDate').value = date;
-    document.getElementById('editLoanAmount').value = amount;
-    document.getElementById('editLoanNotes').value = notes;
+    form.action = `/receivables/${btn.dataset.id}`;
+    document.getElementById('editLoanName').value = btn.dataset.name;
+    document.getElementById('editLoanPurpose').value = btn.dataset.purpose;
+    document.getElementById('editLoanDate').value = btn.dataset.date;
+    document.getElementById('editLoanAmount').value = btn.dataset.amount;
+    document.getElementById('editLoanNotes').value = btn.dataset.notes;
     openModal('editLoanModal');
 }
 function openLinkRepaymentModal(id, amount) {

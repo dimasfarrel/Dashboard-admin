@@ -58,13 +58,13 @@ class PayableController extends Controller
         return redirect()->route('payables.index')->with('success', 'Data hutang berhasil ditambahkan!');
     }
 
-    public function show(Loan $loan)
+    public function show(Loan $payable)
     {
-        $loan->load('repayments');
-        return view('payables.show', compact('loan'));
+        $payable->load('repayments');
+        return view('payables.show', ['loan' => $payable]);
     }
 
-    public function update(Request $request, Loan $loan)
+    public function update(Request $request, Loan $payable)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -74,21 +74,21 @@ class PayableController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        $loan->update($validated);
-        $this->checkLoanStatus($loan);
+        $payable->update($validated);
+        $this->checkLoanStatus($payable);
 
         return redirect()->back()->with('success', 'Data hutang berhasil diperbarui!');
     }
 
-    public function destroy(Loan $loan)
+    public function destroy(Loan $payable)
     {
-        $loan->delete();
+        $payable->delete();
         return redirect()->route('payables.index')->with('success', 'Data hutang berhasil dihapus!');
     }
 
     // --- REPAYMENTS ---
 
-    public function storeRepayment(Request $request, Loan $loan)
+    public function storeRepayment(Request $request, Loan $payable)
     {
         $validated = $request->validate([
             'repayment_date' => 'required|date',
@@ -96,10 +96,10 @@ class PayableController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        $loan->repayments()->create($validated);
-        $this->checkLoanStatus($loan);
+        $payable->repayments()->create($validated);
+        $this->checkLoanStatus($payable);
 
-        return redirect()->route('payables.show', $loan)->with('success', 'Data pembayaran hutang berhasil ditambahkan!');
+        return redirect()->route('payables.show', $payable)->with('success', 'Data pembayaran hutang berhasil ditambahkan!');
     }
 
     public function storeGlobalRepayment(Request $request)
@@ -148,12 +148,12 @@ class PayableController extends Controller
         return redirect()->back()->with('success', 'Data pelunasan berhasil dihapus!');
     }
 
-    public function destroyRepayment(Loan $loan, \App\Models\LoanRepayment $repayment)
+    public function destroyRepayment(Loan $payable, \App\Models\LoanRepayment $repayment)
     {
         $repayment->delete();
-        $this->checkLoanStatus($loan);
+        $this->checkLoanStatus($payable);
 
-        return redirect()->route('payables.show', $loan)->with('success', 'Data pembayaran hutang berhasil dihapus!');
+        return redirect()->route('payables.show', $payable)->with('success', 'Data pembayaran hutang berhasil dihapus!');
     }
 
     private function checkLoanStatus(Loan $loan)
