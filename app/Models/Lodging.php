@@ -14,12 +14,13 @@ class Lodging extends Model
         'check_in', 'check_out', 'duration_days', 'guest_count',
         'price_per_night', 'total_price', 'deposit',
         'discount', 'daily_discount', 'fixed_discount', 'custom_adjustment',
-        'payment_status', 'payment_method', 'status', 'guest_names', 'notes'
+        'payment_status', 'payment_method', 'paid_at', 'status', 'guest_names', 'notes'
     ];
 
     protected $casts = [
         'check_in'  => 'datetime',
         'check_out' => 'datetime',
+        'paid_at'   => 'date',
     ];
 
     public function room()

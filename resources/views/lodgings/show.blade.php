@@ -116,6 +116,11 @@
             @else
             <span class="badge badge-danger" style="font-size:14px; padding:8px 20px;">❌ Belum Dibayar</span>
             @endif
+            @if($lodging->paid_at)
+            <div style="margin-top:10px; font-size:13px; color:var(--text-muted);">
+                Tgl Bayar: {{ $lodging->paid_at->format('d M Y') }}
+            </div>
+            @endif
             <div style="margin-top:16px; font-size:24px; font-weight:800; color:var(--accent-primary);" class="money-text">
                 Rp {{ number_format($lodging->total_price, 0, ',', '.') }}
             </div>

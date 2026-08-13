@@ -32,8 +32,8 @@ class DashboardController extends Controller
             ->sum('amount');
 
         // Omzet dari penginapan bulan ini
-        $lodgingRevenue = Lodging::whereMonth('check_in', $currentMonth)
-            ->whereYear('check_in', $currentYear)
+        $lodgingRevenue = Lodging::whereMonth('paid_at', $currentMonth)
+            ->whereYear('paid_at', $currentYear)
             ->where('payment_status', 'paid')
             ->sum('total_price');
 
@@ -74,8 +74,8 @@ class DashboardController extends Controller
                 ->where('status', 'paid')
                 ->sum('amount');
 
-            $revLodgings = Lodging::whereMonth('check_in', $month)
-                ->whereYear('check_in', $year)
+            $revLodgings = Lodging::whereMonth('paid_at', $month)
+                ->whereYear('paid_at', $year)
                 ->where('payment_status', 'paid')
                 ->sum('total_price');
 

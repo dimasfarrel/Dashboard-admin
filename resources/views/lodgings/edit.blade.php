@@ -113,6 +113,11 @@
                     </select>
                 </div>
                 <div class="form-group">
+                    <label>Tanggal Pembayaran</label>
+                    <input type="date" name="paid_at" class="form-control" value="{{ old('paid_at', $lodging->paid_at?->format('Y-m-d')) }}">
+                    <span class="form-hint">Mempengaruhi pencatatan omzet bulanan</span>
+                </div>
+                <div class="form-group">
                     <label>Metode Pembayaran</label>
                     <select name="payment_method" class="form-control">
                         <option value="">— Pilih —</option>

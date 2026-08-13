@@ -130,10 +130,10 @@ class PaymentController extends Controller
 
         // --- 2. Lodgings (Harian) ---
         $lodgingsQuery = Lodging::with('room');
-        if ($selectedPeriodMonth) $lodgingsQuery->whereMonth('check_in', $selectedPeriodMonth);
-        if ($selectedPeriodYear)  $lodgingsQuery->whereYear('check_in', $selectedPeriodYear);
-        if ($selectedPayMonth)    $lodgingsQuery->whereMonth('check_in', $selectedPayMonth);
-        if ($selectedPayYear)     $lodgingsQuery->whereYear('check_in', $selectedPayYear);
+        if ($selectedPeriodMonth) $lodgingsQuery->whereMonth('paid_at', $selectedPeriodMonth);
+        if ($selectedPeriodYear)  $lodgingsQuery->whereYear('paid_at', $selectedPeriodYear);
+        if ($selectedPayMonth)    $lodgingsQuery->whereMonth('paid_at', $selectedPayMonth);
+        if ($selectedPayYear)     $lodgingsQuery->whereYear('paid_at', $selectedPayYear);
         if ($selectedRoomId)      $lodgingsQuery->where('room_id', $selectedRoomId);
 
         if ($selectedStatus) {
@@ -157,7 +157,7 @@ class PaymentController extends Controller
                 'method'    => $l->payment_method ?? '—',
                 'status'    => $l->payment_status === 'paid' ? 'paid' : ($l->payment_status === 'partial' ? 'pending' : 'overdue'),
                 'period'    => $l->check_in->format('d/m') . ' - ' . $l->check_out->format('d/m/Y'),
-                'date'      => $l->check_in,
+                'date'      => $l->paid_at ?? $l->check_in,
                 'created_at'=> $l->created_at,
                 'due_date'  => null,
                 'link'      => route('lodgings.show', $l),

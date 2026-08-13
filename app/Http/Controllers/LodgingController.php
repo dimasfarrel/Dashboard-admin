@@ -52,10 +52,15 @@ class LodgingController extends Controller
             'custom_adjustment' => 'nullable|numeric',
             'payment_status'  => 'required|in:paid,partial,unpaid',
             'payment_method'  => 'nullable|in:tunai,transfer,qris,lain-lain',
+            'paid_at'         => 'nullable|date',
             'status'          => 'required|in:active,completed,cancelled',
             'guest_names'     => 'nullable|string',
             'notes'           => 'nullable|string',
         ]);
+
+        if (empty($validated['paid_at']) && $validated['payment_status'] === 'paid') {
+            $validated['paid_at'] = now()->toDateString();
+        }
 
         $checkIn  = Carbon::parse($validated['check_in'])->startOfDay();
         $checkOut = Carbon::parse($validated['check_out'])->startOfDay();
@@ -116,10 +121,15 @@ class LodgingController extends Controller
             'custom_adjustment' => 'nullable|numeric',
             'payment_status'  => 'required|in:paid,partial,unpaid',
             'payment_method'  => 'nullable|in:tunai,transfer,qris,lain-lain',
+            'paid_at'         => 'nullable|date',
             'status'          => 'required|in:active,completed,cancelled',
             'guest_names'     => 'nullable|string',
             'notes'           => 'nullable|string',
         ]);
+
+        if (empty($validated['paid_at']) && $validated['payment_status'] === 'paid') {
+            $validated['paid_at'] = now()->toDateString();
+        }
 
         $checkIn  = Carbon::parse($validated['check_in'])->startOfDay();
         $checkOut = Carbon::parse($validated['check_out'])->startOfDay();
