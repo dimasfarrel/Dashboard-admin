@@ -40,6 +40,7 @@
             <option value="{{ $cat->slug }}" {{ request('category') == $cat->slug ? 'selected' : '' }}>{{ $cat->name }}</option>
             @endforeach
         </select>
+        <input type="text" name="vendor" class="form-control" style="width:140px;" placeholder="Cari Vendor..." value="{{ request('vendor') }}">
         <select name="status" class="form-control" style="width:140px;">
             <option value="">Semua Status</option>
             <option value="pending"     {{ request('status') == 'pending'     ? 'selected' : '' }}>⏳ Pending</option>
