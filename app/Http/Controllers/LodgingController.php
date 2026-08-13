@@ -17,11 +17,24 @@ class LodgingController extends Controller
         if ($request->filled('status'))  $query->where('status', $request->status);
         if ($request->filled('room_id')) $query->where('room_id', $request->room_id);
 
+        if ($request->filled('month')) {
+            $query->where(function($q) use ($request) {
+                $q->whereMonth('paid_at', $request->month)->orWhereMonth('check_in', $request->month);
+            });
+        }
+        if ($request->filled('year')) {
+            $query->where(function($q) use ($request) {
+                $q->whereYear('paid_at', $request->year)->orWhereYear('check_in', $request->year);
+            });
+        }
+
+        $statsQuery = clone $query;
+        $activeLodgings   = (clone $statsQuery)->where('status', 'active')->count();
+        $totalLodgingRev  = (clone $statsQuery)->where('payment_status', 'paid')->sum('total_price');
+
         $lodgings = $query->orderByDesc('check_in')->paginate(15);
         $rooms    = Room::orderBy('room_number')->get();
 
-        $activeLodgings   = Lodging::where('status', 'active')->count();
-        $totalLodgingRev  = Lodging::where('payment_status', 'paid')->sum('total_price');
         $defaultPrice     = (int) AppSetting::get('lodging_default_price', 150000);
 
         return view('lodgings.index', compact('lodgings', 'rooms', 'activeLodgings', 'totalLodgingRev', 'defaultPrice'));
