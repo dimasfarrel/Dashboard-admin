@@ -36,17 +36,22 @@ class PayableController extends Controller
         // Unlinked repayments (Saldo bebas)
         $unlinkedRepayments = \App\Models\LoanRepayment::where('type', 'payable')->whereNull('loan_id')->orderBy('repayment_date', 'desc')->get();
 
-        // Stats
-        $totalLoansCount = Loan::where('type', 'payable')->count();
-        $paidLoansCount = Loan::where('type', 'payable')->where('is_paid', true)->count();
-        $unpaidLoansCount = Loan::where('type', 'payable')->where('is_paid', false)->count();
+        // Stats (Filtered)
+        $statsQuery = clone $query;
+        $totalLoansCount = (clone $statsQuery)->count();
+        $paidLoansCount = (clone $statsQuery)->where('is_paid', true)->count();
+        $unpaidLoansCount = (clone $statsQuery)->where('is_paid', false)->count();
 
-        $totalLoansAmount = Loan::where('type', 'payable')->sum('total_amount');
-        $paidAmount = \App\Models\LoanRepayment::whereHas('loan', function($q) {
-            $q->where('type', 'payable');
-        })->orWhere(function($q) {
-            $q->where('type', 'payable')->whereNull('loan_id');
-        })->sum('amount');
+        $totalLoansAmount = (clone $statsQuery)->sum('total_amount');
+        
+        $loanIds = (clone $statsQuery)->pluck('id');
+        $repaymentsOfFilteredLoans = \App\Models\LoanRepayment::whereIn('loan_id', $loanIds)->sum('amount');
+        
+        $unlinkedQueryForStats = \App\Models\LoanRepayment::where('type', 'payable')->whereNull('loan_id');
+        if ($month) $unlinkedQueryForStats->whereMonth('repayment_date', $month);
+        if ($year)  $unlinkedQueryForStats->whereYear('repayment_date', $year);
+        
+        $paidAmount = $repaymentsOfFilteredLoans + $unlinkedQueryForStats->sum('amount');
         return view('payables.index', compact('loans', 'activeLoans', 'unlinkedRepayments', 'totalLoansCount', 'paidLoansCount', 'unpaidLoansCount', 'totalLoansAmount', 'paidAmount', 'status', 'month', 'year'));
     }
 
