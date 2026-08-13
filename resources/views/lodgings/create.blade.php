@@ -178,8 +178,12 @@ function calcDuration() {
     const ci = document.getElementById('check_in').value;
     const co = document.getElementById('check_out').value;
     if (ci && co) {
-        const diff = (new Date(co) - new Date(ci)) / (1000 * 60 * 60 * 24);
-        const days = Math.max(1, Math.ceil(diff));
+        const d1 = new Date(ci);
+        const d2 = new Date(co);
+        d1.setHours(0,0,0,0);
+        d2.setHours(0,0,0,0);
+        const diff = (d2 - d1) / (1000 * 60 * 60 * 24);
+        const days = Math.max(1, Math.round(diff));
         document.getElementById('duration-display').textContent = days + ' hari';
         calcTotal(days);
     }
@@ -193,7 +197,13 @@ function calcTotal(days) {
     if (!days) {
         const ci = document.getElementById('check_in').value;
         const co = document.getElementById('check_out').value;
-        if (ci && co) days = Math.max(1, Math.ceil((new Date(co) - new Date(ci)) / 86400000));
+        if (ci && co) {
+            const d1 = new Date(ci);
+            const d2 = new Date(co);
+            d1.setHours(0,0,0,0);
+            d2.setHours(0,0,0,0);
+            days = Math.max(1, Math.round((d2 - d1) / 86400000));
+        }
     }
     
     const netPerNight = Math.max(0, price - dailyDisc);

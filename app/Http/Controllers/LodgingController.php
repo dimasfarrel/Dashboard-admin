@@ -57,8 +57,8 @@ class LodgingController extends Controller
             'notes'           => 'nullable|string',
         ]);
 
-        $checkIn  = Carbon::parse($validated['check_in']);
-        $checkOut = Carbon::parse($validated['check_out']);
+        $checkIn  = Carbon::parse($validated['check_in'])->startOfDay();
+        $checkOut = Carbon::parse($validated['check_out'])->startOfDay();
         $duration = $checkIn->diffInDays($checkOut);
 
         $validated['duration_days']     = max(1, $duration);
@@ -121,8 +121,8 @@ class LodgingController extends Controller
             'notes'           => 'nullable|string',
         ]);
 
-        $checkIn  = Carbon::parse($validated['check_in']);
-        $checkOut = Carbon::parse($validated['check_out']);
+        $checkIn  = Carbon::parse($validated['check_in'])->startOfDay();
+        $checkOut = Carbon::parse($validated['check_out'])->startOfDay();
         $duration = $checkIn->diffInDays($checkOut);
 
         $validated['duration_days']     = max(1, $duration);
