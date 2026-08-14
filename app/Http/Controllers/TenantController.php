@@ -13,7 +13,7 @@ class TenantController extends Controller
 {
     public function index()
     {
-        $tenants = Tenant::with('room')->orderBy('name')->paginate(15);
+        $tenants = Tenant::with(['room', 'deposits'])->orderBy('name')->paginate(15);
         return view('tenants.index', compact('tenants'));
     }
 
@@ -86,9 +86,16 @@ class TenantController extends Controller
 
     public function show(Tenant $tenant)
     {
-        $tenant->load(['room', 'payments' => function($q) {
-            $q->orderByDesc('period_year')->orderByDesc('period_month');
-        }, 'fieldValues']);
+        $tenant->load([
+            'room',
+            'payments' => function($q) {
+                $q->orderByDesc('period_year')->orderByDesc('period_month');
+            },
+            'fieldValues',
+            'deposits' => function($q) {
+                $q->orderByDesc('date')->orderByDesc('created_at');
+            },
+        ]);
 
         $customFields = TenantCustomField::orderBy('sort_order')->orderBy('name')->get();
 

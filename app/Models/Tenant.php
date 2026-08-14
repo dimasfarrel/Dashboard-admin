@@ -33,6 +33,31 @@ class Tenant extends Model
         return $this->hasMany(Payment::class);
     }
 
+    public function deposits()
+    {
+        return $this->hasMany(TenantDeposit::class);
+    }
+
+    /**
+     * Saldo deposit saat ini (total credit - total debit)
+     */
+    public function getDepositBalanceAttribute(): int
+    {
+        $credit = $this->deposits->where('type', 'credit')->sum('amount');
+        $debit  = $this->deposits->where('type', 'debit')->sum('amount');
+        return max(0, $credit - $debit);
+    }
+
+    public function getDepositTotalCreditAttribute(): int
+    {
+        return $this->deposits->where('type', 'credit')->sum('amount');
+    }
+
+    public function getDepositTotalDebitAttribute(): int
+    {
+        return $this->deposits->where('type', 'debit')->sum('amount');
+    }
+
     public function fieldValues()
     {
         return $this->hasMany(TenantFieldValue::class);

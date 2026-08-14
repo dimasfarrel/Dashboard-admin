@@ -203,7 +203,9 @@ document.querySelectorAll('form[data-confirm]').forEach(form => {
 
 // Format Rupiah Input Helper
 function formatRupiah(angka) {
-    let number_string = angka.replace(/[^,\d]/g, '').toString(),
+    // Hanya potong desimal .00 dari database, jangan potong separator ribuan (karena ribuan punya 3 digit misal .000)
+    let str_angka = angka.toString().replace(/\.\d{2}$/, ''); 
+    let number_string = str_angka.replace(/[^,\d]/g, ''),
         split = number_string.split(','),
         sisa = split[0].length % 3,
         rupiah = split[0].substr(0, sisa),
@@ -242,6 +244,8 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
+@stack('modals')
 @stack('scripts')
 </body>
 </html>
+

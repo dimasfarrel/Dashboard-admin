@@ -25,6 +25,7 @@
                     <th>WhatsApp</th>
                     <th>Kamar</th>
                     <th>Mulai Sewa</th>
+                    <th>Deposit</th>
                     <th>Status</th>
                     <th>Aksi</th>
                 </tr>
@@ -56,6 +57,14 @@
                         @endif
                     </td>
                     <td class="text-sm">{{ $tenant->start_date->format('d/m/Y') }}</td>
+                    <td>
+                        @php $depBal = $tenant->deposit_balance; @endphp
+                        @if($depBal > 0)
+                        <span class="money-text" style="color:#a855f7; font-weight:600; font-size:13px;">Rp {{ number_format($depBal, 0, ',', '.') }}</span>
+                        @else
+                        <span class="text-muted" style="font-size:12px;">—</span>
+                        @endif
+                    </td>
                     <td>
                         @if($tenant->status === 'active')
                         <span class="badge badge-success"><i class="bi bi-circle-fill" style="font-size:7px;"></i> Aktif</span>

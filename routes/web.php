@@ -26,6 +26,10 @@ Route::patch('/rooms/{room}/status', [RoomController::class, 'updateStatus'])->n
 
 // Penyewa
 Route::resource('tenants', TenantController::class);
+// Deposit Penyewa
+Route::post('/tenants/{tenant}/deposits', [\App\Http\Controllers\TenantDepositController::class, 'store'])->name('tenant-deposits.store');
+Route::post('/tenants/{tenant}/deposits/deduct', [\App\Http\Controllers\TenantDepositController::class, 'storeDeduction'])->name('tenant-deposits.deduct');
+Route::delete('/tenant-deposits/{deposit}', [\App\Http\Controllers\TenantDepositController::class, 'destroy'])->name('tenant-deposits.destroy');
 
 // Pembayaran / Omzet
 Route::resource('payments', PaymentController::class);
