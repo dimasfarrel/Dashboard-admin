@@ -194,10 +194,10 @@ function calcDuration() {
     }
 }
 function calcTotal(days) {
-    const price       = parseFloat(document.getElementById('price_per_night').value) || 0;
+    const price       = parseFloat(document.getElementById('price_per_night').value.replace(/\./g, '')) || 0;
     const guests      = parseFloat(document.getElementById('guest_count').value) || 1;
-    const dailyDisc   = parseFloat(document.getElementById('daily_discount').value) || 0;
-    const fixedDisc   = parseFloat(document.getElementById('fixed_discount').value) || 0;
+    const dailyDisc   = parseFloat(document.getElementById('daily_discount').value.replace(/\./g, '')) || 0;
+    const fixedDisc   = parseFloat(document.getElementById('fixed_discount').value.replace(/\./g, '')) || 0;
     
     if (!days) {
         const ci = document.getElementById('check_in').value;
