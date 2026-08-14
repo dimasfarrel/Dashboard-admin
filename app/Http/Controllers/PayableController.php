@@ -73,7 +73,9 @@ class PayableController extends Controller
 
     public function show(Loan $payable)
     {
-        $payable->load('repayments');
+        $payable->load(['repayments' => function ($query) {
+            $query->orderBy('repayment_date', 'desc')->orderBy('created_at', 'desc');
+        }]);
         return view('payables.show', ['loan' => $payable]);
     }
 

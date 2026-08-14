@@ -79,7 +79,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($loan->repayments->sortByDesc('repayment_date') as $rep)
+                    @foreach($loan->repayments as $rep)
                     <tr>
                         <td>{{ $rep->repayment_date->format('d/m/Y') }}</td>
                         <td class="money-text text-success">+ Rp {{ number_format($rep->amount, 0, ',', '.') }}</td>
