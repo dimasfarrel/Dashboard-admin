@@ -59,6 +59,18 @@
                 Omzet & Pembayaran
             </a>
 
+            <a href="{{ route('reports.index') }}"
+               class="nav-item {{ request()->routeIs('reports.index') ? 'active' : '' }}">
+                <i class="bi bi-file-earmark-bar-graph"></i>
+                Laporan Keuangan
+            </a>
+
+            <a href="{{ route('reports.loans') }}"
+               class="nav-item {{ request()->routeIs('reports.loans') ? 'active' : '' }}">
+                <i class="bi bi-file-earmark-diff"></i>
+                Lap. Hutang & Piutang
+            </a>
+
             <a href="{{ route('maintenances.index') }}"
                class="nav-item {{ request()->routeIs('maintenances.*') ? 'active' : '' }}">
                 <i class="bi bi-tools"></i>

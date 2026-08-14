@@ -32,7 +32,7 @@ class LodgingController extends Controller
         $activeLodgings   = (clone $statsQuery)->where('status', 'active')->count();
         $totalLodgingRev  = (clone $statsQuery)->where('payment_status', 'paid')->sum('total_price');
 
-        $lodgings = $query->orderByDesc('check_in')->paginate(15);
+        $lodgings = $query->latest()->paginate(15);
         $rooms    = Room::orderBy('room_number')->get();
 
         $defaultPrice     = (int) AppSetting::get('lodging_default_price', 150000);

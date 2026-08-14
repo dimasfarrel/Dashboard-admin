@@ -33,7 +33,10 @@
                 @foreach($tenants as $tenant)
                 <tr>
                     <td>
-                        <div style="font-weight:600; color:var(--text-primary);">{{ $tenant->name }}</div>
+                        <div style="font-weight:600; color:var(--text-primary);">
+                            {{ $tenant->name }}
+                            @if($tenant->nickname) <span style="font-weight:400; color:var(--text-secondary);">("{{ $tenant->nickname }}")</span> @endif
+                        </div>
                         <div class="text-muted text-sm">{{ $tenant->occupation ?? '—' }} · {{ $tenant->origin_city ?? '' }}</div>
                     </td>
                     <td style="font-family:monospace; font-size:12px;">{{ $tenant->nik }}</td>

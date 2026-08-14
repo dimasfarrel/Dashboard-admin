@@ -9,11 +9,14 @@ use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\LodgingController;
 use App\Http\Controllers\ConfigController;
 use App\Http\Controllers\OtherIncomeController;
+use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn() => redirect()->route('dashboard'));
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+Route::get('/reports/loans', [ReportController::class, 'loans'])->name('reports.loans');
 
 // Kamar
 Route::resource('rooms', RoomController::class);

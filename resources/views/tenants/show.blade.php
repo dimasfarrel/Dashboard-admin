@@ -35,7 +35,10 @@
             <div class="detail-grid">
                 <div class="detail-item">
                     <span class="detail-label">Nama Lengkap</span>
-                    <span class="detail-value">{{ $tenant->name }}</span>
+                    <span class="detail-value">
+                        {{ $tenant->name }}
+                        @if($tenant->nickname) <span style="font-weight:400; color:var(--text-secondary); font-size:13px;">("{{ $tenant->nickname }}")</span> @endif
+                    </span>
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Nomor Identitas</span>
