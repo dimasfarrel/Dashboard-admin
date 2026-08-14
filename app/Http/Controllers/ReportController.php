@@ -233,7 +233,8 @@ class ReportController extends Controller
         // 1. Pemasukan: Pembayaran Kost (Payment)
         if (in_array($typeFilter, ['all', 'income'])) {
             $payments = Payment::where('status', 'paid')
-                ->whereBetween('paid_at', [$startDate, $endDate])
+                ->where('period_month', $month)
+                ->where('period_year', $year)
                 ->with(['tenant', 'room'])
                 ->get()
                 ->map(function ($item) {
@@ -255,7 +256,8 @@ class ReportController extends Controller
             $transactions = $transactions->concat($payments);
 
             // 2. Pemasukan: Pendapatan Lain (OtherIncome)
-            $otherIncomes = OtherIncome::whereBetween('income_date', [$startDate, $endDate])
+            $otherIncomes = OtherIncome::where('period_month', $month)
+                ->where('period_year', $year)
                 ->get()
                 ->map(function ($item) {
                     return [
@@ -274,7 +276,8 @@ class ReportController extends Controller
             // 3. Pemasukan: Penginapan (Lodging)
             $lodgings = Lodging::where('payment_status', 'paid')
                 ->whereNotNull('paid_at')
-                ->whereBetween('paid_at', [$startDate, $endDate])
+                ->whereMonth('paid_at', $month)
+                ->whereYear('paid_at', $year)
                 ->with('room')
                 ->get()
                 ->map(function ($item) {
@@ -294,7 +297,8 @@ class ReportController extends Controller
 
         // 4. Pengeluaran: Pengeluaran Kost (Expense)
         if (in_array($typeFilter, ['all', 'expense'])) {
-            $expenses = Expense::whereBetween('expense_date', [$startDate, $endDate])
+            $expenses = Expense::where('period_month', $month)
+                ->where('period_year', $year)
                 ->get()
                 ->map(function ($item) {
                     return [
@@ -312,12 +316,14 @@ class ReportController extends Controller
 
             // 5. Pengeluaran: Maintenance Kamar (RoomMaintenance)
             $maintenances = RoomMaintenance::where('cost', '>', 0)
-                ->where(function($q) use ($startDate, $endDate) {
-                    $q->whereBetween('done_date', [$startDate, $endDate])
-                      ->orWhere(function($subQ) use ($startDate, $endDate) {
-                          $subQ->whereNull('done_date')
-                               ->whereBetween('report_date', [$startDate, $endDate]);
-                      });
+                ->where(function($q) use ($month, $year) {
+                    $q->where(function($subQ1) use ($month, $year) {
+                        $subQ1->whereMonth('done_date', $month)->whereYear('done_date', $year);
+                    })->orWhere(function($subQ2) use ($month, $year) {
+                        $subQ2->whereNull('done_date')
+                              ->whereMonth('report_date', $month)
+                              ->whereYear('report_date', $year);
+                    });
                 })
                 ->with('room')
                 ->get()
