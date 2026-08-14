@@ -45,6 +45,15 @@
     <form method="GET" id="filterForm">
         <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:flex-end;">
             <div>
+                <label class="text-xs text-muted" style="display:block; margin-bottom:4px;">Nama Pemberi Hutang</label>
+                <select name="search" class="form-control" style="width:200px;">
+                    <option value="">Semua Peminjam</option>
+                    @foreach($lenderNames as $name)
+                        <option value="{{ $name }}" {{ request('search') == $name ? 'selected' : '' }}>{{ $name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
                 <label class="text-xs text-muted" style="display:block; margin-bottom:4px;">Status</label>
                 <select name="status" class="form-control" style="width:150px;">
                     <option value="">Semua Status</option>

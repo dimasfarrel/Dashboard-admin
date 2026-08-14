@@ -12,8 +12,13 @@ class PayableController extends Controller
         $status = $request->input('status');
         $month = $request->input('month');
         $year = $request->input('year');
+        $search = $request->input('search');
 
         $query = Loan::where('type', 'payable');
+
+        if ($search) {
+            $query->where('name', 'like', '%' . $search . '%');
+        }
 
         if ($status === 'paid') {
             $query->where('is_paid', true);
@@ -52,7 +57,16 @@ class PayableController extends Controller
         if ($year)  $unlinkedQueryForStats->whereYear('repayment_date', $year);
         
         $paidAmount = $repaymentsOfFilteredLoans + $unlinkedQueryForStats->sum('amount');
-        return view('payables.index', compact('loans', 'activeLoans', 'unlinkedRepayments', 'totalLoansCount', 'paidLoansCount', 'unpaidLoansCount', 'totalLoansAmount', 'paidAmount', 'status', 'month', 'year'));
+
+        
+        // Get unique names for the filter dropdown
+        $lenderNames = Loan::where('type', 'payable')->select('name')->distinct()->orderBy('name')->pluck('name');
+
+        return view('payables.index', compact(
+            'loans', 'status', 'month', 'year', 'search',
+            'totalLoansCount', 'paidLoansCount', 'unpaidLoansCount',
+            'totalLoansAmount', 'paidAmount', 'activeLoans', 'unlinkedRepayments', 'lenderNames'
+        ));
     }
 
     public function store(Request $request)
