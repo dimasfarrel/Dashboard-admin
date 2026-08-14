@@ -200,6 +200,46 @@ document.querySelectorAll('form[data-confirm]').forEach(form => {
         }
     });
 });
+
+// Format Rupiah Input Helper
+function formatRupiah(angka) {
+    let number_string = angka.replace(/[^,\d]/g, '').toString(),
+        split = number_string.split(','),
+        sisa = split[0].length % 3,
+        rupiah = split[0].substr(0, sisa),
+        ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+
+    if (ribuan) {
+        let separator = sisa ? '.' : '';
+        rupiah += separator + ribuan.join('.');
+    }
+    return split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
+}
+
+// Apply on input event
+document.addEventListener('input', function(e) {
+    if (e.target.classList.contains('input-rupiah')) {
+        e.target.value = formatRupiah(e.target.value);
+    }
+});
+
+// Remove dots before submit
+document.querySelectorAll('form').forEach(form => {
+    form.addEventListener('submit', function() {
+        this.querySelectorAll('.input-rupiah').forEach(input => {
+            input.value = input.value.replace(/\./g, '');
+        });
+    });
+});
+
+// Format existing values on load (for edit forms or old input validation)
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.input-rupiah').forEach(input => {
+        if(input.value) {
+            input.value = formatRupiah(input.value);
+        }
+    });
+});
 </script>
 
 @stack('scripts')

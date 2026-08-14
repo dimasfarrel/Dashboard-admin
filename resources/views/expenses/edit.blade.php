@@ -21,7 +21,7 @@
             </div>
             <div class="form-group">
                 <label>Nominal <span class="required">*</span></label>
-                <input type="number" name="amount" class="form-control" value="{{ old('amount', $expense->amount) }}" required>
+                <input type="text" inputmode="numeric" name="amount" class="form-control input-rupiah" value="{{ old('amount', $expense->amount) }}" required>
             </div>
             <div class="form-group span-full">
                 <label>Judul <span class="required">*</span></label>

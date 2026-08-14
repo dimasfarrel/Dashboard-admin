@@ -23,7 +23,7 @@
             </div>
             <div class="form-group">
                 <label>Nominal (Rp) <span class="required">*</span></label>
-                <input type="number" name="amount" class="form-control @error('amount') is-invalid @enderror"
+                <input type="text" inputmode="numeric" name="amount" class="form-control input-rupiah @error('amount') is-invalid @enderror"
                     value="{{ old('amount') }}" placeholder="Contoh: 850000" min="0" required>
                 @error('amount') <span class="invalid-feedback">{{ $message }}</span> @enderror
             </div>

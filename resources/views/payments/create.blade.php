@@ -56,7 +56,7 @@
             </div>
             <div class="form-group">
                 <label>Nominal Pembayaran <span class="required">*</span></label>
-                <input type="number" name="amount" id="amount_input" class="form-control @error('amount') is-invalid @enderror"
+                <input type="text" inputmode="numeric" name="amount" id="amount_input" class="form-control input-rupiah @error('amount') is-invalid @enderror"
                     value="{{ old('amount') }}" placeholder="Rp" min="0" required readonly>
                 @error('amount') <span class="invalid-feedback">{{ $message }}</span> @enderror
             </div>

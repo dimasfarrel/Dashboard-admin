@@ -46,17 +46,17 @@
                 </div>
                 <div class="form-group">
                     <label>Harga per Malam (Rp) <span class="required">*</span></label>
-                    <input type="number" name="price_per_night" id="price_per_night" class="form-control" value="{{ old('price_per_night', $lodging->price_per_night) }}" min="0" required onchange="calcTotal()">
+                    <input type="text" inputmode="numeric" name="price_per_night" id="price_per_night" class="form-control input-rupiah" value="{{ old('price_per_night', $lodging->price_per_night) }}" min="0" required onchange="calcTotal()">
                 </div>
                 <div class="form-group">
                     <label>Diskon Harian (Rp/malam)</label>
-                    <input type="number" name="daily_discount" id="daily_discount" class="form-control"
+                    <input type="text" inputmode="numeric" name="daily_discount" id="daily_discount" class="form-control input-rupiah"
                         value="{{ old('daily_discount', $lodging->daily_discount ?? 0) }}" min="0" onchange="calcTotal()">
                     <span class="form-hint">Potongan per malam, dikalikan jumlah malam</span>
                 </div>
                 <div class="form-group">
                     <label>Diskon Tetap (Rp)</label>
-                    <input type="number" name="fixed_discount" id="fixed_discount" class="form-control"
+                    <input type="text" inputmode="numeric" name="fixed_discount" id="fixed_discount" class="form-control input-rupiah"
                         value="{{ old('fixed_discount', $lodging->fixed_discount ?? $lodging->discount ?? 0) }}" min="0" onchange="calcTotal()">
                     <span class="form-hint">Potongan langsung dari total</span>
                 </div>
@@ -129,7 +129,7 @@
                 </div>
                 <div class="form-group">
                     <label>Deposit (Rp)</label>
-                    <input type="number" name="deposit" class="form-control" value="{{ old('deposit', $lodging->deposit) }}" min="0">
+                    <input type="text" inputmode="numeric" name="deposit" class="form-control input-rupiah" value="{{ old('deposit', $lodging->deposit) }}" min="0">
                 </div>
                 <div class="form-group">
                     <label>Status Penginapan</label>

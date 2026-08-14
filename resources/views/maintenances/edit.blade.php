@@ -37,7 +37,7 @@
             </div>
             <div class="form-group">
                 <label>Biaya (Rp)</label>
-                <input type="number" name="cost" class="form-control" value="{{ old('cost', $maintenance->cost) }}" min="0">
+                <input type="text" inputmode="numeric" name="cost" class="form-control input-rupiah" value="{{ old('cost', $maintenance->cost) }}" min="0">
             </div>
             <div class="form-group">
                 <label>Status <span class="required">*</span></label>

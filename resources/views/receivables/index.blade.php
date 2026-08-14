@@ -223,7 +223,7 @@
             </div>
             <div class="form-group mb-4">
                 <label>Total Piutang (Rp) <span class="required">*</span></label>
-                <input type="number" name="total_amount" class="form-control" required>
+                <input type="text" inputmode="numeric" name="total_amount" class="form-control input-rupiah" required>
             </div>
             <div class="form-group mb-6">
                 <label>Keterangan Tambahan (Opsional)</label>
@@ -260,7 +260,7 @@
             </div>
             <div class="form-group mb-4">
                 <label>Total Piutang (Rp) <span class="required">*</span></label>
-                <input type="number" name="total_amount" id="editLoanAmount" class="form-control" required>
+                <input type="text" inputmode="numeric" name="total_amount" id="editLoanAmount" class="form-control input-rupiah" required>
             </div>
             <div class="form-group mb-6">
                 <label>Keterangan Tambahan (Opsional)</label>
@@ -299,7 +299,7 @@
             </div>
             <div class="form-group mb-4">
                 <label>Nominal Pembayaran (Rp) <span class="required">*</span></label>
-                <input type="number" name="amount" class="form-control" required>
+                <input type="text" inputmode="numeric" name="amount" class="form-control input-rupiah" required>
             </div>
             <div class="form-group mb-6">
                 <label>Keterangan Tambahan</label>

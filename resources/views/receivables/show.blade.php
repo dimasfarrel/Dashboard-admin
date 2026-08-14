@@ -120,7 +120,7 @@
             </div>
             <div class="form-group mb-4">
                 <label>Nominal (Rp) <span class="required">*</span></label>
-                <input type="number" name="amount" class="form-control" value="{{ $loan->remaining_amount > 0 ? $loan->remaining_amount : '' }}" required>
+                <input type="text" inputmode="numeric" name="amount" class="form-control input-rupiah" value="{{ $loan->remaining_amount > 0 ? $loan->remaining_amount : '' }}" required>
                 <span class="form-hint">Sisa tagihan: Rp {{ number_format($loan->remaining_amount, 0, ',', '.') }}</span>
             </div>
             <div class="form-group mb-6">

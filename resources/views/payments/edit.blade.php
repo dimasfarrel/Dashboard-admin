@@ -56,7 +56,7 @@
             </div>
             <div class="form-group">
                 <label>Nominal <span class="required">*</span></label>
-                <input type="number" name="amount" id="amount_input" class="form-control" value="{{ old('amount', $payment->amount) }}" required {{ $isAuto ? 'readonly' : '' }}>
+                <input type="text" inputmode="numeric" name="amount" id="amount_input" class="form-control input-rupiah" value="{{ old('amount', $payment->amount) }}" required {{ $isAuto ? 'readonly' : '' }}>
             </div>
             <div class="form-group">
                 <label>Metode</label>

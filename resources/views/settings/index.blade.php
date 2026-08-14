@@ -352,7 +352,7 @@
                     @csrf @method('PATCH')
                     <div class="form-group">
                         <label>Harga Default per Malam (Rp)</label>
-                        <input type="number" name="lodging_default_price" class="form-control"
+                        <input type="text" inputmode="numeric" name="lodging_default_price" class="form-control input-rupiah"
                             value="{{ $lodgingDefaultPrice }}" min="0" required>
                         <span class="form-hint">Nilai ini akan menjadi harga pre-fill saat membuat data penginapan baru. Harga tetap bisa diubah per transaksi.</span>
                     </div>

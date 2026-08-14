@@ -49,7 +49,7 @@
 
                 <div class="form-group">
                     <label>Harga Sewa / Bulan <span class="required">*</span></label>
-                    <input type="number" name="price" class="form-control @error('price') is-invalid @enderror"
+                    <input type="text" inputmode="numeric" name="price" class="form-control input-rupiah @error('price') is-invalid @enderror"
                         value="{{ old('price') }}" placeholder="Contoh: 1500000" min="0" required>
                     @error('price') <span class="invalid-feedback">{{ $message }}</span> @enderror
                 </div>
