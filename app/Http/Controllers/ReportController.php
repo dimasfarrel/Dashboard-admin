@@ -9,6 +9,7 @@ use App\Models\Lodging;
 use App\Models\LoanRepayment;
 use App\Models\Expense;
 use App\Models\RoomMaintenance;
+use App\Models\TenantDeposit;
 use Carbon\Carbon;
 
 class ReportController extends Controller
@@ -81,6 +82,25 @@ class ReportController extends Controller
                     ];
                 });
             $transactions = $transactions->concat($lodgings);
+
+            // 4. Pemasukan: Deposit Jaminan (TenantDeposit)
+            $deposits = TenantDeposit::where('type', 'credit')
+                ->whereBetween('date', [$startDate, $endDate])
+                ->with(['tenant.room'])
+                ->get()
+                ->map(function ($item) {
+                    return [
+                        'date' => Carbon::parse($item->date)->startOfDay(),
+                        'created_at' => $item->created_at,
+                        'category' => 'Deposit Jaminan',
+                        'description' => "Deposit Jaminan - Kamar " . ($item->tenant->room->room_number ?? 'N/A') . " (" . ($item->tenant->name ?? 'N/A') . ")",
+                        'notes' => $item->notes,
+                        'type' => 'income',
+                        'amount' => (float) $item->amount,
+                        'route' => route('tenants.show', $item->tenant_id)
+                    ];
+                });
+            $transactions = $transactions->concat($deposits);
         }
 
         // 4. Pengeluaran: Pengeluaran Kost (Expense)
@@ -293,6 +313,26 @@ class ReportController extends Controller
                     ];
                 });
             $transactions = $transactions->concat($lodgings);
+
+            // 4. Pemasukan: Deposit Jaminan (TenantDeposit)
+            $deposits = TenantDeposit::where('type', 'credit')
+                ->whereMonth('date', $month)
+                ->whereYear('date', $year)
+                ->with(['tenant.room'])
+                ->get()
+                ->map(function ($item) {
+                    return [
+                        'date' => Carbon::parse($item->date)->startOfDay(),
+                        'created_at' => $item->created_at,
+                        'category' => 'Deposit Jaminan',
+                        'description' => "Deposit Jaminan - Kamar " . ($item->tenant->room->room_number ?? 'N/A') . " (" . ($item->tenant->name ?? 'N/A') . ")",
+                        'notes' => $item->notes,
+                        'type' => 'income',
+                        'amount' => (float) $item->amount,
+                        'route' => route('tenants.show', $item->tenant_id)
+                    ];
+                });
+            $transactions = $transactions->concat($deposits);
         }
 
         // 4. Pengeluaran: Pengeluaran Kost (Expense)
@@ -412,6 +452,24 @@ class ReportController extends Controller
                     ];
                 });
             $transactions = $transactions->concat($lodgings);
+
+            $deposits = TenantDeposit::where('type', 'credit')
+                ->whereMonth('date', $month)
+                ->whereYear('date', $year)
+                ->with(['tenant.room'])
+                ->get()
+                ->map(function ($item) {
+                    return [
+                        'date' => Carbon::parse($item->date)->startOfDay(),
+                        'created_at' => $item->created_at,
+                        'category' => 'Deposit Jaminan',
+                        'description' => "Deposit Jaminan - Kamar " . ($item->tenant->room->room_number ?? 'N/A') . " (" . ($item->tenant->name ?? 'N/A') . ")",
+                        'notes' => $item->notes,
+                        'amount' => (float) $item->amount,
+                        'type' => 'income',
+                    ];
+                });
+            $transactions = $transactions->concat($deposits);
         }
 
         // 2. Pengeluaran (expenses)

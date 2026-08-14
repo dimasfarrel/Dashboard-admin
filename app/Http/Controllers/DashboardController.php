@@ -9,6 +9,7 @@ use App\Models\RoomMaintenance;
 use App\Models\Expense;
 use App\Models\Lodging;
 use App\Models\OtherIncome;
+use App\Models\TenantDeposit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -40,6 +41,12 @@ class DashboardController extends Controller
         // Omzet dari pendapatan lain-lain bulan ini
         $otherIncomeRevenue = OtherIncome::where('period_month', $currentMonth)
             ->where('period_year', $currentYear)
+            ->sum('amount');
+
+        // Omzet dari deposit jaminan bulan ini
+        $depositRevenue = TenantDeposit::where('type', 'credit')
+            ->whereMonth('date', $currentMonth)
+            ->whereYear('date', $currentYear)
             ->sum('amount');
 
         // Total pengeluaran bulan ini
@@ -83,7 +90,12 @@ class DashboardController extends Controller
                 ->where('period_year', $year)
                 ->sum('amount');
 
-            $rev = $revPayments + $revLodgings + $revOther;
+            $revDeposit = TenantDeposit::where('type', 'credit')
+                ->whereMonth('date', $month)
+                ->whereYear('date', $year)
+                ->sum('amount');
+
+            $rev = $revPayments + $revLodgings + $revOther + $revDeposit;
 
             $exp = Expense::where('period_month', $month)
                 ->where('period_year', $year)
@@ -111,7 +123,7 @@ class DashboardController extends Controller
 
         return view('dashboard', compact(
             'totalRooms', 'availableRooms', 'occupiedRooms', 'maintenanceRooms',
-            'monthlyRevenue', 'lodgingRevenue', 'otherIncomeRevenue',
+            'monthlyRevenue', 'lodgingRevenue', 'otherIncomeRevenue', 'depositRevenue',
             'monthlyExpenses', 'maintenanceCost',
             'pendingPayments', 'overduePayments', 'activeLodgings', 'pendingMaintenance',
             'revenueChart', 'recentRooms', 'recentPayments',

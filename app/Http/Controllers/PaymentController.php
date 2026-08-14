@@ -7,6 +7,7 @@ use App\Models\Room;
 use App\Models\Tenant;
 use App\Models\Lodging;
 use App\Models\OtherIncome;
+use App\Models\TenantDeposit;
 use App\Models\AppSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -199,6 +200,40 @@ class PaymentController extends Controller
             $otherList = collect([]); // Other incomes don't have room_id
         }
 
+        // --- 4. Deposit Incomes (Setor Deposit) ---
+        $depositsQuery = TenantDeposit::with(['tenant.room'])->where('type', 'credit');
+        if ($selectedPeriodMonth) $depositsQuery->whereMonth('date', $selectedPeriodMonth);
+        if ($selectedPeriodYear)  $depositsQuery->whereYear('date', $selectedPeriodYear);
+        if ($selectedPayMonth)    $depositsQuery->whereMonth('date', $selectedPayMonth);
+        if ($selectedPayYear)     $depositsQuery->whereYear('date', $selectedPayYear);
+        if ($selectedRoomId) {
+            $depositsQuery->whereHas('tenant', function($q) use ($selectedRoomId) {
+                $q->where('room_id', $selectedRoomId);
+            });
+        }
+        if ($selectedStatus && $selectedStatus !== 'paid') {
+            $depositsList = collect([]);
+        } else {
+            $depositsList = $depositsQuery->get()->map(function($d) {
+                return [
+                    'type'      => 'deposit',
+                    'id'        => $d->id,
+                    'room'      => $d->tenant?->room?->room_number ?? '—',
+                    'name'      => ($d->tenant?->name ?? '—') . ' (Deposit)',
+                    'amount'    => $d->amount,
+                    'method'    => '—',
+                    'status'    => 'paid',
+                    'period'    => $d->description,
+                    'date'      => $d->date,
+                    'created_at'=> $d->created_at,
+                    'due_date'  => null,
+                    'link'      => route('tenants.show', $d->tenant_id),
+                    'edit_link' => route('tenants.show', $d->tenant_id),
+                    'is_virtual'=> false,
+                ];
+            });
+        }
+
         // --- Merge and Filter by Type ---
         $allTransactions = collect([]);
         
@@ -210,6 +245,9 @@ class PaymentController extends Controller
         }
         if (!$selectedType || $selectedType === 'other') {
             $allTransactions = $allTransactions->concat($otherList);
+        }
+        if (!$selectedType || $selectedType === 'deposit') {
+            $allTransactions = $allTransactions->concat($depositsList);
         }
 
         // Sort: real records by date, virtual ones at top? 
@@ -236,6 +274,7 @@ class PaymentController extends Controller
         $totalPaid = $allTransactions->where('status', 'paid')->where('type', 'rental')->sum('amount');
         $totalLodgingPaid = $allTransactions->where('status', 'paid')->where('type', 'lodging')->sum('amount');
         $totalOtherPaid = $allTransactions->where('status', 'paid')->where('type', 'other')->sum('amount');
+        $totalDepositPaid = $allTransactions->where('status', 'paid')->where('type', 'deposit')->sum('amount');
 
         $totalPending = $allTransactions->where('status', 'pending')->count();
         $totalOverdue = $allTransactions->where('status', 'overdue')->count();
@@ -243,7 +282,7 @@ class PaymentController extends Controller
         $rooms = Room::orderBy('room_number')->get();
 
         return view('payments.index', compact(
-            'paginatedTransactions', 'totalPaid', 'totalLodgingPaid', 'totalOtherPaid',
+            'paginatedTransactions', 'totalPaid', 'totalLodgingPaid', 'totalOtherPaid', 'totalDepositPaid',
             'totalPending', 'totalOverdue', 'dueDay', 'rooms'
         ));
     }

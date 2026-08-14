@@ -53,7 +53,7 @@
         <div class="stat-icon"><i class="bi bi-cash-stack"></i></div>
         <div>
             <div class="stat-label">Omzet {{ \Carbon\Carbon::createFromDate($currentYear, $currentMonth, 1)->translatedFormat('M Y') }}</div>
-            <div class="stat-value small money-text">Rp {{ number_format($monthlyRevenue + $lodgingRevenue + $otherIncomeRevenue, 0, ',', '.') }}</div>
+            <div class="stat-value small money-text">Rp {{ number_format($monthlyRevenue + $lodgingRevenue + $otherIncomeRevenue + $depositRevenue, 0, ',', '.') }}</div>
         </div>
         <div class="text-muted text-sm" style="flex-wrap:wrap; display:flex; gap:4px;">
             <span>Sewa: Rp {{ number_format($monthlyRevenue, 0, ',', '.') }}</span>
@@ -62,6 +62,10 @@
             @if($otherIncomeRevenue > 0)
             <span>&nbsp;|&nbsp;</span>
             <span>Lain-lain: Rp {{ number_format($otherIncomeRevenue, 0, ',', '.') }}</span>
+            @endif
+            @if($depositRevenue > 0)
+            <span>&nbsp;|&nbsp;</span>
+            <span style="color:#eab308;">Deposit: Rp {{ number_format($depositRevenue, 0, ',', '.') }}</span>
             @endif
         </div>
     </div>

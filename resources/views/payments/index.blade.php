@@ -19,7 +19,7 @@
             <div class="stat-icon"><i class="bi bi-cash-stack"></i></div>
             <div>
                 <div class="stat-label">Total Pemasukan (Lunas)</div>
-                <div class="stat-value small money-text">Rp {{ number_format($totalPaid + $totalLodgingPaid + $totalOtherPaid, 0, ',', '.') }}</div>
+                <div class="stat-value small money-text">Rp {{ number_format($totalPaid + $totalLodgingPaid + $totalOtherPaid + $totalDepositPaid, 0, ',', '.') }}</div>
             </div>
         </div>
         <div class="text-muted text-xs" style="margin-top:8px; border-top:1px solid rgba(255,255,255,0.08); padding-top:6px; display:flex; flex-wrap:wrap; gap:8px;">
@@ -27,7 +27,11 @@
             <span style="opacity:0.5;">|</span>
             <span>Penginapan: Rp {{ number_format($totalLodgingPaid, 0, ',', '.') }}</span>
             <span style="opacity:0.5;">|</span>
-            <span>Lain-lain: Rp {{ number_format($totalOtherPaid, 0, ',', '.') }}</span>
+            <span>Lainnya: Rp {{ number_format($totalOtherPaid, 0, ',', '.') }}</span>
+            @if($totalDepositPaid > 0)
+            <span style="opacity:0.5;">|</span>
+            <span style="color:#eab308;">Deposit: Rp {{ number_format($totalDepositPaid, 0, ',', '.') }}</span>
+            @endif
         </div>
     </div>
     <div class="stat-card" style="--accent-color:#eab308;">
@@ -122,6 +126,7 @@
                     <option value="rental" {{ request('type') == 'rental' ? 'selected' : '' }}>Sewa Bulanan</option>
                     <option value="lodging" {{ request('type') == 'lodging' ? 'selected' : '' }}>Harian</option>
                     <option value="other" {{ request('type') == 'other' ? 'selected' : '' }}>Lainnya</option>
+                    <option value="deposit" {{ request('type') == 'deposit' ? 'selected' : '' }}>Deposit Jaminan</option>
                 </select>
             </div>
 
@@ -193,6 +198,8 @@
                             <span class="badge" style="background:rgba(0,212,170,0.12); color:#00d4aa; border:1px solid rgba(0,212,170,0.2);">Sewa</span>
                         @elseif($trx['type'] === 'lodging')
                             <span class="badge" style="background:rgba(59,130,246,0.12); color:#3b82f6; border:1px solid rgba(59,130,246,0.2);">Harian</span>
+                        @elseif($trx['type'] === 'deposit')
+                            <span class="badge" style="background:rgba(234,179,8,0.12); color:#eab308; border:1px solid rgba(234,179,8,0.2);">Deposit</span>
                         @else
                             <span class="badge" style="background:rgba(168,85,247,0.12); color:#a855f7; border:1px solid rgba(168,85,247,0.2);">Lainnya</span>
                         @endif
