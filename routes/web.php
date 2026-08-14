@@ -17,6 +17,7 @@ Route::get('/', fn() => redirect()->route('dashboard'));
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
 Route::get('/reports/loans', [ReportController::class, 'loans'])->name('reports.loans');
+Route::get('/reports/periods', [ReportController::class, 'periods'])->name('reports.periods');
 
 // Kamar
 Route::resource('rooms', RoomController::class);

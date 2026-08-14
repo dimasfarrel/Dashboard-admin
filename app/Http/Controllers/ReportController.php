@@ -218,4 +218,139 @@ class ReportController extends Controller
             'totalReceivable', 'totalPayable', 'netCashflow'
         ));
     }
+
+    public function periods(Request $request)
+    {
+        $month = $request->input('month', Carbon::now()->month);
+        $year = $request->input('year', Carbon::now()->year);
+        $typeFilter = $request->input('type', 'all'); // 'all', 'income', 'expense'
+
+        $startDate = Carbon::create($year, $month, 1)->startOfMonth()->toDateString();
+        $endDate = Carbon::create($year, $month, 1)->endOfMonth()->toDateString();
+
+        $transactions = collect();
+
+        // 1. Pemasukan: Pembayaran Kost (Payment)
+        if (in_array($typeFilter, ['all', 'income'])) {
+            $payments = Payment::where('status', 'paid')
+                ->whereBetween('paid_at', [$startDate, $endDate])
+                ->with(['tenant', 'room'])
+                ->get()
+                ->map(function ($item) {
+                    $desc = "Pembayaran Kost - Kamar " . ($item->room->room_number ?? 'N/A') . " (" . ($item->tenant->name ?? 'N/A') . ")";
+                    if ($item->period_month && $item->period_year) {
+                        $desc .= " periode " . $item->period_label;
+                    }
+                    return [
+                        'date' => Carbon::parse($item->paid_at)->startOfDay(),
+                        'created_at' => $item->created_at,
+                        'category' => 'Omzet Kost',
+                        'description' => $desc,
+                        'notes' => $item->notes,
+                        'type' => 'income',
+                        'amount' => (float) $item->amount,
+                        'route' => route('payments.show', $item->id)
+                    ];
+                });
+            $transactions = $transactions->concat($payments);
+
+            // 2. Pemasukan: Pendapatan Lain (OtherIncome)
+            $otherIncomes = OtherIncome::whereBetween('income_date', [$startDate, $endDate])
+                ->get()
+                ->map(function ($item) {
+                    return [
+                        'date' => Carbon::parse($item->income_date)->startOfDay(),
+                        'created_at' => $item->created_at,
+                        'category' => 'Pendapatan Lain',
+                        'description' => $item->title,
+                        'notes' => $item->notes,
+                        'type' => 'income',
+                        'amount' => (float) $item->amount,
+                        'route' => route('other-incomes.index')
+                    ];
+                });
+            $transactions = $transactions->concat($otherIncomes);
+
+            // 3. Pemasukan: Penginapan (Lodging)
+            $lodgings = Lodging::where('payment_status', 'paid')
+                ->whereNotNull('paid_at')
+                ->whereBetween('paid_at', [$startDate, $endDate])
+                ->with('room')
+                ->get()
+                ->map(function ($item) {
+                    return [
+                        'date' => Carbon::parse($item->paid_at)->startOfDay(),
+                        'created_at' => $item->created_at,
+                        'category' => 'Penginapan',
+                        'description' => "Sewa Harian - Kamar " . ($item->room->room_number ?? 'N/A') . " (" . $item->pic_name . ")",
+                        'notes' => $item->notes,
+                        'type' => 'income',
+                        'amount' => (float) $item->calculateTotal(),
+                        'route' => route('lodgings.show', $item->id)
+                    ];
+                });
+            $transactions = $transactions->concat($lodgings);
+        }
+
+        // 4. Pengeluaran: Pengeluaran Kost (Expense)
+        if (in_array($typeFilter, ['all', 'expense'])) {
+            $expenses = Expense::whereBetween('expense_date', [$startDate, $endDate])
+                ->get()
+                ->map(function ($item) {
+                    return [
+                        'date' => Carbon::parse($item->expense_date)->startOfDay(),
+                        'created_at' => $item->created_at,
+                        'category' => 'Pengeluaran Kost',
+                        'description' => $item->title,
+                        'notes' => $item->notes,
+                        'type' => 'expense',
+                        'amount' => (float) $item->amount,
+                        'route' => route('expenses.index')
+                    ];
+                });
+            $transactions = $transactions->concat($expenses);
+
+            // 5. Pengeluaran: Maintenance Kamar (RoomMaintenance)
+            $maintenances = RoomMaintenance::where('cost', '>', 0)
+                ->where(function($q) use ($startDate, $endDate) {
+                    $q->whereBetween('done_date', [$startDate, $endDate])
+                      ->orWhere(function($subQ) use ($startDate, $endDate) {
+                          $subQ->whereNull('done_date')
+                               ->whereBetween('report_date', [$startDate, $endDate]);
+                      });
+                })
+                ->with('room')
+                ->get()
+                ->map(function ($item) {
+                    $date = $item->done_date ? $item->done_date : $item->report_date;
+                    $desc = "Maintenance Kamar " . ($item->room->room_number ?? 'N/A') . " - " . $item->item_name;
+                    return [
+                        'date' => Carbon::parse($date)->startOfDay(),
+                        'created_at' => $item->created_at,
+                        'category' => 'Maintenance',
+                        'description' => $desc,
+                        'notes' => $item->notes,
+                        'type' => 'expense',
+                        'amount' => (float) $item->cost,
+                        'route' => route('maintenances.index')
+                    ];
+                });
+            $transactions = $transactions->concat($maintenances);
+        }
+
+        // Sort by date descending, then by created_at descending (newest first)
+        $transactions = $transactions->sortByDesc(function ($item) {
+            return sprintf('%010d_%010d', $item['date']->timestamp, $item['created_at'] ? $item['created_at']->timestamp : 0);
+        })->values();
+
+        // Calculate Totals
+        $totalIncome = $transactions->where('type', 'income')->sum('amount');
+        $totalExpense = $transactions->where('type', 'expense')->sum('amount');
+        $netCashflow = $totalIncome - $totalExpense;
+
+        return view('reports.periods', compact(
+            'transactions', 'month', 'year', 'typeFilter',
+            'totalIncome', 'totalExpense', 'netCashflow'
+        ));
+    }
 }
