@@ -33,7 +33,7 @@ class PayableController extends Controller
             $query->whereYear('loan_date', $year);
         }
 
-        $loans = $query->orderBy('loan_date', 'desc')->paginate(15);
+        $loans = $query->orderBy('loan_date', 'desc')->paginate(15)->appends(request()->query());
 
         // Active loans for the global repayment dropdown
         $activeLoans = Loan::where('type', 'payable')->where('is_paid', false)->orderBy('name')->get();

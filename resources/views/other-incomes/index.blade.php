@@ -7,6 +7,7 @@
     <a href="{{ route('other-incomes.create') }}" class="btn btn-primary">
         <i class="bi bi-plus-lg"></i> Tambah Pendapatan
     </a>
+    <button type="button" onclick="window.print()" class="btn btn-info"><i class="bi bi-printer"></i> Cetak</button>
 @endsection
 
 @section('content')

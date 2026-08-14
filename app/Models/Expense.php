@@ -12,7 +12,7 @@ class Expense extends Model
     protected $fillable = [
         'category', 'title', 'description', 'amount',
         'expense_date', 'period_month', 'period_year',
-        'receipt_photo', 'notes'
+        'receipt_photo', 'notes', 'room_maintenance_id'
     ];
 
     protected $casts = [

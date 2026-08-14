@@ -359,4 +359,182 @@ class ReportController extends Controller
             'totalIncome', 'totalExpense', 'netCashflow'
         ));
     }
+    public function customPrint(Request $request)
+    {
+        $month = $request->input('month', Carbon::now()->month);
+        $year = $request->input('year', Carbon::now()->year);
+        $sections = $request->input('sections', []); // Array of selected sections
+
+        $startDate = Carbon::create($year, $month, 1)->startOfMonth()->toDateString();
+        $endDate = Carbon::create($year, $month, 1)->endOfMonth()->toDateString();
+
+        $transactions = collect();
+
+        // 1. Pemasukan Kost (payments)
+        if (in_array('payments', $sections)) {
+            $payments = Payment::where('status', 'paid')
+                ->where('period_month', $month)
+                ->where('period_year', $year)
+                ->with(['tenant', 'room'])
+                ->get()
+                ->map(function ($item) {
+                    $desc = "Pembayaran Kost - Kamar " . ($item->room->room_number ?? 'N/A') . " (" . ($item->tenant->name ?? 'N/A') . ")";
+                    if ($item->period_month && $item->period_year) {
+                        $desc .= " periode " . $item->period_label;
+                    }
+                    return [
+                        'date' => Carbon::parse($item->paid_at)->startOfDay(),
+                        'created_at' => $item->created_at,
+                        'category' => 'Pemasukan Kost',
+                        'description' => $desc,
+                        'notes' => $item->notes,
+                        'amount' => $item->amount,
+                        'type' => 'income',
+                    ];
+                });
+            $transactions = $transactions->concat($payments);
+
+            $lodgings = \App\Models\Lodging::where('payment_status', 'paid')
+                ->whereNotNull('paid_at')
+                ->whereMonth('paid_at', $month)
+                ->whereYear('paid_at', $year)
+                ->with('room')
+                ->get()
+                ->map(function ($item) {
+                    return [
+                        'date' => Carbon::parse($item->paid_at)->startOfDay(),
+                        'created_at' => $item->created_at,
+                        'category' => 'Penginapan',
+                        'description' => "Sewa Harian - Kamar " . ($item->room->room_number ?? 'N/A') . " (" . $item->pic_name . ")",
+                        'notes' => $item->notes,
+                        'amount' => $item->total_price,
+                        'type' => 'income',
+                    ];
+                });
+            $transactions = $transactions->concat($lodgings);
+        }
+
+        // 2. Pengeluaran (expenses)
+        if (in_array('expenses', $sections)) {
+            $expenses = \App\Models\Expense::where('period_month', $month)
+                ->where('period_year', $year)
+                ->with('category')
+                ->get()
+                ->map(function ($item) {
+                    return [
+                        'date' => Carbon::parse($item->expense_date)->startOfDay(),
+                        'created_at' => $item->created_at,
+                        'category' => $item->category->name ?? 'Pengeluaran Umum',
+                        'description' => $item->description,
+                        'notes' => $item->notes,
+                        'amount' => $item->amount,
+                        'type' => 'expense',
+                    ];
+                });
+            $transactions = $transactions->concat($expenses);
+
+            $maintenances = \App\Models\RoomMaintenance::where('cost', '>', 0)
+                ->where(function($q) use ($month, $year) {
+                    $q->where(function($subQ1) use ($month, $year) {
+                        $subQ1->whereMonth('done_date', $month)->whereYear('done_date', $year);
+                    })->orWhere(function($subQ2) use ($month, $year) {
+                        $subQ2->whereNull('done_date')
+                              ->whereMonth('report_date', $month)
+                              ->whereYear('report_date', $year);
+                    });
+                })
+                ->with('room', 'category')
+                ->get()
+                ->map(function ($item) {
+                    return [
+                        'date' => Carbon::parse($item->done_date ?? $item->report_date)->startOfDay(),
+                        'created_at' => $item->created_at,
+                        'category' => 'Maintenance Kamar',
+                        'description' => "Perbaikan Kamar " . ($item->room->room_number ?? 'N/A') . " (" . ($item->category->name ?? '') . ") - " . $item->description,
+                        'notes' => $item->notes,
+                        'amount' => $item->cost,
+                        'type' => 'expense',
+                    ];
+                });
+            $transactions = $transactions->concat($maintenances);
+        }
+
+        // 3. Pendapatan Lain-lain (other_incomes)
+        if (in_array('other_incomes', $sections)) {
+            $otherIncomes = \App\Models\OtherIncome::where('period_month', $month)
+                ->where('period_year', $year)
+                ->get()
+                ->map(function ($item) {
+                    return [
+                        'date' => Carbon::parse($item->income_date)->startOfDay(),
+                        'created_at' => $item->created_at,
+                        'category' => 'Pendapatan Lain',
+                        'description' => $item->description,
+                        'notes' => $item->notes,
+                        'amount' => $item->amount,
+                        'type' => 'income',
+                    ];
+                });
+            $transactions = $transactions->concat($otherIncomes);
+        }
+
+        // 4. Piutang & Pelunasan (receivables)
+        if (in_array('receivables', $sections)) {
+            $receivableRepayments = \App\Models\LoanRepayment::where('type', 'receivable')
+                ->whereMonth('repayment_date', $month)
+                ->whereYear('repayment_date', $year)
+                ->with('loan')
+                ->get()
+                ->map(function ($item) {
+                    $desc = "Pemasukan (Pelunasan Piutang)";
+                    if ($item->loan) $desc .= " - " . $item->loan->name;
+                    return [
+                        'date' => Carbon::parse($item->repayment_date)->startOfDay(),
+                        'created_at' => $item->created_at,
+                        'category' => 'Piutang',
+                        'description' => $desc,
+                        'notes' => $item->notes,
+                        'amount' => $item->amount,
+                        'type' => 'income',
+                    ];
+                });
+            $transactions = $transactions->concat($receivableRepayments);
+        }
+
+        // 5. Hutang & Pembayaran (payables)
+        if (in_array('payables', $sections)) {
+            $payableRepayments = \App\Models\LoanRepayment::where('type', 'payable')
+                ->whereMonth('repayment_date', $month)
+                ->whereYear('repayment_date', $year)
+                ->with('loan')
+                ->get()
+                ->map(function ($item) {
+                    $desc = "Pengeluaran (Pembayaran Hutang)";
+                    if ($item->loan) $desc .= " - " . $item->loan->name;
+                    return [
+                        'date' => Carbon::parse($item->repayment_date)->startOfDay(),
+                        'created_at' => $item->created_at,
+                        'category' => 'Hutang',
+                        'description' => $desc,
+                        'notes' => $item->notes,
+                        'amount' => $item->amount,
+                        'type' => 'expense',
+                    ];
+                });
+            $transactions = $transactions->concat($payableRepayments);
+        }
+
+        $transactions = $transactions->sortByDesc(function ($item) {
+            return sprintf('%010d_%010d', $item['date']->timestamp, $item['created_at'] ? $item['created_at']->timestamp : 0);
+        })->values();
+
+        $totalIncome = $transactions->where('type', 'income')->sum('amount');
+        $totalExpense = $transactions->where('type', 'expense')->sum('amount');
+        $netIncome = $totalIncome - $totalExpense;
+
+        return view('reports.custom_print', compact(
+            'transactions', 'month', 'year', 'sections',
+            'totalIncome', 'totalExpense', 'netIncome'
+        ));
+    }
 }

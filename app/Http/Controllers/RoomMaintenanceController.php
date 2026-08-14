@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\RoomMaintenance;
 use App\Models\Room;
 use App\Models\MaintenanceCategory;
+use App\Models\Expense;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -76,7 +77,12 @@ class RoomMaintenanceController extends Controller
         }
 
         $validated['cost'] = $validated['cost'] ?? 0;
-        RoomMaintenance::create($validated);
+        $maintenance = RoomMaintenance::create($validated);
+
+        // Otomatis catat ke pengeluaran kost jika ada biaya
+        if ($maintenance->cost > 0) {
+            $this->syncExpense($maintenance);
+        }
 
         return redirect()->route('maintenances.index')
             ->with('success', "Data maintenance berhasil dicatat!");
@@ -125,6 +131,13 @@ class RoomMaintenanceController extends Controller
         $validated['cost'] = $validated['cost'] ?? 0;
         $maintenance->update($validated);
 
+        // Sync pengeluaran kost: update jika ada biaya, hapus jika biaya 0
+        if ($maintenance->cost > 0) {
+            $this->syncExpense($maintenance);
+        } else {
+            Expense::where('room_maintenance_id', $maintenance->id)->delete();
+        }
+
         return redirect()->route('maintenances.show', $maintenance)
             ->with('success', "Data maintenance berhasil diperbarui!");
     }
@@ -133,8 +146,40 @@ class RoomMaintenanceController extends Controller
     {
         if ($maintenance->before_photo) Storage::disk('public')->delete($maintenance->before_photo);
         if ($maintenance->after_photo)  Storage::disk('public')->delete($maintenance->after_photo);
+        // Hapus expense terkait jika ada
+        Expense::where('room_maintenance_id', $maintenance->id)->delete();
         $maintenance->delete();
         return redirect()->route('maintenances.index')
             ->with('success', "Data maintenance berhasil dihapus.");
+    }
+
+    /**
+     * Buat atau update Expense dari data maintenance.
+     */
+    private function syncExpense(RoomMaintenance $maintenance): void
+    {
+        $room = $maintenance->room ?? Room::find($maintenance->room_id);
+        $roomLabel = $room ? "Kamar {$room->room_number}" : "Kamar";
+
+        // Cek apakah kategori 'renovasi' ada di expense_categories
+        $categorySlug = \App\Models\ExpenseCategory::where('slug', 'renovasi')->exists()
+            ? 'renovasi'
+            : (\App\Models\ExpenseCategory::first()?->slug ?? 'lain-lain');
+
+        $expenseDate = $maintenance->done_date ?? $maintenance->report_date;
+
+        Expense::updateOrCreate(
+            ['room_maintenance_id' => $maintenance->id],
+            [
+                'category'      => $categorySlug,
+                'title'         => "[Maintenance] {$maintenance->item_name} — {$roomLabel}",
+                'description'   => $maintenance->description,
+                'amount'        => $maintenance->cost,
+                'expense_date'  => $expenseDate,
+                'period_month'  => $expenseDate->month,
+                'period_year'   => $expenseDate->year,
+                'notes'         => $maintenance->vendor ? "Vendor: {$maintenance->vendor}" : null,
+            ]
+        );
     }
 }

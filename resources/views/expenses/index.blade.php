@@ -5,6 +5,7 @@
 
 @section('topbar-actions')
     <a href="{{ route('expenses.create') }}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Tambah Pengeluaran</a>
+    <button type="button" onclick="window.print()" class="btn btn-info"><i class="bi bi-printer"></i> Cetak</button>
 @endsection
 
 @section('content')
