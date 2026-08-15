@@ -33,7 +33,8 @@ class ReceivableController extends Controller
             $query->whereYear('loan_date', $year);
         }
 
-        $loans = $query->orderBy('loan_date', 'desc')->paginate(15);
+        $perPage = request('print') === 'all' ? 999999 : 15;
+        $loans = $query->orderBy('loan_date', 'desc')->paginate($perPage)->appends(request()->query());
 
         // Active loans for the global repayment dropdown
         $activeLoans = Loan::where('type', 'receivable')->where('is_paid', false)->orderBy('name')->get();

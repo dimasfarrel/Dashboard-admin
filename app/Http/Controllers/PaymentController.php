@@ -260,7 +260,7 @@ class PaymentController extends Controller
 
         // Pagination
         $currentPage = \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPage();
-        $perPage = 15;
+        $perPage = request('print') === 'all' ? max($transactions->count(), 1) : 15;
         $currentPageItems = $transactions->values()->slice(($currentPage - 1) * $perPage, $perPage)->all();
         $paginatedTransactions = new \Illuminate\Pagination\LengthAwarePaginator(
             $currentPageItems,

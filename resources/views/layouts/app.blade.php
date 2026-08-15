@@ -244,6 +244,15 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
+@if(request('print') === 'all')
+<script>
+    window.addEventListener('load', function() {
+        setTimeout(function() {
+            window.print();
+        }, 500); // short delay to ensure rendering
+    });
+</script>
+@endif
 @stack('modals')
 @stack('scripts')
 </body>

@@ -17,7 +17,8 @@ class ExpenseController extends Controller
         if ($request->filled('year'))     $query->where('period_year', $request->year);
         if ($request->filled('category')) $query->where('category', $request->category);
 
-        $expenses = $query->orderByDesc('expense_date')->paginate(15)->appends(request()->query());
+        $perPage = request('print') === 'all' ? 999999 : 15;
+        $expenses = $query->orderByDesc('expense_date')->paginate($perPage)->appends(request()->query());
         $categories = ExpenseCategory::orderBy('name')->get();
 
         $currentMonth = $request->month ?? now()->month;

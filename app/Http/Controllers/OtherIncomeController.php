@@ -20,7 +20,8 @@ class OtherIncomeController extends Controller
         if ($request->filled('year'))  $query->where('period_year', $currentYear);
         if ($request->filled('category')) $query->where('category', $request->category);
 
-        $incomes = $query->orderByDesc('income_date')->paginate(15);
+        $perPage = request('print') === 'all' ? 999999 : 15;
+        $incomes = $query->orderByDesc('income_date')->paginate($perPage)->appends(request()->query());
 
         // Category totals for this month
         $categoryTotals = OtherIncome::where('period_month', $currentMonth)
