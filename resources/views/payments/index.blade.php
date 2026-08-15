@@ -186,6 +186,7 @@
                     <th>Nominal</th>
                     <th>Metode</th>
                     <th>Jatuh Tempo</th>
+                    <th>Tgl Bayar</th>
                     <th>Status</th>
                     <th>Aksi</th>
                 </tr>
@@ -216,6 +217,13 @@
                                 {{ $dueDate->translatedFormat('d-M-Y') }}
                                 @if($isPast) <i class="bi bi-exclamation-triangle"></i>@endif
                             </span>
+                        @else
+                            <span class="text-muted">—</span>
+                        @endif
+                    </td>
+                    <td class="text-sm">
+                        @if($trx['date'])
+                            {{ \Carbon\Carbon::parse($trx['date'])->translatedFormat('d-M-Y') }}
                         @else
                             <span class="text-muted">—</span>
                         @endif
