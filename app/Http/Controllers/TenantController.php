@@ -19,7 +19,7 @@ class TenantController extends Controller
 
     public function create()
     {
-        $rooms        = Room::where('status', 'available')->orderBy('room_number')->get();
+        $rooms        = Room::with('tenant')->orderBy('room_number')->get();
         $customFields = TenantCustomField::orderBy('sort_order')->orderBy('name')->get();
         return view('tenants.create', compact('rooms', 'customFields'));
     }
@@ -37,6 +37,7 @@ class TenantController extends Controller
 
         $validated = $request->validate(array_merge([
             'room_id'                   => 'required|exists:rooms,id',
+            'status'                    => 'required|in:active,inactive',
             'name'                      => 'required|string|max:255',
             'nickname'                  => 'nullable|string|max:100',
             'nik'                       => 'required|string|max:255|unique:tenants',
@@ -77,8 +78,10 @@ class TenantController extends Controller
             }
         }
 
-        // Update room status to occupied
-        Room::where('id', $validated['room_id'])->update(['status' => 'occupied']);
+        // Update room status to occupied only if active
+        if ($validated['status'] === 'active') {
+            Room::where('id', $validated['room_id'])->update(['status' => 'occupied']);
+        }
 
         return redirect()->route('tenants.show', $tenant)
             ->with('success', "Data penyewa {$tenant->name} berhasil ditambahkan!");

@@ -14,12 +14,30 @@
             <div class="form-group span-full">
                 <label>Penyewa <span class="required">*</span></label>
                 <select name="tenant_id" id="tenant_select" class="form-control" required onchange="fillRoom(this)">
-                    @foreach($tenants as $t)
-                    <option value="{{ $t->id }}" data-room="{{ $t->room_id }}" data-price="{{ $t->room?->price }}"
-                        {{ old('tenant_id', $payment->tenant_id) == $t->id ? 'selected' : '' }}>
-                        {{ $t->name }} — Kamar {{ $t->room?->room_number }} (Rp {{ number_format($t->room?->price, 0, ',', '.') }})
-                    </option>
-                    @endforeach
+                    @php
+                        $activeTenants = $tenants->where('status', 'active');
+                        $inactiveTenants = $tenants->where('status', 'inactive');
+                    @endphp
+                    @if($activeTenants->count())
+                    <optgroup label="Penyewa Aktif">
+                        @foreach($activeTenants as $t)
+                        <option value="{{ $t->id }}" data-room="{{ $t->room_id }}" data-price="{{ $t->room?->price }}"
+                            {{ old('tenant_id', $payment->tenant_id) == $t->id ? 'selected' : '' }}>
+                            {{ $t->name }} — Kamar {{ $t->room?->room_number }} (Rp {{ number_format($t->room?->price, 0, ',', '.') }})
+                        </option>
+                        @endforeach
+                    </optgroup>
+                    @endif
+                    @if($inactiveTenants->count())
+                    <optgroup label="Penyewa Non-Aktif (Riwayat)">
+                        @foreach($inactiveTenants as $t)
+                        <option value="{{ $t->id }}" data-room="{{ $t->room_id }}" data-price="{{ $t->room?->price }}"
+                            {{ old('tenant_id', $payment->tenant_id) == $t->id ? 'selected' : '' }}>
+                            {{ $t->name }} — Eks Kamar {{ $t->room?->room_number }}
+                        </option>
+                        @endforeach
+                    </optgroup>
+                    @endif
                 </select>
             </div>
             <input type="hidden" name="room_id" id="room_id" value="{{ old('room_id', $payment->room_id) }}">
@@ -119,7 +137,7 @@ function fillRoom(sel) {
     const activeMode = document.querySelector('input[name="amount_mode"]:checked').value;
     if (activeMode === 'auto') {
         const price = opt.dataset.price || '';
-        document.getElementById('amount_input').value = price;
+        document.getElementById('amount_input').value = price ? formatRupiah(price) : '';
     }
 }
 
@@ -131,7 +149,7 @@ function toggleAmountMode(mode) {
         amountInput.setAttribute('readonly', 'readonly');
         if (sel.value) {
             const opt = sel.options[sel.selectedIndex];
-            amountInput.value = opt.dataset.price || '';
+            amountInput.value = opt.dataset.price ? formatRupiah(opt.dataset.price) : '';
         } else {
             amountInput.value = '';
         }

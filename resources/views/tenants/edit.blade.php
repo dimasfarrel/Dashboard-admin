@@ -9,8 +9,23 @@
 @endsection
 
 @section('content')
+@php
+    $isLocked = $tenant->status === 'inactive';
+@endphp
+@if($isLocked)
+<div class="alert alert-warning" id="locked-warning" style="display:flex; align-items:center;">
+    <i class="bi bi-lock-fill" style="margin-right:8px; font-size:18px;"></i>
+    <div><strong>Data Riwayat Terkunci.</strong> Data penyewa non-aktif tidak dapat diubah.</div>
+    <button type="button" class="btn btn-sm btn-dark" style="margin-left: auto;" onclick="document.getElementById('tenant-fieldset').disabled = false; this.parentElement.style.display='none';">
+        <i class="bi bi-unlock-fill"></i> Buka Kunci (Admin)
+    </button>
+</div>
+@endif
+
 <form action="{{ route('tenants.update', $tenant) }}" method="POST" enctype="multipart/form-data">
 @csrf @method('PUT')
+<fieldset id="tenant-fieldset" {{ $isLocked ? 'disabled' : '' }} style="border:none; padding:0; margin:0; min-width:0;">
+
 
 <div style="display:grid; grid-template-columns:1fr 340px; gap:24px;">
     <div style="display:flex; flex-direction:column; gap:20px;">
@@ -167,5 +182,6 @@
         </div>
     </div>
 </div>
+</fieldset>
 </form>
 @endsection

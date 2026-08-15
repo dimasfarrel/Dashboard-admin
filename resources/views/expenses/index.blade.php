@@ -105,7 +105,7 @@
     <div class="table-wrapper">
         <table>
             <thead>
-                <tr><th>Tanggal</th><th>Kategori</th><th>Judul</th><th>Periode</th><th>Nominal</th><th>Aksi</th></tr>
+                <tr><th>Tanggal</th><th>Kategori</th><th>Judul</th><th>Periode</th><th>Nominal</th><th>Catatan</th><th class="no-print">Aksi</th></tr>
             </thead>
             <tbody>
                 @foreach($expenses as $exp)
@@ -121,7 +121,8 @@
                     </td>
                     <td class="text-sm fw-600">{{ \Carbon\Carbon::now()->setMonth((int)($exp->period_month))->translatedFormat('F') }} {{ $exp->period_year }}</td>
                     <td class="money-text fw-600" style="color:var(--accent-red);">Rp {{ number_format($exp->amount, 0, ',', '.') }}</td>
-                    <td>
+                    <td class="text-sm text-muted">{{ Str::limit($exp->notes, 50) ?: '-' }}</td>
+                    <td class="no-print">
                         <div class="flex gap-2">
                             <a href="{{ route('expenses.show', $exp) }}" class="btn btn-info btn-sm btn-icon"><i class="bi bi-eye"></i></a>
                             <a href="{{ route('expenses.edit', $exp) }}" class="btn btn-warning btn-sm btn-icon"><i class="bi bi-pencil"></i></a>

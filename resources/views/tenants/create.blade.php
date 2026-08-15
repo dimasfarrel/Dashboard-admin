@@ -157,6 +157,15 @@
                 <div class="card-title"><i class="bi bi-calendar-check"></i> Data Sewa</div>
             </div>
             <div class="form-grid">
+                <div class="form-group span-full">
+                    <label>Status Input <span class="required">*</span></label>
+                    <select name="status" class="form-control" required>
+                        <option value="active" {{ old('status', 'active') == 'active' ? 'selected' : '' }}>🟢 Penyewa Aktif Sekarang</option>
+                        <option value="inactive" {{ old('status') == 'inactive' ? 'selected' : '' }}>📂 Input Riwayat Lama (Non-Aktif)</option>
+                    </select>
+                    <span class="form-hint">Pilih "Input Riwayat Lama" jika Anda memasukkan data penyewa yang sudah keluar.</span>
+                </div>
+
                 <div class="form-group">
                     <label>Kamar <span class="required">*</span></label>
                     <select name="room_id" class="form-control @error('room_id') is-invalid @enderror" required>
@@ -164,7 +173,9 @@
                         @foreach($rooms as $room)
                         <option value="{{ $room->id }}"
                             {{ old('room_id', request('room_id')) == $room->id ? 'selected' : '' }}>
-                            Kamar {{ $room->room_number }} — Rp {{ number_format($room->price, 0, ',', '.') }}/bln
+                            Kamar {{ $room->room_number }} 
+                            @if($room->status == 'occupied') (Sedang Dihuni: {{ $room->tenant?->name }}) @endif
+                            — Rp {{ number_format($room->price, 0, ',', '.') }}/bln
                         </option>
                         @endforeach
                     </select>

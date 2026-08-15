@@ -289,7 +289,7 @@ class PaymentController extends Controller
 
     public function create()
     {
-        $tenants = Tenant::with('room')->where('status', 'active')->orderBy('name')->get();
+        $tenants = Tenant::with('room')->orderBy('status')->orderBy('name')->get();
         $dueDay  = (int) AppSetting::get('payment_due_day', 10);
         return view('payments.create', compact('tenants', 'dueDay'));
     }
@@ -339,7 +339,7 @@ class PaymentController extends Controller
 
     public function edit(Payment $payment)
     {
-        $tenants = Tenant::with('room')->where('status', 'active')->orderBy('name')->get();
+        $tenants = Tenant::with('room')->orderBy('status')->orderBy('name')->get();
         $dueDay  = (int) AppSetting::get('payment_due_day', 10);
         return view('payments.edit', compact('payment', 'tenants', 'dueDay'));
     }

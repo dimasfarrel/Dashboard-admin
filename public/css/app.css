@@ -923,3 +923,53 @@ tbody td strong, .td-primary {
     height: 220px;
     width: 100%;
 }
+
+/* ===== PRINT STYLES ===== */
+@media print {
+    body {
+        background: #fff;
+        color: #000;
+    }
+    .sidebar, .topbar, .filter-bar, .breadcrumb, .btn, .pagination, .topbar-actions, .no-print {
+        display: none !important;
+    }
+    .main-content, .page-content {
+        margin-left: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+    }
+    .card {
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+        background: #fff !important;
+        color: #000 !important;
+        margin-bottom: 20px;
+        page-break-inside: avoid;
+    }
+    .card-header, .card-title {
+        color: #000 !important;
+        border-bottom-color: #ddd !important;
+    }
+    table {
+        width: 100% !important;
+        border-collapse: collapse;
+    }
+    th, td {
+        border: 1px solid #ddd !important;
+        color: #000 !important;
+    }
+    .badge {
+        border: 1px solid #999 !important;
+        color: #000 !important;
+        background: transparent !important;
+    }
+    .money-text, .text-muted, .text-sm, .fw-600, .fw-700, span {
+        color: #000 !important;
+    }
+    .progress {
+        background: #eee !important;
+    }
+    .progress-bar {
+        background: #888 !important;
+    }
+}
