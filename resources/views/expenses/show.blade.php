@@ -14,7 +14,7 @@
         </div>
         <div class="detail-grid">
             <div class="detail-item"><span class="detail-label">Nominal</span><span class="detail-value money-text" style="font-size:24px; color:var(--accent-red);">Rp {{ number_format($expense->amount, 0, ',', '.') }}</span></div>
-            <div class="detail-item"><span class="detail-label">Tanggal</span><span class="detail-value">{{ $expense->expense_date->format('d F Y') }}</span></div>
+            <div class="detail-item"><span class="detail-label">Tanggal</span><span class="detail-value">{{ $expense->expense_date->translatedFormat('d-M-Y') }}</span></div>
             <div class="detail-item"><span class="detail-label">Periode</span><span class="detail-value fw-600">{{ \Carbon\Carbon::now()->setMonth((int)($expense->period_month))->translatedFormat('F') }} {{ $expense->period_year }}</span></div>
             @if($expense->description)
             <div class="detail-item span-full"><span class="detail-label">Deskripsi</span><span class="detail-value">{{ $expense->description }}</span></div>

@@ -68,8 +68,8 @@
                             <i class="bi bi-whatsapp"></i> {{ $l->pic_phone }}
                         </a>
                     </td>
-                    <td class="text-sm">{{ $l->check_in->format('d/m/Y H:i') }}</td>
-                    <td class="text-sm">{{ $l->check_out->format('d/m/Y H:i') }}</td>
+                    <td class="text-sm">{{ $l->check_in->translatedFormat('d-M-Y, H:i') }}</td>
+                    <td class="text-sm">{{ $l->check_out->translatedFormat('d-M-Y, H:i') }}</td>
                     <td class="text-center"><span class="badge badge-info">{{ $l->duration_days }} hari</span></td>
                     <td class="text-center"><span class="badge badge-secondary"><i class="bi bi-people"></i> {{ $l->guest_count }}</span></td>
                     <td class="money-text fw-600">Rp {{ number_format($l->total_price, 0, ',', '.') }}</td>

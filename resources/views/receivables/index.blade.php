@@ -123,7 +123,7 @@
             <tbody>
                 @foreach($loans as $loan)
                 <tr>
-                    <td>{{ $loan->loan_date->format('d/m/Y') }}</td>
+                    <td>{{ $loan->loan_date->translatedFormat('d-M-Y') }}</td>
                     <td class="fw-600">{{ $loan->name }}</td>
                     <td>{{ Str::limit($loan->purpose, 40) }}</td>
                     <td class="money-text">Rp {{ number_format($loan->total_amount, 0, ',', '.') }}</td>
@@ -187,7 +187,7 @@
             <tbody>
                 @foreach($unlinkedRepayments as $rep)
                 <tr>
-                    <td>{{ $rep->repayment_date->format('d/m/Y') }}</td>
+                    <td>{{ $rep->repayment_date->translatedFormat('d-M-Y') }}</td>
                     <td class="money-text text-success">+ Rp {{ number_format($rep->amount, 0, ',', '.') }}</td>
                     <td>{{ $rep->notes ?: '—' }}</td>
                     <td>

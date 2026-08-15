@@ -30,7 +30,7 @@
             </div>
             <div>
                 <div class="text-muted text-sm">Tanggal</div>
-                <div>{{ $otherIncome->income_date->translatedFormat('d F Y') }}</div>
+                <div>{{ $otherIncome->income_date->translatedFormat('d-M-Y') }}</div>
             </div>
             <div>
                 <div class="text-muted text-sm">Periode</div>

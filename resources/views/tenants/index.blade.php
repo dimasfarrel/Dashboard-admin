@@ -56,7 +56,7 @@
                         <span class="text-muted">—</span>
                         @endif
                     </td>
-                    <td class="text-sm">{{ $tenant->start_date->format('d/m/Y') }}</td>
+                    <td class="text-sm">{{ $tenant->start_date->translatedFormat('d-M-Y') }}</td>
                     <td>
                         @php $depBal = $tenant->deposit_balance; @endphp
                         @if($depBal > 0)

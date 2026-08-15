@@ -16,7 +16,7 @@
             <div class="fw-600">{{ $loan->name }}</div>
             
             <div class="text-muted">Tgl Hutang</div>
-            <div>{{ $loan->loan_date->format('d/m/Y') }}</div>
+            <div>{{ $loan->loan_date->translatedFormat('d-M-Y') }}</div>
             
             <div class="text-muted">Keperluan</div>
             <div>{{ $loan->purpose }}</div>
@@ -81,7 +81,7 @@
                 <tbody>
                     @foreach($loan->repayments as $rep)
                     <tr>
-                        <td>{{ $rep->repayment_date->format('d/m/Y') }}</td>
+                        <td>{{ $rep->repayment_date->translatedFormat('d-M-Y') }}</td>
                         <td class="money-text text-danger">- Rp {{ number_format($rep->amount, 0, ',', '.') }}</td>
                         <td>{{ $rep->notes ?: '-' }}</td>
                         <td>

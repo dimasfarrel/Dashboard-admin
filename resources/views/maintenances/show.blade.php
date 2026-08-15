@@ -22,8 +22,8 @@
             <div class="detail-item"><span class="detail-label">Nama Item</span><span class="detail-value" style="font-size:18px;">{{ $maintenance->item_name }}</span></div>
             <div class="detail-item"><span class="detail-label">Biaya</span><span class="detail-value money-text" style="font-size:20px; color:var(--accent-red);">Rp {{ number_format($maintenance->cost, 0, ',', '.') }}</span></div>
             <div class="detail-item span-full"><span class="detail-label">Deskripsi Kerusakan</span><span class="detail-value">{{ $maintenance->description }}</span></div>
-            <div class="detail-item"><span class="detail-label">Tanggal Laporan</span><span class="detail-value">{{ $maintenance->report_date->format('d F Y') }}</span></div>
-            <div class="detail-item"><span class="detail-label">Tanggal Selesai</span><span class="detail-value">{{ $maintenance->done_date?->format('d F Y') ?? '—' }}</span></div>
+            <div class="detail-item"><span class="detail-label">Tanggal Laporan</span><span class="detail-value">{{ $maintenance->report_date->translatedFormat('d-M-Y') }}</span></div>
+            <div class="detail-item"><span class="detail-label">Tanggal Selesai</span><span class="detail-value">{{ $maintenance->done_date?->translatedFormat('d-M-Y') ?? '—' }}</span></div>
             <div class="detail-item"><span class="detail-label">Vendor/Tukang</span><span class="detail-value">{{ $maintenance->vendor ?? '—' }}</span></div>
             <div class="detail-item"><span class="detail-label">No HP Vendor</span>
                 @if($maintenance->vendor_phone)

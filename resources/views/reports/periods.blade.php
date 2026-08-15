@@ -234,7 +234,7 @@
             <tbody>
                 @forelse($transactions as $trx)
                     <tr>
-                        <td style="color: var(--text-secondary);">{{ \Carbon\Carbon::parse($trx['date'])->format('d M Y') }}</td>
+                        <td style="color: var(--text-secondary);">{{ \Carbon\Carbon::parse($trx['date'])->translatedFormat('d-M-Y') }}</td>
                         <td>
                             <strong style="color: var(--text-primary);">{{ $trx['category'] }}</strong>
                         </td>

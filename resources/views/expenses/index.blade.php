@@ -110,7 +110,7 @@
             <tbody>
                 @foreach($expenses as $exp)
                 <tr>
-                    <td class="text-sm">{{ $exp->expense_date->format('d/m/Y') }}</td>
+                    <td class="text-sm">{{ $exp->expense_date->translatedFormat('d-M-Y') }}</td>
                     <td>
                         @php $icon = $exp->category_icon; $label = $exp->category_label; @endphp
                         <span class="badge badge-secondary"><i class="{{ $icon }}"></i> {{ $label }}</span>

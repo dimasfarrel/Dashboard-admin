@@ -113,7 +113,7 @@
             <tbody>
                 @foreach($incomes as $inc)
                 <tr>
-                    <td class="text-sm">{{ $inc->income_date->format('d/m/Y') }}</td>
+                    <td class="text-sm">{{ $inc->income_date->translatedFormat('d-M-Y') }}</td>
                     <td>
                         <strong>{{ $inc->title }}</strong>
                         @if($inc->notes)<br><span class="text-muted text-sm">{{ Str::limit($inc->notes, 40) }}</span>@endif

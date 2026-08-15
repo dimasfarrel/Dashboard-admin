@@ -173,7 +173,7 @@
 {{-- Print Header (Only visible when printing) --}}
 <div class="print-header">
     <h1>LAPORAN KEUANGAN KOST</h1>
-    <p>Periode: {{ \Carbon\Carbon::parse(request('start_date', $startDate))->format('d F Y') }} - {{ \Carbon\Carbon::parse(request('end_date', $endDate))->format('d F Y') }}</p>
+    <p>Periode: {{ \Carbon\Carbon::parse(request('start_date', $startDate))->translatedFormat('d-M-Y') }} - {{ \Carbon\Carbon::parse(request('end_date', $endDate))->translatedFormat('d-M-Y') }}</p>
 </div>
 
 {{-- Summary Cards --}}
@@ -228,7 +228,7 @@
             <tbody>
                 @forelse($transactions as $trx)
                     <tr>
-                        <td style="color: var(--text-secondary);">{{ \Carbon\Carbon::parse($trx['date'])->format('d M Y') }}</td>
+                        <td style="color: var(--text-secondary);">{{ \Carbon\Carbon::parse($trx['date'])->translatedFormat('d-M-Y') }}</td>
                         <td>
                             <strong style="color: var(--text-primary);">{{ $trx['category'] }}</strong>
                         </td>

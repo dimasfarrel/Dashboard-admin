@@ -127,7 +127,7 @@
             <tbody>
                 @foreach($transactions as $trx)
                     <tr>
-                        <td>{{ $trx['date']->format('d M Y') }}</td>
+                        <td>{{ $trx['date']->translatedFormat('d-M-Y') }}</td>
                         <td>{{ $trx['category'] }}</td>
                         <td>
                             {{ $trx['description'] }}

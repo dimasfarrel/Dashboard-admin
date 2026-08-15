@@ -132,7 +132,7 @@
             <div class="topbar-actions">
                 <span class="topbar-date">
                     <i class="bi bi-calendar3" style="margin-right:4px;"></i>
-                    {{ now()->translatedFormat('l, d F Y') }}
+                    {{ now()->translatedFormat('l, d-M-Y') }}
                 </span>
                 @yield('topbar-actions')
             </div>

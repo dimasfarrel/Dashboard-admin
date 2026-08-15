@@ -21,8 +21,8 @@
             <div class="detail-item"><span class="detail-label">Periode</span><span class="detail-value" style="font-size:18px; font-weight:700;">{{ $payment->period_label }}</span></div>
             <div class="detail-item"><span class="detail-label">Nominal</span><span class="detail-value money-text" style="font-size:22px; color:var(--accent-primary);">Rp {{ number_format($payment->amount, 0, ',', '.') }}</span></div>
             <div class="detail-item"><span class="detail-label">Metode Pembayaran</span><span class="detail-value">{{ ucfirst($payment->payment_method ?? '—') }}</span></div>
-            <div class="detail-item"><span class="detail-label">Jatuh Tempo</span><span class="detail-value {{ $payment->due_date && $payment->due_date->isPast() && $payment->status !== 'paid' ? 'text-danger' : '' }}">{{ $payment->due_date?->format('d F Y') ?? '—' }}</span></div>
-            <div class="detail-item"><span class="detail-label">Tanggal Dibayar</span><span class="detail-value">{{ $payment->paid_at?->format('d F Y') ?? '—' }}</span></div>
+            <div class="detail-item"><span class="detail-label">Jatuh Tempo</span><span class="detail-value {{ $payment->due_date && $payment->due_date->isPast() && $payment->status !== 'paid' ? 'text-danger' : '' }}">{{ $payment->due_date?->translatedFormat('d-M-Y') ?? '—' }}</span></div>
+            <div class="detail-item"><span class="detail-label">Tanggal Dibayar</span><span class="detail-value">{{ $payment->paid_at?->translatedFormat('d-M-Y') ?? '—' }}</span></div>
             @if($payment->notes)
             <div class="detail-item span-full"><span class="detail-label">Catatan</span><span class="detail-value">{{ $payment->notes }}</span></div>
             @endif

@@ -139,7 +139,7 @@
                     <tbody>
                         @foreach($room->maintenances as $m)
                         <tr>
-                            <td class="text-sm">{{ $m->report_date->format('d/m/Y') }}</td>
+                            <td class="text-sm">{{ $m->report_date->translatedFormat('d-M-Y') }}</td>
                             <td><strong>{{ $m->item_name }}</strong></td>
                             <td>{{ $m->category_label }}</td>
                             <td class="money-text">Rp {{ number_format($m->cost, 0, ',', '.') }}</td>
@@ -191,13 +191,13 @@
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Mulai Sewa</span>
-                    <span class="detail-value">{{ $room->tenant->start_date->format('d F Y') }}</span>
+                    <span class="detail-value">{{ $room->tenant->start_date->translatedFormat('d-M-Y') }}</span>
                 </div>
                 @if($room->tenant->end_date)
                 <div class="detail-item">
                     <span class="detail-label">Kontrak Berakhir</span>
                     <span class="detail-value {{ $room->tenant->end_date->isPast() ? 'text-danger' : '' }}">
-                        {{ $room->tenant->end_date->format('d F Y') }}
+                        {{ $room->tenant->end_date->translatedFormat('d-M-Y') }}
                     </span>
                 </div>
                 @endif

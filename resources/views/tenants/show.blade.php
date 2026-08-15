@@ -57,7 +57,7 @@
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Tanggal Lahir</span>
-                    <span class="detail-value">{{ $tenant->birth_date?->format('d F Y') ?? '—' }}</span>
+                    <span class="detail-value">{{ $tenant->birth_date?->translatedFormat('d-M-Y') ?? '—' }}</span>
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Pekerjaan</span>
@@ -79,13 +79,13 @@
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Mulai Sewa</span>
-                    <span class="detail-value">{{ $tenant->start_date->format('d F Y') }}</span>
+                    <span class="detail-value">{{ $tenant->start_date->translatedFormat('d-M-Y') }}</span>
                 </div>
                 @if($tenant->end_date)
                 <div class="detail-item">
                     <span class="detail-label">Kontrak Berakhir</span>
                     <span class="detail-value {{ $tenant->end_date->isPast() ? 'text-danger' : '' }}">
-                        {{ $tenant->end_date->format('d F Y') }}
+                        {{ $tenant->end_date->translatedFormat('d-M-Y') }}
                         @if($tenant->end_date->isPast())
                         <span class="badge badge-danger" style="margin-left:6px;">Kadaluarsa</span>
                         @endif
@@ -154,7 +154,7 @@
                             <td class="fw-600">{{ $pay->period_label }}</td>
                             <td class="money-text">Rp {{ number_format($pay->amount, 0, ',', '.') }}</td>
                             <td>{{ ucfirst($pay->payment_method ?? '—') }}</td>
-                            <td class="text-sm">{{ $pay->paid_at?->format('d/m/Y') ?? '—' }}</td>
+                            <td class="text-sm">{{ $pay->paid_at?->translatedFormat('d-M-Y') ?? '—' }}</td>
                             <td>
                                 @if($pay->status === 'paid')     <span class="badge badge-success">Lunas</span>
                                 @elseif($pay->status === 'overdue') <span class="badge badge-danger">Terlambat</span>
@@ -229,7 +229,7 @@
                     <tbody>
                         @foreach($tenant->deposits as $dep)
                         <tr>
-                            <td class="text-sm">{{ $dep->date->format('d/m/Y') }}</td>
+                            <td class="text-sm">{{ $dep->date->translatedFormat('d-M-Y') }}</td>
                             <td>
                                 @if($dep->type === 'credit')
                                     <span class="badge" style="background:rgba(0,212,170,0.15);color:#00d4aa;border:1px solid rgba(0,212,170,0.3);"><i class="bi bi-arrow-down-circle"></i> Setor</span>

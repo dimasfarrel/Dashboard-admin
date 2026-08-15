@@ -213,7 +213,7 @@
                         @if($trx['due_date'])
                             @php $dueDate = \Carbon\Carbon::parse($trx['due_date']); $isPast = $dueDate->isPast() && $trx['status'] !== 'paid'; @endphp
                             <span style="color:{{ $isPast ? 'var(--accent-red)' : 'var(--text-muted)' }};">
-                                {{ $dueDate->format('d/m/Y') }}
+                                {{ $dueDate->translatedFormat('d-M-Y') }}
                                 @if($isPast) <i class="bi bi-exclamation-triangle"></i>@endif
                             </span>
                         @else

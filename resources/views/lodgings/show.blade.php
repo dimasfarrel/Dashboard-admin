@@ -27,11 +27,11 @@
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Check In</span>
-                    <span class="detail-value">{{ $lodging->check_in->format('d F Y, H:i') }}</span>
+                    <span class="detail-value">{{ $lodging->check_in->translatedFormat('d-M-Y, H:i') }}</span>
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Check Out</span>
-                    <span class="detail-value">{{ $lodging->check_out->format('d F Y, H:i') }}</span>
+                    <span class="detail-value">{{ $lodging->check_out->translatedFormat('d-M-Y, H:i') }}</span>
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Durasi</span>
@@ -118,7 +118,7 @@
             @endif
             @if($lodging->paid_at)
             <div style="margin-top:10px; font-size:13px; color:var(--text-muted);">
-                Tgl Bayar: {{ $lodging->paid_at->format('d M Y') }}
+                Tgl Bayar: {{ $lodging->paid_at->translatedFormat('d-M-Y') }}
             </div>
             @endif
             <div style="margin-top:16px; font-size:24px; font-weight:800; color:var(--accent-primary);" class="money-text">

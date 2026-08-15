@@ -78,8 +78,8 @@
                     <td><span class="badge badge-secondary">{{ $m->category_label }}</span></td>
                     <td class="money-text">Rp {{ number_format($m->cost, 0, ',', '.') }}</td>
                     <td>{{ $m->vendor ?? '—' }}</td>
-                    <td class="text-sm">{{ $m->report_date->format('d/m/Y') }}</td>
-                    <td class="text-sm">{{ $m->done_date?->format('d/m/Y') ?? '—' }}</td>
+                    <td class="text-sm">{{ $m->report_date->translatedFormat('d-M-Y') }}</td>
+                    <td class="text-sm">{{ $m->done_date?->translatedFormat('d-M-Y') ?? '—' }}</td>
                     <td>
                         @if($m->status === 'done')        <span class="badge badge-success">Selesai</span>
                         @elseif($m->status === 'in_progress') <span class="badge badge-info">Proses</span>
