@@ -200,8 +200,8 @@ class PaymentController extends Controller
             $otherList = collect([]); // Other incomes don't have room_id
         }
 
-        // --- 4. Deposit Incomes (Setor Deposit) ---
-        $depositsQuery = TenantDeposit::with(['tenant.room'])->where('type', 'credit');
+        // --- 4. Deposit Incomes (Setor Deposit & Potongan Deposit) ---
+        $depositsQuery = TenantDeposit::with(['tenant.room']);
         if ($selectedPeriodMonth) $depositsQuery->whereMonth('date', $selectedPeriodMonth);
         if ($selectedPeriodYear)  $depositsQuery->whereYear('date', $selectedPeriodYear);
         if ($selectedPayMonth)    $depositsQuery->whereMonth('date', $selectedPayMonth);
@@ -219,8 +219,8 @@ class PaymentController extends Controller
                     'type'      => 'deposit',
                     'id'        => $d->id,
                     'room'      => $d->tenant?->room?->room_number ?? '—',
-                    'name'      => ($d->tenant?->name ?? '—') . ' (Deposit)',
-                    'amount'    => $d->amount,
+                    'name'      => ($d->tenant?->name ?? '—') . ($d->type === 'debit' ? ' (Potongan Deposit)' : ' (Deposit)'),
+                    'amount'    => $d->type === 'debit' ? -$d->amount : $d->amount,
                     'method'    => '—',
                     'status'    => 'paid',
                     'period'    => $d->description,

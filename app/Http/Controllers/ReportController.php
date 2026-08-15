@@ -84,8 +84,7 @@ class ReportController extends Controller
             $transactions = $transactions->concat($lodgings);
 
             // 4. Pemasukan: Deposit Jaminan (TenantDeposit)
-            $deposits = TenantDeposit::where('type', 'credit')
-                ->whereBetween('date', [$startDate, $endDate])
+            $deposits = TenantDeposit::whereBetween('date', [$startDate, $endDate])
                 ->with(['tenant.room'])
                 ->get()
                 ->map(function ($item) {
@@ -93,10 +92,10 @@ class ReportController extends Controller
                         'date' => Carbon::parse($item->date)->startOfDay(),
                         'created_at' => $item->created_at,
                         'category' => 'Deposit Jaminan',
-                        'description' => "Deposit Jaminan - Kamar " . ($item->tenant->room->room_number ?? 'N/A') . " (" . ($item->tenant->name ?? 'N/A') . ")",
+                        'description' => "Deposit Jaminan - Kamar " . ($item->tenant->room->room_number ?? 'N/A') . " (" . ($item->tenant->name ?? 'N/A') . ")" . ($item->type === 'debit' ? " [Potongan]" : ""),
                         'notes' => $item->notes,
                         'type' => 'income',
-                        'amount' => (float) $item->amount,
+                        'amount' => (float) ($item->type === 'debit' ? -$item->amount : $item->amount),
                         'route' => route('tenants.show', $item->tenant_id)
                     ];
                 });
@@ -315,8 +314,7 @@ class ReportController extends Controller
             $transactions = $transactions->concat($lodgings);
 
             // 4. Pemasukan: Deposit Jaminan (TenantDeposit)
-            $deposits = TenantDeposit::where('type', 'credit')
-                ->whereMonth('date', $month)
+            $deposits = TenantDeposit::whereMonth('date', $month)
                 ->whereYear('date', $year)
                 ->with(['tenant.room'])
                 ->get()
@@ -325,10 +323,10 @@ class ReportController extends Controller
                         'date' => Carbon::parse($item->date)->startOfDay(),
                         'created_at' => $item->created_at,
                         'category' => 'Deposit Jaminan',
-                        'description' => "Deposit Jaminan - Kamar " . ($item->tenant->room->room_number ?? 'N/A') . " (" . ($item->tenant->name ?? 'N/A') . ")",
+                        'description' => "Deposit Jaminan - Kamar " . ($item->tenant->room->room_number ?? 'N/A') . " (" . ($item->tenant->name ?? 'N/A') . ")" . ($item->type === 'debit' ? " [Potongan]" : ""),
                         'notes' => $item->notes,
                         'type' => 'income',
-                        'amount' => (float) $item->amount,
+                        'amount' => (float) ($item->type === 'debit' ? -$item->amount : $item->amount),
                         'route' => route('tenants.show', $item->tenant_id)
                     ];
                 });
