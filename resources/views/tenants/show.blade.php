@@ -162,9 +162,15 @@
                                 @endif
                             </td>
                             <td>
-                                <a href="{{ route('payments.edit', $pay) }}" class="btn btn-secondary btn-sm btn-icon">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
+                                <div class="flex gap-2">
+                                    <a href="{{ route('payments.edit', $pay) }}" class="btn btn-secondary btn-sm btn-icon">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form action="{{ route('payments.destroy', $pay) }}" method="POST" data-confirm="Hapus riwayat pembayaran ini?">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="btn btn-danger btn-sm btn-icon"><i class="bi bi-trash"></i></button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                         @endforeach
