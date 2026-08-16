@@ -40,7 +40,7 @@
             <div>
                 <div class="flex items-center justify-between" style="margin-bottom:5px;">
                     <span style="font-size:13px; font-weight:500; color:var(--text-secondary);">
-                        <i class="{{ $icon }}" style="margin-right:6px;"></i>{{ $labels[$cat->category] ?? $cat->category }}
+                        <i class="{{ $icon }}" style="margin-right:6px;"></i>{{ $labels[$cat->category] ?? ($cat->category === 'deposit_deduction' ? 'Pengembalian Deposit' : $cat->category) }}
                     </span>
                     <span class="money-text fw-600" style="font-size:13px;">Rp {{ number_format($cat->total, 0, ',', '.') }}</span>
                 </div>
@@ -124,12 +124,18 @@
                     <td class="text-sm text-muted">{{ Str::limit($exp->notes, 50) ?: '-' }}</td>
                     <td class="no-print">
                         <div class="flex gap-2">
-                            <a href="{{ route('expenses.show', $exp) }}" class="btn btn-info btn-sm btn-icon"><i class="bi bi-eye"></i></a>
-                            <a href="{{ route('expenses.edit', $exp) }}" class="btn btn-warning btn-sm btn-icon"><i class="bi bi-pencil"></i></a>
-                            <form action="{{ route('expenses.destroy', $exp) }}" method="POST" data-confirm="Hapus pengeluaran ini?">
+                            @if($exp->is_deposit)
+                            <a href="{{ route('tenants.show', $exp->tenant_id) }}" class="btn btn-info btn-sm btn-icon" title="Lihat di Data Penyewa"><i class="bi bi-eye"></i></a>
+                            <button disabled class="btn btn-secondary btn-sm btn-icon" style="opacity:0.5; cursor:not-allowed;" title="Edit via Data Penyewa"><i class="bi bi-pencil"></i></button>
+                            <button disabled class="btn btn-secondary btn-sm btn-icon" style="opacity:0.5; cursor:not-allowed;" title="Hapus via Data Penyewa"><i class="bi bi-trash"></i></button>
+                            @else
+                            <a href="{{ route('expenses.show', $exp->id) }}" class="btn btn-info btn-sm btn-icon"><i class="bi bi-eye"></i></a>
+                            <a href="{{ route('expenses.edit', $exp->id) }}" class="btn btn-warning btn-sm btn-icon"><i class="bi bi-pencil"></i></a>
+                            <form action="{{ route('expenses.destroy', $exp->id) }}" method="POST" data-confirm="Hapus pengeluaran ini?">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="btn btn-danger btn-sm btn-icon"><i class="bi bi-trash"></i></button>
                             </form>
+                            @endif
                         </div>
                     </td>
                 </tr>
@@ -155,7 +161,8 @@
 const catData = @json($categoryTotals);
 const labels = {
     listrik: 'Listrik', air: 'Air/PDAM', internet: 'Internet', kebersihan: 'Kebersihan',
-    keamanan: 'Keamanan', pajak: 'Pajak', renovasi: 'Renovasi', perlengkapan: 'Perlengkapan', 'lain-lain': 'Lain-lain'
+    keamanan: 'Keamanan', pajak: 'Pajak', renovasi: 'Renovasi', perlengkapan: 'Perlengkapan', 'lain-lain': 'Lain-lain',
+    deposit_deduction: 'Pengembalian Deposit'
 };
 const colors = ['#00d4aa','#3b82f6','#7c3aed','#f97316','#eab308','#ef4444','#22c55e','#06b6d4','#94a3b8'];
 

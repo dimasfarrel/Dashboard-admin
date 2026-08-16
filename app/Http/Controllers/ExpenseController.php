@@ -11,27 +11,95 @@ class ExpenseController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Expense::query();
-
-        if ($request->filled('month'))    $query->where('period_month', $request->month);
-        if ($request->filled('year'))     $query->where('period_year', $request->year);
-        if ($request->filled('category')) $query->where('category', $request->category);
-
-        $perPage = request('print') === 'all' ? 999999 : 15;
-        $expenses = $query->orderByDesc('expense_date')->paginate($perPage)->appends(request()->query());
-        $categories = ExpenseCategory::orderBy('name')->get();
-
         $currentMonth = $request->month ?? now()->month;
         $currentYear  = $request->year  ?? now()->year;
+        $selectedCategory = $request->filled('category') ? $request->category : null;
 
-        // Ringkasan per kategori bulan ini
+        // --- 1. Get Expenses ---
+        $expensesQuery = Expense::query();
+        if ($request->filled('month'))    $expensesQuery->where('period_month', $currentMonth);
+        if ($request->filled('year'))     $expensesQuery->where('period_year', $currentYear);
+        if ($selectedCategory && $selectedCategory !== 'deposit_deduction') {
+            $expensesQuery->where('category', $selectedCategory);
+        }
+        $expensesList = $expensesQuery->get()->map(function($e) {
+            return (object) [
+                'id'            => $e->id,
+                'is_deposit'    => false,
+                'expense_date'  => $e->expense_date,
+                'category'      => $e->category,
+                'category_label'=> $e->category_label,
+                'category_icon' => $e->category_icon,
+                'title'         => $e->title,
+                'description'   => $e->description,
+                'period_month'  => $e->period_month,
+                'period_year'   => $e->period_year,
+                'amount'        => $e->amount,
+                'notes'         => $e->notes,
+                'receipt_photo' => $e->receipt_photo,
+            ];
+        });
+
+        // --- 2. Get Deposit Deductions (Pengembalian/Potongan Deposit) ---
+        $depositsList = collect([]);
+        if (!$selectedCategory || $selectedCategory === 'deposit_deduction') {
+            $depositsQuery = \App\Models\TenantDeposit::with('tenant.room')->where('type', 'debit');
+            if ($request->filled('month')) $depositsQuery->whereMonth('date', $currentMonth);
+            if ($request->filled('year'))  $depositsQuery->whereYear('date', $currentYear);
+            
+            $depositsList = $depositsQuery->get()->map(function($d) {
+                return (object) [
+                    'id'            => $d->id,
+                    'is_deposit'    => true,
+                    'expense_date'  => \Carbon\Carbon::parse($d->date)->startOfDay(),
+                    'category'      => 'deposit_deduction',
+                    'category_label'=> 'Pengembalian Deposit',
+                    'category_icon' => 'bi-wallet2',
+                    'title'         => 'Pengembalian / Potongan Deposit',
+                    'description'   => ($d->tenant->name ?? '—') . ' (' . ($d->tenant->room->room_number ?? '') . ') - ' . $d->description,
+                    'period_month'  => \Carbon\Carbon::parse($d->date)->month,
+                    'period_year'   => \Carbon\Carbon::parse($d->date)->year,
+                    'amount'        => $d->amount,
+                    'notes'         => $d->notes,
+                    'receipt_photo' => null,
+                    'tenant_id'     => $d->tenant_id,
+                ];
+            });
+        }
+
+        // --- 3. Merge & Paginate ---
+        $allExpenses = $expensesList->concat($depositsList)->sortByDesc('expense_date')->values();
+        
+        $perPage = request('print') === 'all' ? 999999 : 15;
+        $currentPage = \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPage();
+        $currentPageItems = $allExpenses->slice(($currentPage - 1) * $perPage, $perPage)->values();
+        $expenses = new \Illuminate\Pagination\LengthAwarePaginator($currentPageItems, $allExpenses->count(), $perPage, $currentPage, [
+            'path' => \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPath(),
+            'query' => request()->query(),
+        ]);
+
+        $categories = ExpenseCategory::orderBy('name')->get();
+
+        // --- 4. Ringkasan per kategori bulan ini ---
         $categoryTotals = Expense::where('period_month', $currentMonth)
             ->where('period_year', $currentYear)
             ->selectRaw('category, SUM(amount) as total')
             ->groupBy('category')
-            ->orderByDesc('total')
             ->get();
-
+            
+        $depositTotal = \App\Models\TenantDeposit::where('type', 'debit')
+            ->whereMonth('date', $currentMonth)
+            ->whereYear('date', $currentYear)
+            ->sum('amount');
+            
+        if ($depositTotal > 0) {
+            $categoryTotals->push((object)[
+                'category' => 'deposit_deduction',
+                'total' => $depositTotal
+            ]);
+        }
+        
+        $categoryTotals = $categoryTotals->sortByDesc('total')->values();
         $totalThisMonth = $categoryTotals->sum('total');
 
         return view('expenses.index', compact(

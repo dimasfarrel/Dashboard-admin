@@ -84,7 +84,8 @@ class ReportController extends Controller
             $transactions = $transactions->concat($lodgings);
 
             // 4. Pemasukan: Deposit Jaminan (TenantDeposit)
-            $deposits = TenantDeposit::whereBetween('date', [$startDate, $endDate])
+            $deposits = TenantDeposit::where('type', 'credit')
+                ->whereBetween('date', [$startDate, $endDate])
                 ->with(['tenant.room'])
                 ->get()
                 ->map(function ($item) {
@@ -92,10 +93,10 @@ class ReportController extends Controller
                         'date' => Carbon::parse($item->date)->startOfDay(),
                         'created_at' => $item->created_at,
                         'category' => 'Deposit Jaminan',
-                        'description' => "Deposit Jaminan - Kamar " . ($item->tenant->room->room_number ?? 'N/A') . " (" . ($item->tenant->name ?? 'N/A') . ")" . ($item->type === 'debit' ? " [Potongan]" : ""),
+                        'description' => "Deposit Jaminan - Kamar " . ($item->tenant->room->room_number ?? 'N/A') . " (" . ($item->tenant->name ?? 'N/A') . ")",
                         'notes' => $item->notes,
                         'type' => 'income',
-                        'amount' => (float) ($item->type === 'debit' ? -$item->amount : $item->amount),
+                        'amount' => (float) $item->amount,
                         'route' => route('tenants.show', $item->tenant_id)
                     ];
                 });
@@ -146,6 +147,25 @@ class ReportController extends Controller
                     ];
                 });
             $transactions = $transactions->concat($maintenances);
+
+            // 6. Pengeluaran: Potongan / Pengembalian Deposit (TenantDeposit)
+            $depositDeductions = TenantDeposit::where('type', 'debit')
+                ->whereBetween('date', [$startDate, $endDate])
+                ->with(['tenant.room'])
+                ->get()
+                ->map(function ($item) {
+                    return [
+                        'date' => Carbon::parse($item->date)->startOfDay(),
+                        'created_at' => $item->created_at,
+                        'category' => 'Pengembalian Deposit',
+                        'description' => "Pengembalian/Potongan Deposit - Kamar " . ($item->tenant->room->room_number ?? 'N/A') . " (" . ($item->tenant->name ?? 'N/A') . ")",
+                        'notes' => $item->notes,
+                        'type' => 'expense',
+                        'amount' => (float) $item->amount,
+                        'route' => route('tenants.show', $item->tenant_id)
+                    ];
+                });
+            $transactions = $transactions->concat($depositDeductions);
         }
 
         // Sort by date descending, then by created_at descending (newest first)
@@ -314,7 +334,8 @@ class ReportController extends Controller
             $transactions = $transactions->concat($lodgings);
 
             // 4. Pemasukan: Deposit Jaminan (TenantDeposit)
-            $deposits = TenantDeposit::whereMonth('date', $month)
+            $deposits = TenantDeposit::where('type', 'credit')
+                ->whereMonth('date', $month)
                 ->whereYear('date', $year)
                 ->with(['tenant.room'])
                 ->get()
@@ -323,10 +344,10 @@ class ReportController extends Controller
                         'date' => Carbon::parse($item->date)->startOfDay(),
                         'created_at' => $item->created_at,
                         'category' => 'Deposit Jaminan',
-                        'description' => "Deposit Jaminan - Kamar " . ($item->tenant->room->room_number ?? 'N/A') . " (" . ($item->tenant->name ?? 'N/A') . ")" . ($item->type === 'debit' ? " [Potongan]" : ""),
+                        'description' => "Deposit Jaminan - Kamar " . ($item->tenant->room->room_number ?? 'N/A') . " (" . ($item->tenant->name ?? 'N/A') . ")",
                         'notes' => $item->notes,
                         'type' => 'income',
-                        'amount' => (float) ($item->type === 'debit' ? -$item->amount : $item->amount),
+                        'amount' => (float) $item->amount,
                         'route' => route('tenants.show', $item->tenant_id)
                     ];
                 });
@@ -513,6 +534,24 @@ class ReportController extends Controller
                     ];
                 });
             $transactions = $transactions->concat($maintenances);
+
+            $depositDeductions = TenantDeposit::where('type', 'debit')
+                ->whereMonth('date', $month)
+                ->whereYear('date', $year)
+                ->with(['tenant.room'])
+                ->get()
+                ->map(function ($item) {
+                    return [
+                        'date' => Carbon::parse($item->date)->startOfDay(),
+                        'created_at' => $item->created_at,
+                        'category' => 'Pengembalian Deposit',
+                        'description' => "Pengembalian/Potongan Deposit - Kamar " . ($item->tenant->room->room_number ?? 'N/A') . " (" . ($item->tenant->name ?? 'N/A') . ")",
+                        'notes' => $item->notes,
+                        'amount' => (float) $item->amount,
+                        'type' => 'expense',
+                    ];
+                });
+            $transactions = $transactions->concat($depositDeductions);
         }
 
         // 3. Pendapatan Lain-lain (other_incomes)
