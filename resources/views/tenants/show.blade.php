@@ -245,10 +245,13 @@
                                 {{ $dep->type === 'credit' ? '+' : '-' }} Rp {{ number_format($dep->amount, 0, ',', '.') }}
                             </td>
                             <td>
-                                <form action="{{ route('tenant-deposits.destroy', $dep) }}" method="POST" data-confirm="Hapus transaksi deposit ini?">
-                                    @csrf @method('DELETE')
-                                    <button type="submit" class="btn btn-danger btn-sm btn-icon"><i class="bi bi-trash"></i></button>
-                                </form>
+                                <div class="flex gap-2">
+                                    <button class="btn btn-warning btn-sm btn-icon" onclick="editDeposit({{ $dep->id }}, '{{ $dep->date->format('Y-m-d') }}', '{{ $dep->description }}', '{{ $dep->amount }}', '{{ $dep->notes }}')"><i class="bi bi-pencil"></i></button>
+                                    <form action="{{ route('tenant-deposits.destroy', $dep) }}" method="POST" data-confirm="Hapus transaksi deposit ini?">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="btn btn-danger btn-sm btn-icon"><i class="bi bi-trash"></i></button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                         @endforeach
@@ -417,6 +420,41 @@
         </form>
     </div>
 </div>
+
+{{-- Edit Deposit Modal --}}
+<div id="editDepositModal" class="modal-backdrop d-none">
+    <div class="modal-card">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="fw-700 m-0" style="font-size:18px;">Edit Transaksi Deposit</h3>
+            <button class="btn btn-icon" style="background:transparent;" onclick="closeModal('editDepositModal')">
+                <i class="bi bi-x-lg text-muted"></i>
+            </button>
+        </div>
+        <form id="editDepositForm" method="POST">
+            @csrf @method('PUT')
+            <div class="form-group mb-4">
+                <label>Nominal (Rp) <span class="required">*</span></label>
+                <input type="text" inputmode="numeric" name="amount" id="edit_deposit_amount" class="form-control input-rupiah" required>
+            </div>
+            <div class="form-group mb-4">
+                <label>Keperluan / Keterangan <span class="required">*</span></label>
+                <input type="text" name="description" id="edit_deposit_desc" class="form-control" required>
+            </div>
+            <div class="form-group mb-4">
+                <label>Tanggal <span class="required">*</span></label>
+                <input type="date" name="date" id="edit_deposit_date" class="form-control" required>
+            </div>
+            <div class="form-group mb-6">
+                <label>Catatan (Opsional)</label>
+                <textarea name="notes" id="edit_deposit_notes" class="form-control" rows="2"></textarea>
+            </div>
+            <div class="flex justify-between">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('editDepositModal')">Batal</button>
+                <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Simpan Perubahan</button>
+            </div>
+        </form>
+    </div>
+</div>
 @endpush
 
 @push('styles')
@@ -452,6 +490,15 @@
 <script>
 function openModal(id)  { document.getElementById(id).classList.remove('d-none'); }
 function closeModal(id) { document.getElementById(id).classList.add('d-none'); }
+
+function editDeposit(id, date, desc, amount, notes) {
+    document.getElementById('editDepositForm').action = `/tenant-deposits/${id}`;
+    document.getElementById('edit_deposit_date').value = date;
+    document.getElementById('edit_deposit_desc').value = desc;
+    document.getElementById('edit_deposit_amount').value = formatRupiah(amount);
+    document.getElementById('edit_deposit_notes').value = notes;
+    openModal('editDepositModal');
+}
 
 // Auto buka modal kurangi jika ada error
 @if(session('deduct_error'))

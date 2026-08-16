@@ -71,6 +71,28 @@ class TenantDepositController extends Controller
     }
 
     /**
+     * Update transaksi deposit.
+     */
+    public function update(Request $request, TenantDeposit $deposit)
+    {
+        if ($request->has('amount')) {
+            $request->merge(['amount' => str_replace('.', '', $request->amount)]);
+        }
+
+        $validated = $request->validate([
+            'amount'      => 'required|integer|min:1',
+            'description' => 'required|string|max:255',
+            'date'        => 'required|date',
+            'notes'       => 'nullable|string',
+        ]);
+
+        $deposit->update($validated);
+
+        return redirect()->route('tenants.show', $deposit->tenant_id)
+            ->with('success', "Transaksi deposit berhasil diupdate.");
+    }
+
+    /**
      * Hapus transaksi deposit.
      */
     public function destroy(TenantDeposit $deposit)

@@ -9,9 +9,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css" rel="stylesheet">
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 
     @stack('styles')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
 </head>
 <body>
 <div class="layout">
@@ -192,12 +194,26 @@ document.querySelectorAll('.facility-item input[type="checkbox"]').forEach(cb =>
     });
 });
 
-// Confirm delete
+// Confirm delete with SweetAlert
 document.querySelectorAll('form[data-confirm]').forEach(form => {
     form.addEventListener('submit', (e) => {
-        if (!confirm(form.dataset.confirm || 'Yakin ingin menghapus data ini?')) {
-            e.preventDefault();
-        }
+        e.preventDefault();
+        Swal.fire({
+            title: 'Konfirmasi Hapus',
+            text: form.dataset.confirm || 'Yakin ingin menghapus data ini?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal',
+            background: 'var(--bg-card)',
+            color: 'var(--text-primary)'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
     });
 });
 
