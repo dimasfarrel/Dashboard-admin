@@ -4,6 +4,55 @@
 @section('page-title', 'Laporan Pengeluaran Total')
 @section('page-subtitle', 'Rekap Pengeluaran Kost dan Piutang')
 
+@push('styles')
+<style>
+.summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-bottom: 24px;
+}
+.summary-card {
+    background: var(--bg-card, #1e293b);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--border-color, #334155);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+.summary-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin-right: 16px;
+}
+.icon-expense { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+.icon-receivable { background: rgba(14, 165, 233, 0.15); color: #0ea5e9; }
+.icon-net { background: rgba(168, 85, 247, 0.15); color: #a855f7; }
+.summary-content { flex: 1; }
+.summary-label {
+    font-size: 13px;
+    color: var(--text-secondary, #94a3b8);
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+.summary-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary, #f8fafc);
+}
+/* Ensure table cells don't wrap and have enough space */
+.table th, .table td {
+    white-space: nowrap;
+}
+</style>
+@endpush
+
 @section('topbar-actions')
     <button onclick="window.print()" class="btn btn-info"><i class="bi bi-printer"></i> Cetak Laporan</button>
 @endsection
@@ -89,6 +138,37 @@
     $sumPiutang = $expenses->sum('piutang_amount');
     $sumTotalPengeluaran = $sumPengeluaran + $sumPiutang;
 @endphp
+
+{{-- Summary Cards --}}
+<div class="summary-cards no-print">
+    <div class="summary-card">
+        <div class="summary-icon icon-expense">
+            <i class="bi bi-cart-dash"></i>
+        </div>
+        <div class="summary-content">
+            <div class="summary-label">Total Pengeluaran</div>
+            <div class="summary-value">Rp {{ number_format($sumPengeluaran, 0, ',', '.') }}</div>
+        </div>
+    </div>
+    <div class="summary-card">
+        <div class="summary-icon icon-receivable">
+            <i class="bi bi-journal-minus"></i>
+        </div>
+        <div class="summary-content">
+            <div class="summary-label">Total Piutang</div>
+            <div class="summary-value">Rp {{ number_format($sumPiutang, 0, ',', '.') }}</div>
+        </div>
+    </div>
+    <div class="summary-card">
+        <div class="summary-icon icon-net">
+            <i class="bi bi-box-arrow-up-right"></i>
+        </div>
+        <div class="summary-content">
+            <div class="summary-label">Total Pengeluaran Keseluruhan</div>
+            <div class="summary-value">Rp {{ number_format($sumTotalPengeluaran, 0, ',', '.') }}</div>
+        </div>
+    </div>
+</div>
 <div class="card" style="margin-bottom: 30px; border:1px solid #ef4444;">
     <div class="card-header" style="background-color: rgba(239, 68, 68, 0.1); border-bottom: 1px solid #ef4444;">
         <h2 class="card-title" style="color: #b91c1c; font-weight: 700;"><i class="bi bi-arrow-up-right-circle"></i> Pengeluaran Total</h2>

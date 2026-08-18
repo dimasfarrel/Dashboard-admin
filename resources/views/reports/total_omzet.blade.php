@@ -4,6 +4,55 @@
 @section('page-title', 'Laporan Omzet Total')
 @section('page-subtitle', 'Rekap Pemasukan Kost (Omzet) dan Hutang')
 
+@push('styles')
+<style>
+.summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-bottom: 24px;
+}
+.summary-card {
+    background: var(--bg-card, #1e293b);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--border-color, #334155);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+.summary-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin-right: 16px;
+}
+.icon-income { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+.icon-debt { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+.icon-net { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+.summary-content { flex: 1; }
+.summary-label {
+    font-size: 13px;
+    color: var(--text-secondary, #94a3b8);
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+.summary-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary, #f8fafc);
+}
+/* Ensure table cells don't wrap and have enough space */
+.table th, .table td {
+    white-space: nowrap;
+}
+</style>
+@endpush
+
 @section('topbar-actions')
     <button onclick="window.print()" class="btn btn-info"><i class="bi bi-printer"></i> Cetak Laporan</button>
 @endsection
@@ -89,6 +138,37 @@
     $sumHutang = $incomes->sum('hutang_amount');
     $sumPemasukan = $sumOmzet + $sumHutang;
 @endphp
+
+{{-- Summary Cards --}}
+<div class="summary-cards no-print">
+    <div class="summary-card">
+        <div class="summary-icon icon-income">
+            <i class="bi bi-wallet2"></i>
+        </div>
+        <div class="summary-content">
+            <div class="summary-label">Total Omzet</div>
+            <div class="summary-value">Rp {{ number_format($sumOmzet, 0, ',', '.') }}</div>
+        </div>
+    </div>
+    <div class="summary-card">
+        <div class="summary-icon icon-debt">
+            <i class="bi bi-journal-plus"></i>
+        </div>
+        <div class="summary-content">
+            <div class="summary-label">Total Hutang</div>
+            <div class="summary-value">Rp {{ number_format($sumHutang, 0, ',', '.') }}</div>
+        </div>
+    </div>
+    <div class="summary-card">
+        <div class="summary-icon icon-net">
+            <i class="bi bi-cash-stack"></i>
+        </div>
+        <div class="summary-content">
+            <div class="summary-label">Total Pemasukan Keseluruhan</div>
+            <div class="summary-value">Rp {{ number_format($sumPemasukan, 0, ',', '.') }}</div>
+        </div>
+    </div>
+</div>
 <div class="card" style="margin-bottom: 30px; border:1px solid #10b981;">
     <div class="card-header" style="background-color: rgba(16, 185, 129, 0.1); border-bottom: 1px solid #10b981;">
         <h2 class="card-title" style="color: #047857; font-weight: 700;"><i class="bi bi-arrow-down-left-circle"></i> Omzet Total</h2>
@@ -102,7 +182,7 @@
                     <th>Deskripsi</th>
                     <th style="text-align: right; width: 140px;">Nominal Omzet</th>
                     <th style="text-align: right; width: 140px;">Nominal Hutang</th>
-                    <th style="text-align: right; width: 140px; background-color: #ecfdf5;">Total Masuk</th>
+                    <th style="text-align: right; width: 140px; background-color: #fdefecff;">Total Masuk</th>
                 </tr>
             </thead>
             <tbody>
