@@ -16,18 +16,11 @@ class ReportController extends Controller
 {
     public function totalOmzet(Request $request)
     {
-        $filterMode = $request->input('filter_mode', 'month'); // 'month' or 'date'
-        
         $currentMonth = $request->input('month', Carbon::now()->month);
         $currentYear = $request->input('year', Carbon::now()->year);
         
-        if ($filterMode === 'date') {
-            $startDate = $request->input('start_date', Carbon::now()->startOfMonth()->toDateString());
-            $endDate = $request->input('end_date', Carbon::now()->endOfMonth()->toDateString());
-        } else {
-            $startDate = Carbon::createFromDate($currentYear, $currentMonth, 1)->startOfMonth()->toDateString();
-            $endDate = Carbon::createFromDate($currentYear, $currentMonth, 1)->endOfMonth()->toDateString();
-        }
+        $startDate = Carbon::createFromDate($currentYear, $currentMonth, 1)->startOfMonth()->toDateString();
+        $endDate = Carbon::createFromDate($currentYear, $currentMonth, 1)->endOfMonth()->toDateString();
 
         $incomes = collect();
 
@@ -44,6 +37,7 @@ class ReportController extends Controller
                     'description' => "Kamar " . ($item->room->room_number ?? 'N/A') . " (" . ($item->tenant->name ?? 'N/A') . ")",
                     'omzet_amount' => (float) $item->amount,
                     'hutang_amount' => 0,
+                    'deposit_amount' => 0,
                 ];
             });
         $incomes = $incomes->concat($payments);
@@ -62,6 +56,7 @@ class ReportController extends Controller
                     'description' => "Harian - Kamar " . ($item->room->room_number ?? 'N/A') . " (" . $item->pic_name . ")",
                     'omzet_amount' => (float) $item->calculateTotal(),
                     'hutang_amount' => 0,
+                    'deposit_amount' => (float) $item->deposit,
                 ];
             });
         $incomes = $incomes->concat($lodgings);
@@ -77,6 +72,7 @@ class ReportController extends Controller
                     'description' => $item->title,
                     'omzet_amount' => (float) $item->amount,
                     'hutang_amount' => 0,
+                    'deposit_amount' => 0,
                 ];
             });
         $incomes = $incomes->concat($otherIncomes);
@@ -95,6 +91,7 @@ class ReportController extends Controller
                     'description' => $desc,
                     'omzet_amount' => (float) $item->amount,
                     'hutang_amount' => 0,
+                    'deposit_amount' => 0,
                 ];
             });
         $incomes = $incomes->concat($receivableRepayments);
@@ -111,6 +108,7 @@ class ReportController extends Controller
                     'description' => "Pinjaman dari " . $item->name,
                     'omzet_amount' => 0,
                     'hutang_amount' => (float) $item->total_amount,
+                    'deposit_amount' => 0,
                 ];
             });
         $incomes = $incomes->concat($payables);
@@ -120,23 +118,16 @@ class ReportController extends Controller
             return sprintf('%010d_%010d', $item['date']->timestamp, $item['created_at'] ? $item['created_at']->timestamp : 0);
         })->values();
 
-        return view('reports.total_omzet', compact('incomes', 'startDate', 'endDate', 'currentMonth', 'currentYear', 'filterMode'));
+        return view('reports.total_omzet', compact('incomes', 'startDate', 'endDate', 'currentMonth', 'currentYear'));
     }
 
     public function totalPengeluaran(Request $request)
     {
-        $filterMode = $request->input('filter_mode', 'month'); // 'month' or 'date'
-        
         $currentMonth = $request->input('month', Carbon::now()->month);
         $currentYear = $request->input('year', Carbon::now()->year);
         
-        if ($filterMode === 'date') {
-            $startDate = $request->input('start_date', Carbon::now()->startOfMonth()->toDateString());
-            $endDate = $request->input('end_date', Carbon::now()->endOfMonth()->toDateString());
-        } else {
-            $startDate = Carbon::createFromDate($currentYear, $currentMonth, 1)->startOfMonth()->toDateString();
-            $endDate = Carbon::createFromDate($currentYear, $currentMonth, 1)->endOfMonth()->toDateString();
-        }
+        $startDate = Carbon::createFromDate($currentYear, $currentMonth, 1)->startOfMonth()->toDateString();
+        $endDate = Carbon::createFromDate($currentYear, $currentMonth, 1)->endOfMonth()->toDateString();
 
         $expenses = collect();
 
@@ -218,23 +209,16 @@ class ReportController extends Controller
             return sprintf('%010d_%010d', $item['date']->timestamp, $item['created_at'] ? $item['created_at']->timestamp : 0);
         })->values();
 
-        return view('reports.total_pengeluaran', compact('expenses', 'startDate', 'endDate', 'currentMonth', 'currentYear', 'filterMode'));
+        return view('reports.total_pengeluaran', compact('expenses', 'startDate', 'endDate', 'currentMonth', 'currentYear'));
     }
 
     public function loans(Request $request)
     {
-        $filterMode = $request->input('filter_mode', 'month'); // 'month' or 'date'
-        
         $currentMonth = $request->input('month', Carbon::now()->month);
         $currentYear = $request->input('year', Carbon::now()->year);
         
-        if ($filterMode === 'date') {
-            $startDate = $request->input('start_date', Carbon::now()->startOfMonth()->toDateString());
-            $endDate = $request->input('end_date', Carbon::now()->endOfMonth()->toDateString());
-        } else {
-            $startDate = Carbon::createFromDate($currentYear, $currentMonth, 1)->startOfMonth()->toDateString();
-            $endDate = Carbon::createFromDate($currentYear, $currentMonth, 1)->endOfMonth()->toDateString();
-        }
+        $startDate = Carbon::createFromDate($currentYear, $currentMonth, 1)->startOfMonth()->toDateString();
+        $endDate = Carbon::createFromDate($currentYear, $currentMonth, 1)->endOfMonth()->toDateString();
         
         $typeFilter = $request->input('type', 'all'); // 'all', 'receivable', 'payable'
 
@@ -302,7 +286,7 @@ class ReportController extends Controller
 
         return view('reports.loans', compact(
             'transactions', 'startDate', 'endDate', 'typeFilter',
-            'totalReceivable', 'totalPayable', 'netCashflow', 'currentMonth', 'currentYear', 'filterMode'
+            'totalReceivable', 'totalPayable', 'netCashflow', 'currentMonth', 'currentYear'
         ));
     }
 }
