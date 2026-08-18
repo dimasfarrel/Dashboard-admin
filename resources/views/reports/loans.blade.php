@@ -146,22 +146,47 @@
 @section('content')
 
 {{-- Filter Card --}}
-<div class="filter-card">
-    <form action="{{ route('reports.loans') }}" method="GET" class="filter-form">
+    <form action="{{ route('reports.loans') }}" method="GET" class="filter-form" id="filterForm">
         <div class="filter-group">
-            <label>Bulan</label>
-            <select name="month">
-                @foreach(range(1,12) as $m)
-                    <option value="{{ $m }}" {{ request('month', $currentMonth) == $m ? 'selected' : '' }}>
-                        {{ \Carbon\Carbon::now()->setMonth((int)($m))->translatedFormat('F') }}
-                    </option>
-                @endforeach
-            </select>
+            <label>Tipe Filter</label>
+            <div style="display:flex; gap:10px; margin-top:8px;">
+                <label style="font-size: 13px; cursor: pointer;">
+                    <input type="radio" name="filter_mode" value="month" onchange="toggleFilterMode()" {{ $filterMode === 'month' ? 'checked' : '' }}> Per Bulan
+                </label>
+                <label style="font-size: 13px; cursor: pointer;">
+                    <input type="radio" name="filter_mode" value="date" onchange="toggleFilterMode()" {{ $filterMode === 'date' ? 'checked' : '' }}> Per Periode
+                </label>
+            </div>
         </div>
-        <div class="filter-group">
-            <label>Tahun</label>
-            <input type="number" name="year" value="{{ request('year', $currentYear) }}" min="2020">
+
+        <div id="filter-month-container" style="display: {{ $filterMode === 'month' ? 'flex' : 'none' }}; gap: 20px;">
+            <div class="filter-group">
+                <label>Bulan</label>
+                <select name="month">
+                    @foreach(range(1,12) as $m)
+                        <option value="{{ $m }}" {{ request('month', $currentMonth) == $m ? 'selected' : '' }}>
+                            {{ \Carbon\Carbon::now()->setMonth((int)($m))->translatedFormat('F') }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Tahun</label>
+                <input type="number" name="year" value="{{ request('year', $currentYear) }}" min="2020">
+            </div>
         </div>
+
+        <div id="filter-date-container" style="display: {{ $filterMode === 'date' ? 'flex' : 'none' }}; gap: 20px;">
+            <div class="filter-group">
+                <label>Tanggal Mulai</label>
+                <input type="date" name="start_date" value="{{ request('start_date', $startDate) }}">
+            </div>
+            <div class="filter-group">
+                <label>Tanggal Selesai</label>
+                <input type="date" name="end_date" value="{{ request('end_date', $endDate) }}">
+            </div>
+        </div>
+
         <div class="filter-group">
             <label>Jenis Transaksi</label>
             <select name="type">
@@ -175,6 +200,19 @@
         </div>
     </form>
 </div>
+
+<script>
+    function toggleFilterMode() {
+        const mode = document.querySelector('input[name="filter_mode"]:checked').value;
+        if (mode === 'month') {
+            document.getElementById('filter-month-container').style.display = 'flex';
+            document.getElementById('filter-date-container').style.display = 'none';
+        } else {
+            document.getElementById('filter-month-container').style.display = 'none';
+            document.getElementById('filter-date-container').style.display = 'flex';
+        }
+    }
+</script>
 
 {{-- Print Header (Only visible when printing) --}}
 <div class="print-header">
