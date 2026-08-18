@@ -79,6 +79,9 @@
                         @elseif($l->payment_status === 'partial') <span class="badge badge-warning">Sebagian</span>
                         @else                                      <span class="badge badge-danger">Belum</span>
                         @endif
+                        @if($l->paid_at)
+                            <br><span class="text-muted" style="font-size:11px;">{{ \Carbon\Carbon::parse($l->paid_at)->translatedFormat('d-M-Y') }}</span>
+                        @endif
                     </td>
                     <td>
                         @if($l->status === 'active')    <span class="badge badge-success">Aktif</span>
