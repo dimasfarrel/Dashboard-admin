@@ -929,8 +929,10 @@ tbody td strong, .td-primary {
     body {
         background: #fff;
         color: #000;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
     }
-    .sidebar, .topbar, .filter-bar, .breadcrumb, .btn, .pagination, .topbar-actions, .no-print {
+    .sidebar, .topbar, .filter-bar, .breadcrumb, .btn, .pagination, .topbar-actions, .no-print, .action-buttons {
         display: none !important;
     }
     .main-content, .page-content {
@@ -938,9 +940,12 @@ tbody td strong, .td-primary {
         padding: 0 !important;
         width: 100% !important;
     }
+    .print-header {
+        display: block !important;
+    }
     .card {
         box-shadow: none !important;
-        border: 1px solid #ddd !important;
+        border: 1px solid #ccc !important;
         background: #fff !important;
         color: #000 !important;
         margin-bottom: 20px;
@@ -948,28 +953,32 @@ tbody td strong, .td-primary {
     }
     .card-header, .card-title {
         color: #000 !important;
-        border-bottom-color: #ddd !important;
+        border-bottom-color: #ccc !important;
+        background: #f8f9fa !important;
     }
     table {
         width: 100% !important;
         border-collapse: collapse;
     }
-    th, td {
-        border: 1px solid #ddd !important;
+    th {
+        background-color: #f1f5f9 !important;
         color: #000 !important;
+        font-weight: bold !important;
+    }
+    th, td {
+        border: 1px solid #ccc !important;
+        color: #000 !important;
+        padding: 8px !important;
     }
     .badge {
-        border: 1px solid #999 !important;
-        color: #000 !important;
-        background: transparent !important;
+        border: none !important;
     }
     .money-text, .text-muted, .text-sm, .fw-600, .fw-700, span {
         color: #000 !important;
     }
-    .progress {
-        background: #eee !important;
-    }
-    .progress-bar {
-        background: #888 !important;
+    .stat-card {
+        border: 1px solid #ccc !important;
+        box-shadow: none !important;
+        break-inside: avoid;
     }
 }

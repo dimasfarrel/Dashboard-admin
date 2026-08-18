@@ -4,7 +4,7 @@
 @section('page-subtitle', 'Rekap perbaikan dan perawatan per kamar')
 
 @section('topbar-actions')
-    <a href="{{ request()->fullUrlWithQuery(['print' => 'all']) }}" target="_blank" class="btn btn-info"><i class="bi bi-printer"></i> Cetak</a>
+    <a href="{{ request()->fullUrlWithQuery(['print' => 'all']) }}" class="btn btn-info"><i class="bi bi-printer"></i> Cetak</a>
     <a href="{{ route('maintenances.create') }}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Laporkan Maintenance</a>
 @endsection
 

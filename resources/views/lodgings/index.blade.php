@@ -4,6 +4,7 @@
 @section('page-subtitle', 'Manajemen sewa harian dan penginapan singkat')
 
 @section('topbar-actions')
+    <a href="{{ request()->fullUrlWithQuery(['print' => 'all']) }}" class="btn btn-info"><i class="bi bi-printer"></i> Cetak</a>
     <a href="{{ route('lodgings.create') }}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Tambah Penginapan</a>
 @endsection
 
@@ -56,7 +57,7 @@
     <div class="table-wrapper">
         <table>
             <thead>
-                <tr><th>Kamar</th><th>Penanggung Jawab</th><th>Check In</th><th>Check Out</th><th>Durasi</th><th>Tamu</th><th>Total</th><th>Bayar</th><th>Status</th><th>Aksi</th></tr>
+                <tr><th>Kamar</th><th>Penanggung Jawab</th><th>Check In</th><th>Check Out</th><th>Durasi</th><th>Tamu</th><th>Total</th><th>Bayar</th><th>Status</th><th class="no-print">Aksi</th></tr>
             </thead>
             <tbody>
                 @foreach($lodgings as $l)
@@ -85,7 +86,7 @@
                         @else                               <span class="badge badge-danger">Batal</span>
                         @endif
                     </td>
-                    <td>
+                    <td class="no-print">
                         <div class="flex gap-2">
                             <a href="{{ route('lodgings.show', $l) }}" class="btn btn-info btn-sm btn-icon"><i class="bi bi-eye"></i></a>
                             <a href="{{ route('lodgings.edit', $l) }}" class="btn btn-warning btn-sm btn-icon"><i class="bi bi-pencil"></i></a>
@@ -100,7 +101,7 @@
             </tbody>
         </table>
     </div>
-    <div class="pagination">{{ $lodgings->links('components.pagination') }}</div>
+    <div class="pagination">{{ $lodgings->appends(request()->query())->links('components.pagination') }}</div>
     @else
     <div class="empty-state">
         <i class="bi bi-moon-stars"></i>

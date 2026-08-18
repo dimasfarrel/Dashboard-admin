@@ -142,6 +142,12 @@
 
         {{-- Page Content --}}
         <main class="page-content">
+            {{-- Print Header (Hidden by default) --}}
+            <div class="print-header" style="display:none; text-align:center; margin-bottom:20px; border-bottom:2px solid #000; padding-bottom:10px;">
+                <h2 style="margin:0; font-weight:700;">KOST MALANG</h2>
+                <h4 style="margin:5px 0;">@yield('page-title', 'Laporan')</h4>
+                <p style="margin:0; font-size:12px;">Tanggal Cetak: {{ now()->translatedFormat('d F Y H:i') }}</p>
+            </div>
             {{-- Flash Messages --}}
             @if (session('success'))
                 <div class="alert alert-success" id="flash-msg">

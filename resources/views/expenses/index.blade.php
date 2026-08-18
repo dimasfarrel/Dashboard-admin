@@ -5,7 +5,7 @@
 
 @section('topbar-actions')
     <a href="{{ route('expenses.create') }}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Tambah Pengeluaran</a>
-    <a href="{{ request()->fullUrlWithQuery(['print' => 'all']) }}" target="_blank" class="btn btn-info"><i class="bi bi-printer"></i> Cetak</a>
+    <a href="{{ request()->fullUrlWithQuery(['print' => 'all']) }}" class="btn btn-info"><i class="bi bi-printer"></i> Cetak</a>
 @endsection
 
 @section('content')
