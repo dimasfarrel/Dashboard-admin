@@ -1,421 +1,235 @@
 @extends('layouts.app')
-
 @section('title', 'Laporan Keuangan')
-@section('page-title', 'Laporan Keuangan')
-@section('page-subtitle', 'Ringkasan Pemasukan & Pengeluaran')
 
-@push('styles')
-<style>
-.summary-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 20px;
-    margin-bottom: 24px;
-}
-.summary-card {
-    background: var(--bg-card);
-    border-radius: var(--radius-md);
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-card);
-}
-.summary-icon {
-    width: 56px;
-    height: 56px;
-    border-radius: var(--radius-md);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    margin-right: 16px;
-}
-.icon-income {
-    background: rgba(16, 185, 129, 0.15);
-    color: #10b981;
-}
-.icon-expense {
-    background: rgba(239, 68, 68, 0.15);
-    color: #ef4444;
-}
-.icon-net {
-    background: rgba(0, 212, 170, 0.15);
-    color: var(--accent-primary);
-}
-.summary-content {
-    flex: 1;
-}
-.summary-label {
-    font-size: 13px;
-    color: var(--text-secondary);
-    font-weight: 500;
-    margin-bottom: 4px;
-}
-.summary-value {
-    font-size: 24px;
-    font-weight: 700;
-    color: var(--text-primary);
-}
-.filter-card {
-    background: var(--bg-card);
-    border-radius: var(--radius-md);
-    padding: 20px;
-    margin-bottom: 24px;
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-card);
-}
-.filter-form {
-    display: flex;
-    gap: 16px;
-    align-items: flex-end;
-    flex-wrap: wrap;
-}
-.filter-group {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-.filter-group label {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text-secondary);
-}
-.filter-group input, .filter-group select {
-    padding: 10px 14px;
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    font-size: 14px;
-    outline: none;
-    min-width: 160px;
-    background: var(--bg-secondary);
-    color: var(--text-primary);
-}
-.filter-group input:focus, .filter-group select:focus {
-    border-color: var(--accent-primary);
-    background: var(--bg-primary);
-}
-.btn-filter {
-    padding: 10px 20px;
-    background: var(--accent-primary);
-    color: #000;
-    border: none;
-    border-radius: var(--radius-sm);
-    font-weight: 600;
-    cursor: pointer;
-    font-size: 14px;
-    transition: var(--transition);
-    height: 41px;
-}
-.btn-filter:hover {
-    background: #00e0b3;
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-accent);
-}
-.badge-type {
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-}
-.badge-income {
-    background: rgba(16, 185, 129, 0.15);
-    color: #10b981;
-}
-.badge-expense {
-    background: rgba(239, 68, 68, 0.15);
-    color: #ef4444;
-}
-.amount-income {
-    color: #10b981;
-    font-weight: 600;
-}
-.amount-expense {
-    color: #ef4444;
-    font-weight: 600;
-}
-</style>
-@endpush
+@section('page-title', 'Laporan Keuangan')
+@section('page-subtitle', 'Laporan arus kas (Pemasukan dan Pengeluaran) berdasarkan periode')
 
 @section('topbar-actions')
-<button onclick="window.print()" class="btn btn-outline" style="background:white; border:1px solid var(--border-color); border-radius:8px; padding:8px 16px; cursor:pointer;">
-    <i class="bi bi-printer"></i> Cetak Laporan
-</button>
+    <button onclick="window.print()" class="btn btn-info"><i class="bi bi-printer"></i> Cetak Laporan</button>
 @endsection
 
 @section('content')
 
-{{-- Filter Card --}}
-<div class="filter-card">
-    <form action="{{ route('reports.index') }}" method="GET" class="filter-form">
-        <div class="filter-group">
-            <label>Tanggal Mulai</label>
-            <input type="date" name="start_date" value="{{ request('start_date', $startDate) }}">
-        </div>
-        <div class="filter-group">
-            <label>Tanggal Selesai</label>
-            <input type="date" name="end_date" value="{{ request('end_date', $endDate) }}">
-        </div>
-        <div class="filter-group">
-            <label>Jenis Transaksi</label>
-            <select name="type">
-                <option value="all" {{ request('type') == 'all' ? 'selected' : '' }}>Semua Transaksi</option>
-                <option value="income" {{ request('type') == 'income' ? 'selected' : '' }}>Hanya Pemasukan</option>
-                <option value="expense" {{ request('type') == 'expense' ? 'selected' : '' }}>Hanya Pengeluaran</option>
-            </select>
-        </div>
-        <div class="filter-group">
-            <button type="submit" class="btn-filter">Tampilkan</button>
-        </div>
-    </form>
-</div>
-
-{{-- Print Header (Only visible when printing) --}}
-<div class="print-header">
-    <h1>LAPORAN KEUANGAN KOST</h1>
-    <p>Periode: {{ \Carbon\Carbon::parse(request('start_date', $startDate))->translatedFormat('d-M-Y') }} - {{ \Carbon\Carbon::parse(request('end_date', $endDate))->translatedFormat('d-M-Y') }}</p>
-</div>
-
-{{-- Summary Cards --}}
-<div class="summary-cards">
-    <div class="summary-card">
-        <div class="summary-icon icon-income">
-            <i class="bi bi-arrow-down-circle-fill"></i>
-        </div>
-        <div class="summary-content">
-            <div class="summary-label">Total Pemasukan</div>
-            <div class="summary-value">Rp {{ number_format($totalIncome, 0, ',', '.') }}</div>
-        </div>
-    </div>
-    <div class="summary-card">
-        <div class="summary-icon icon-expense">
-            <i class="bi bi-arrow-up-circle-fill"></i>
-        </div>
-        <div class="summary-content">
-            <div class="summary-label">Total Pengeluaran</div>
-            <div class="summary-value">Rp {{ number_format($totalExpense, 0, ',', '.') }}</div>
-        </div>
-    </div>
-    <div class="summary-card">
-        <div class="summary-icon icon-net">
-            <i class="bi bi-wallet-fill"></i>
-        </div>
-        <div class="summary-content">
-            <div class="summary-label">Saldo Bersih</div>
-            <div class="summary-value">Rp {{ number_format($netCashflow, 0, ',', '.') }}</div>
-        </div>
+{{-- Filter Card (Hidden on Print) --}}
+<div class="card filter-card no-print" style="margin-bottom: 24px;">
+    <div class="card-body">
+        <form method="GET" action="{{ route('reports.index') }}" class="flex items-center gap-3 flex-wrap">
+            <div style="display:flex; flex-direction:column; gap:4px;">
+                <label for="start_date" style="font-size:12px; font-weight:600; color:var(--text-secondary);">Tanggal Mulai</label>
+                <input type="date" name="start_date" id="start_date" class="form-control" value="{{ $startDate }}" required>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:4px;">
+                <label for="end_date" style="font-size:12px; font-weight:600; color:var(--text-secondary);">Tanggal Selesai</label>
+                <input type="date" name="end_date" id="end_date" class="form-control" value="{{ $endDate }}" required>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:4px; margin-top:20px;">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Tampilkan</button>
+            </div>
+        </form>
     </div>
 </div>
 
-{{-- Transactions Table --}}
-<div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <h2 class="card-title">Detail Transaksi</h2>
+{{-- Print Header (Only visible on Print) --}}
+<div class="print-header" style="display: none; text-align: center; margin-bottom: 30px; border-bottom: 2px solid #000; padding-bottom: 15px;">
+    <h1 style="margin: 0; font-size: 24px; font-weight: bold; text-transform: uppercase;">Laporan Keuangan Kost Malang</h1>
+    <p style="margin: 5px 0 0 0; font-size: 14px;">
+        Periode: {{ \Carbon\Carbon::parse($startDate)->translatedFormat('d F Y') }} - {{ \Carbon\Carbon::parse($endDate)->translatedFormat('d F Y') }}
+    </p>
+    <p style="margin: 2px 0 0 0; font-size: 12px; color: #555;">Dicetak pada: {{ now()->translatedFormat('d F Y H:i') }}</p>
+</div>
+
+{{-- 1. TOTAL PEMASUKAN --}}
+@php
+    $sumOmzet = $incomes->sum('omzet_amount');
+    $sumHutang = $incomes->sum('hutang_amount');
+    $sumPemasukan = $sumOmzet + $sumHutang;
+@endphp
+<div class="card" style="margin-bottom: 30px; border:1px solid #10b981;">
+    <div class="card-header" style="background-color: rgba(16, 185, 129, 0.1); border-bottom: 1px solid #10b981;">
+        <h2 class="card-title" style="color: #047857; font-weight: 700;"><i class="bi bi-arrow-down-left-circle"></i> 1. Total Pemasukan</h2>
     </div>
-    <div class="table-responsive">
+    <div class="table-wrapper">
         <table class="table">
             <thead>
-                <tr>
-                    <th style="width: 120px;">Tanggal</th>
-                    <th style="width: 150px;">Kategori</th>
+                <tr style="background-color: #f8fafc;">
+                    <th style="width: 100px;">Tanggal</th>
+                    <th style="width: 130px;">Kategori</th>
                     <th>Deskripsi</th>
-                    <th>Keterangan</th>
-                    <th style="width: 100px;">Jenis</th>
-                    <th style="text-align: right; width: 180px;">Pemasukan</th>
-                    <th style="text-align: right; width: 180px;">Pengeluaran</th>
+                    <th style="text-align: right; width: 140px;">Nominal Omzet</th>
+                    <th style="text-align: right; width: 140px;">Nominal Hutang</th>
+                    <th style="text-align: right; width: 140px; background-color: #ecfdf5;">Total Masuk</th>
                 </tr>
             </thead>
             <tbody>
-                @forelse($transactions as $trx)
+                @forelse($incomes as $inc)
+                    @php $rowTotal = $inc['omzet_amount'] + $inc['hutang_amount']; @endphp
                     <tr>
-                        <td style="color: var(--text-secondary);">{{ \Carbon\Carbon::parse($trx['date'])->translatedFormat('d-M-Y') }}</td>
-                        <td>
-                            <strong style="color: var(--text-primary);">{{ $trx['category'] }}</strong>
-                        </td>
-                        <td>
-                            @if(isset($trx['route']))
-                                <a href="{{ $trx['route'] }}" style="color: var(--accent-primary); text-decoration: none; border-bottom: 1px dashed var(--border-accent);">
-                                    {{ $trx['description'] }}
-                                </a>
-                            @else
-                                <span style="color: var(--text-secondary);">{{ $trx['description'] }}</span>
-                            @endif
-                        </td>
-                        <td style="color: var(--text-secondary); font-size: 13px;">
-                            {{ $trx['notes'] ?: '-' }}
-                        </td>
-                        <td>
-                            @if($trx['type'] === 'income')
-                                <span class="badge-type badge-income">Masuk</span>
-                            @else
-                                <span class="badge-type badge-expense">Keluar</span>
-                            @endif
-                        </td>
-                        <td style="text-align: right;">
-                            @if($trx['type'] === 'income')
-                                <span class="amount-income">+ Rp {{ number_format($trx['amount'], 0, ',', '.') }}</span>
-                            @else
-                                -
-                            @endif
-                        </td>
-                        <td style="text-align: right;">
-                            @if($trx['type'] === 'expense')
-                                <span class="amount-expense">- Rp {{ number_format($trx['amount'], 0, ',', '.') }}</span>
-                            @else
-                                -
-                            @endif
-                        </td>
+                        <td style="color: #475569;">{{ \Carbon\Carbon::parse($inc['date'])->translatedFormat('d-M-Y') }}</td>
+                        <td><strong>{{ $inc['category'] }}</strong></td>
+                        <td>{{ $inc['description'] }}</td>
+                        <td style="text-align: right; color: #047857;">{{ $inc['omzet_amount'] > 0 ? 'Rp ' . number_format($inc['omzet_amount'], 0, ',', '.') : '-' }}</td>
+                        <td style="text-align: right; color: #b45309;">{{ $inc['hutang_amount'] > 0 ? 'Rp ' . number_format($inc['hutang_amount'], 0, ',', '.') : '-' }}</td>
+                        <td style="text-align: right; font-weight: bold; background-color: rgba(16, 185, 129, 0.05);">Rp {{ number_format($rowTotal, 0, ',', '.') }}</td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" style="text-align: center; padding: 40px 20px; color: var(--text-secondary);">
-                            <div style="font-size: 40px; margin-bottom: 12px;"><i class="bi bi-folder-x"></i></div>
-                            <div>Belum ada transaksi pada periode ini</div>
-                        </td>
+                        <td colspan="6" style="text-align: center; padding: 30px; color: #64748b;">Belum ada data pemasukan pada periode ini.</td>
                     </tr>
                 @endforelse
             </tbody>
+            <tfoot>
+                <tr style="font-weight: bold; background-color: #ecfdf5;">
+                    <td colspan="3" style="text-align: right;">TOTAL:</td>
+                    <td style="text-align: right; color: #047857;">Rp {{ number_format($sumOmzet, 0, ',', '.') }}</td>
+                    <td style="text-align: right; color: #b45309;">Rp {{ number_format($sumHutang, 0, ',', '.') }}</td>
+                    <td style="text-align: right; font-size: 15px;">Rp {{ number_format($sumPemasukan, 0, ',', '.') }}</td>
+                </tr>
+            </tfoot>
         </table>
     </div>
 </div>
 
-{{-- Print Styles --}}
+{{-- 2. TOTAL PENGELUARAN --}}
+@php
+    $sumPengeluaran = $expenses->sum('pengeluaran_amount');
+    $sumPiutang = $expenses->sum('piutang_amount');
+    $sumTotalPengeluaran = $sumPengeluaran + $sumPiutang;
+@endphp
+<div class="card" style="margin-bottom: 30px; border:1px solid #ef4444;">
+    <div class="card-header" style="background-color: rgba(239, 68, 68, 0.1); border-bottom: 1px solid #ef4444;">
+        <h2 class="card-title" style="color: #b91c1c; font-weight: 700;"><i class="bi bi-arrow-up-right-circle"></i> 2. Total Pengeluaran</h2>
+    </div>
+    <div class="table-wrapper">
+        <table class="table">
+            <thead>
+                <tr style="background-color: #f8fafc;">
+                    <th style="width: 100px;">Tanggal</th>
+                    <th style="width: 130px;">Kategori</th>
+                    <th>Deskripsi</th>
+                    <th style="text-align: right; width: 140px;">Nominal Pengeluaran</th>
+                    <th style="text-align: right; width: 140px;">Nominal Piutang</th>
+                    <th style="text-align: right; width: 140px; background-color: #fef2f2;">Total Keluar</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($expenses as $exp)
+                    @php $rowTotalExp = $exp['pengeluaran_amount'] + $exp['piutang_amount']; @endphp
+                    <tr>
+                        <td style="color: #475569;">{{ \Carbon\Carbon::parse($exp['date'])->translatedFormat('d-M-Y') }}</td>
+                        <td><strong>{{ $exp['category'] }}</strong></td>
+                        <td>{{ $exp['description'] }}</td>
+                        <td style="text-align: right; color: #b91c1c;">{{ $exp['pengeluaran_amount'] > 0 ? 'Rp ' . number_format($exp['pengeluaran_amount'], 0, ',', '.') : '-' }}</td>
+                        <td style="text-align: right; color: #1d4ed8;">{{ $exp['piutang_amount'] > 0 ? 'Rp ' . number_format($exp['piutang_amount'], 0, ',', '.') : '-' }}</td>
+                        <td style="text-align: right; font-weight: bold; background-color: rgba(239, 68, 68, 0.05);">Rp {{ number_format($rowTotalExp, 0, ',', '.') }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 30px; color: #64748b;">Belum ada data pengeluaran pada periode ini.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+            <tfoot>
+                <tr style="font-weight: bold; background-color: #fef2f2;">
+                    <td colspan="3" style="text-align: right;">TOTAL:</td>
+                    <td style="text-align: right; color: #b91c1c;">Rp {{ number_format($sumPengeluaran, 0, ',', '.') }}</td>
+                    <td style="text-align: right; color: #1d4ed8;">Rp {{ number_format($sumPiutang, 0, ',', '.') }}</td>
+                    <td style="text-align: right; font-size: 15px;">Rp {{ number_format($sumTotalPengeluaran, 0, ',', '.') }}</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+{{-- SUMMARY / SALDO --}}
+@php
+    $netCashflow = $sumPemasukan - $sumTotalPengeluaran;
+    $netColor = $netCashflow >= 0 ? '#047857' : '#b91c1c';
+@endphp
+<div class="card" style="border: 2px solid {{ $netColor }}; max-width: 500px; margin: 0 auto;">
+    <div class="card-body" style="text-align: center; padding: 20px;">
+        <h3 style="margin: 0; color: #64748b; font-size: 16px; text-transform: uppercase; letter-spacing: 1px;">Saldo Arus Kas (Net)</h3>
+        <p style="margin: 10px 0 0 0; font-size: 28px; font-weight: 800; color: {{ $netColor }};">
+            {{ $netCashflow < 0 ? '-' : '' }} Rp {{ number_format(abs($netCashflow), 0, ',', '.') }}
+        </p>
+    </div>
+</div>
+
+{{-- CSS KHUSUS PRINT --}}
 <style>
-@media screen {
-    .print-header {
-        display: none;
-    }
-}
 @media print {
-    /* Hide UI elements not meant for print */
-    .sidebar, .topbar, .filter-card, .breadcrumb, .btn-outline, .btn-icon, .page-header {
+    /* Sembunyikan elemen UI yang tidak perlu dicetak */
+    .sidebar, .topbar, .filter-card, .no-print, .btn {
         display: none !important;
     }
 
-    /* Reset layouts for print */
-    body, html, .main-content, .page-content {
+    /* Reset margin dan padding untuk area print */
+    body, .main-content, .page-content {
         margin: 0 !important;
         padding: 0 !important;
         background: #fff !important;
-        color: #000 !important;
         width: 100% !important;
-        min-height: auto !important;
     }
 
-    /* Header for print */
+    /* Tampilkan header khusus print */
     .print-header {
         display: block !important;
-        text-align: center;
-        margin-bottom: 25px;
-        border-bottom: 2px solid #000;
-        padding-bottom: 15px;
-    }
-    .print-header h1 {
-        font-size: 22px;
-        margin: 0 0 5px 0;
-        font-weight: bold;
-        color: #000 !important;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
-    .print-header p {
-        font-size: 14px;
-        margin: 0;
-        color: #333 !important;
     }
 
-    /* Summary Cards */
-    .summary-cards {
-        display: flex !important;
-        flex-direction: row !important;
-        justify-content: space-between !important;
-        gap: 15px !important;
-        margin-bottom: 25px !important;
-        border: none !important;
-        grid-template-columns: repeat(3, 1fr) !important;
-    }
-    .summary-card {
-        flex: 1 !important;
-        border: 1px solid #000 !important;
-        box-shadow: none !important;
-        background: #fff !important;
-        padding: 15px !important;
-        border-radius: 0 !important;
-    }
-    .summary-icon {
-        display: none !important;
-    }
-    .summary-content {
-        text-align: center !important;
-    }
-    .summary-label {
-        font-size: 11px !important;
-        color: #555 !important;
-        text-transform: uppercase;
-        font-weight: bold;
-        margin-bottom: 5px;
-    }
-    .summary-value {
-        font-size: 16px !important;
-        color: #000 !important;
-        font-weight: bold;
-    }
-
-    /* Tables */
+    /* Gaya tabel agar rapi saat diprint (Hitam Putih / Grayscale) */
     .card {
         border: none !important;
+        margin-bottom: 30px !important;
         box-shadow: none !important;
-        background: transparent !important;
     }
     .card-header {
-        display: none !important; /* Hide "Detail Transaksi" title */
+        background: transparent !important;
+        border-bottom: 2px solid #000 !important;
+        padding: 0 0 10px 0 !important;
+        margin-bottom: 15px !important;
     }
-    .table-responsive {
-        overflow: visible !important;
+    .card-title {
+        color: #000 !important;
+        font-size: 18px !important;
     }
+    
     table {
         width: 100% !important;
         border-collapse: collapse !important;
-        font-size: 11px !important;
+    }
+    th, td {
+        border: 1px solid #333 !important;
+        padding: 8px !important;
+        color: #000 !important;
+        font-size: 12px !important;
     }
     th {
-        background-color: #f2f2f2 !important;
-        color: #000 !important;
-        font-weight: bold !important;
-        border: 1px solid #000 !important;
-        padding: 10px 8px !important;
-        text-transform: uppercase;
-    }
-    td {
-        border: 1px solid #000 !important;
-        padding: 10px 8px !important;
-        color: #000 !important;
-    }
-    
-    /* Clean up specific text styles */
-    a {
-        color: #000 !important;
-        text-decoration: none !important;
-        border-bottom: none !important;
-    }
-    strong, b {
-        color: #000 !important;
-    }
-    .text-muted, .text-secondary, td[style*="color: var(--text-secondary)"] {
-        color: #333 !important;
-    }
-    .badge-type, .badge {
-        background: transparent !important;
-        color: #000 !important;
-        border: none !important;
-        padding: 0 !important;
+        background-color: #f0f0f0 !important;
         font-weight: bold !important;
     }
-    .amount-income, .amount-expense {
-        color: #000 !important;
+    tfoot tr {
+        background-color: #f0f0f0 !important;
+    }
+    tfoot td {
         font-weight: bold !important;
     }
-    
+
+    /* Hapus warna background dan teks warna-warni agar cetakan bersih */
+    td[style*="color"] {
+        color: #000 !important;
+    }
+    th[style*="background-color"], td[style*="background-color"], tr[style*="background-color"] {
+        background-color: transparent !important;
+    }
+
+    /* Saldo akhir di-print juga */
+    .card[style*="max-width: 500px"] {
+        border: 2px solid #000 !important;
+        page-break-inside: avoid;
+    }
+    .card[style*="max-width: 500px"] h3, .card[style*="max-width: 500px"] p {
+        color: #000 !important;
+    }
+
     @page {
         size: A4 portrait;
         margin: 1.5cm;

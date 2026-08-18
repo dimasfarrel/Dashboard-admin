@@ -65,10 +65,6 @@
                 <i class="bi bi-file-earmark-text"></i>
                 Laporan Keuangan
             </a>
-            <a href="{{ route('reports.periods') }}" class="nav-item {{ request()->routeIs('reports.periods') ? 'active' : '' }}">
-                <i class="bi bi-bar-chart-fill"></i>
-                Laporan Periode
-            </a>
 
             <a href="{{ route('reports.loans') }}" class="nav-item {{ request()->routeIs('reports.loans') ? 'active' : '' }}">
                 <i class="bi bi-journal-arrow-up"></i>
