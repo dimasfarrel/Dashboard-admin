@@ -25,7 +25,7 @@
                     <optgroup label="Penyewa Aktif">
                         @foreach($activeTenants as $t)
                         <option value="{{ $t->id }}" data-room="{{ $t->room_id }}" data-price="{{ $t->room?->price }}" {{ old('tenant_id', request('tenant_id')) == $t->id ? 'selected' : '' }}>
-                            {{ $t->name }} — Kamar {{ $t->room?->room_number }} (Rp {{ number_format($t->room?->price, 0, ',', '.') }})
+                            Kamar {{ $t->room?->room_number }} - {{ $t->name }}{{ $t->nickname ? ' - ' . $t->nickname : '' }} (Rp {{ number_format($t->room?->price, 0, ',', '.') }})
                         </option>
                         @endforeach
                     </optgroup>
@@ -34,7 +34,7 @@
                     <optgroup label="Penyewa Non-Aktif (Riwayat)">
                         @foreach($inactiveTenants as $t)
                         <option value="{{ $t->id }}" data-room="{{ $t->room_id }}" data-price="{{ $t->room?->price }}" {{ old('tenant_id', request('tenant_id')) == $t->id ? 'selected' : '' }}>
-                            {{ $t->name }} — Eks Kamar {{ $t->room?->room_number }}
+                            Kamar {{ $t->room?->room_number }} - {{ $t->name }}{{ $t->nickname ? ' - ' . $t->nickname : '' }}
                         </option>
                         @endforeach
                     </optgroup>
