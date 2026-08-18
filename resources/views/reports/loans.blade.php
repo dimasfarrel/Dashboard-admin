@@ -149,12 +149,18 @@
 <div class="filter-card">
     <form action="{{ route('reports.loans') }}" method="GET" class="filter-form">
         <div class="filter-group">
-            <label>Tanggal Mulai</label>
-            <input type="date" name="start_date" value="{{ request('start_date', $startDate) }}">
+            <label>Bulan</label>
+            <select name="month">
+                @foreach(range(1,12) as $m)
+                    <option value="{{ $m }}" {{ request('month', $currentMonth) == $m ? 'selected' : '' }}>
+                        {{ \Carbon\Carbon::now()->setMonth((int)($m))->translatedFormat('F') }}
+                    </option>
+                @endforeach
+            </select>
         </div>
         <div class="filter-group">
-            <label>Tanggal Selesai</label>
-            <input type="date" name="end_date" value="{{ request('end_date', $endDate) }}">
+            <label>Tahun</label>
+            <input type="number" name="year" value="{{ request('year', $currentYear) }}" min="2020">
         </div>
         <div class="filter-group">
             <label>Jenis Transaksi</label>
@@ -173,7 +179,7 @@
 {{-- Print Header (Only visible when printing) --}}
 <div class="print-header">
     <h1>LAPORAN HUTANG & PIUTANG KOST</h1>
-    <p>Periode: {{ \Carbon\Carbon::parse(request('start_date', $startDate))->translatedFormat('d-M-Y') }} - {{ \Carbon\Carbon::parse(request('end_date', $endDate))->translatedFormat('d-M-Y') }}</p>
+    <p>Periode: {{ \Carbon\Carbon::parse($startDate)->translatedFormat('d-M-Y') }} - {{ \Carbon\Carbon::parse($endDate)->translatedFormat('d-M-Y') }}</p>
 </div>
 
 {{-- Summary Cards --}}

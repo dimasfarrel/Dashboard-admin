@@ -4,6 +4,9 @@
 @section('page-subtitle', 'Manajemen data uang masuk dari kasbon atau hutang orang lain')
 
 @section('topbar-actions')
+    <a href="{{ route('system-logs.index', ['menu' => 'Hutang / Piutang']) }}" class="btn btn-secondary btn-sm" style="background-color: var(--surface-2); color: var(--text-primary); border: 1px solid var(--border-color);">
+        <i class="bi bi-clock-history"></i> Log Piutang
+    </a>
     <button class="btn btn-primary" onclick="openModal('addLoanModal')">
         <i class="bi bi-plus-lg"></i> Tambah Piutang
     </button>

@@ -4,6 +4,9 @@
 @section('page-subtitle', 'Rekap biaya operasional — listrik, air, internet, dll')
 
 @section('topbar-actions')
+    <a href="{{ route('system-logs.index', ['menu' => 'Pengeluaran']) }}" class="btn btn-secondary" style="background-color: var(--surface-2); color: var(--text-primary); border: 1px solid var(--border-color);">
+        <i class="bi bi-clock-history"></i> Log
+    </a>
     <a href="{{ route('expenses.create') }}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Tambah Pengeluaran</a>
     <a href="{{ request()->fullUrlWithQuery(['print' => 'all']) }}" class="btn btn-info"><i class="bi bi-printer"></i> Cetak</a>
 @endsection

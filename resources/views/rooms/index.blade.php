@@ -4,9 +4,10 @@
 @section('page-subtitle', 'Kelola semua kamar kost beserta fasilitas dan penyewa')
 
 @section('topbar-actions')
-    <a href="{{ route('rooms.create') }}" class="btn btn-primary">
-        <i class="bi bi-plus-lg"></i> Tambah Kamar
+    <a href="{{ route('system-logs.index', ['menu' => 'Kamar']) }}" class="btn btn-secondary btn-sm" style="background-color: var(--surface-2); color: var(--text-primary); border: 1px solid var(--border-color);">
+        <i class="bi bi-clock-history"></i> Log Kamar
     </a>
+    <a href="{{ route('rooms.create') }}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg"></i> Tambah Kamar</a>
 @endsection
 
 @section('content')

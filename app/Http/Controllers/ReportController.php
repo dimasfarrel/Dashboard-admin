@@ -14,15 +14,15 @@ use Carbon\Carbon;
 
 class ReportController extends Controller
 {
-    public function index(Request $request)
+    public function totalOmzet(Request $request)
     {
-        $startDate = $request->input('start_date', Carbon::now()->startOfMonth()->toDateString());
-        $endDate = $request->input('end_date', Carbon::now()->endOfMonth()->toDateString());
+        $currentMonth = $request->input('month', Carbon::now()->month);
+        $currentYear = $request->input('year', Carbon::now()->year);
+        $startDate = Carbon::createFromDate($currentYear, $currentMonth, 1)->startOfMonth()->toDateString();
+        $endDate = Carbon::createFromDate($currentYear, $currentMonth, 1)->endOfMonth()->toDateString();
 
         $incomes = collect();
-        $expenses = collect();
 
-        // --- PEMASUKAN (OMZET + HUTANG) ---
         // 1. Omzet Kost (Payment)
         $payments = Payment::where('status', 'paid')
             ->whereBetween('paid_at', [$startDate, $endDate])
@@ -93,16 +93,16 @@ class ReportController extends Controller
 
         // 5. Hutang (Loan type='payable') -> uang masuk
         $payables = Loan::where('type', 'payable')
-            ->whereBetween('date', [$startDate, $endDate])
+            ->whereBetween('loan_date', [$startDate, $endDate])
             ->get()
             ->map(function ($item) {
                 return [
-                    'date' => Carbon::parse($item->date)->startOfDay(),
+                    'date' => Carbon::parse($item->loan_date)->startOfDay(),
                     'created_at' => $item->created_at,
                     'category' => 'Hutang Masuk',
                     'description' => "Pinjaman dari " . $item->name,
                     'omzet_amount' => 0,
-                    'hutang_amount' => (float) $item->amount,
+                    'hutang_amount' => (float) $item->total_amount,
                 ];
             });
         $incomes = $incomes->concat($payables);
@@ -112,7 +112,18 @@ class ReportController extends Controller
             return sprintf('%010d_%010d', $item['date']->timestamp, $item['created_at'] ? $item['created_at']->timestamp : 0);
         })->values();
 
-        // --- PENGELUARAN (PENGELUARAN + PIUTANG) ---
+        return view('reports.total_omzet', compact('incomes', 'startDate', 'endDate', 'currentMonth', 'currentYear'));
+    }
+
+    public function totalPengeluaran(Request $request)
+    {
+        $currentMonth = $request->input('month', Carbon::now()->month);
+        $currentYear = $request->input('year', Carbon::now()->year);
+        $startDate = Carbon::createFromDate($currentYear, $currentMonth, 1)->startOfMonth()->toDateString();
+        $endDate = Carbon::createFromDate($currentYear, $currentMonth, 1)->endOfMonth()->toDateString();
+
+        $expenses = collect();
+
         // 1. Pengeluaran Kost (Expense)
         $expenseItems = Expense::whereBetween('expense_date', [$startDate, $endDate])
             ->get()
@@ -172,16 +183,16 @@ class ReportController extends Controller
 
         // 4. Piutang (Loan type='receivable') -> uang keluar
         $receivables = Loan::where('type', 'receivable')
-            ->whereBetween('date', [$startDate, $endDate])
+            ->whereBetween('loan_date', [$startDate, $endDate])
             ->get()
             ->map(function ($item) {
                 return [
-                    'date' => Carbon::parse($item->date)->startOfDay(),
+                    'date' => Carbon::parse($item->loan_date)->startOfDay(),
                     'created_at' => $item->created_at,
                     'category' => 'Piutang Keluar',
                     'description' => "Pinjaman ke " . $item->name,
                     'pengeluaran_amount' => 0,
-                    'piutang_amount' => (float) $item->amount,
+                    'piutang_amount' => (float) $item->total_amount,
                 ];
             });
         $expenses = $expenses->concat($receivables);
@@ -191,13 +202,15 @@ class ReportController extends Controller
             return sprintf('%010d_%010d', $item['date']->timestamp, $item['created_at'] ? $item['created_at']->timestamp : 0);
         })->values();
 
-        return view('reports.index', compact('incomes', 'expenses', 'startDate', 'endDate'));
+        return view('reports.total_pengeluaran', compact('expenses', 'startDate', 'endDate', 'currentMonth', 'currentYear'));
     }
 
     public function loans(Request $request)
     {
-        $startDate = $request->input('start_date', Carbon::now()->startOfMonth()->toDateString());
-        $endDate = $request->input('end_date', Carbon::now()->endOfMonth()->toDateString());
+        $currentMonth = $request->input('month', Carbon::now()->month);
+        $currentYear = $request->input('year', Carbon::now()->year);
+        $startDate = Carbon::createFromDate($currentYear, $currentMonth, 1)->startOfMonth()->toDateString();
+        $endDate = Carbon::createFromDate($currentYear, $currentMonth, 1)->endOfMonth()->toDateString();
         $typeFilter = $request->input('type', 'all'); // 'all', 'receivable', 'payable'
 
         $transactions = collect();
@@ -264,7 +277,7 @@ class ReportController extends Controller
 
         return view('reports.loans', compact(
             'transactions', 'startDate', 'endDate', 'typeFilter',
-            'totalReceivable', 'totalPayable', 'netCashflow'
+            'totalReceivable', 'totalPayable', 'netCashflow', 'currentMonth', 'currentYear'
         ));
     }
 }

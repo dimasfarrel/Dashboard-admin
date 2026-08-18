@@ -4,10 +4,13 @@
 @section('page-subtitle', 'Rekap pendapatan di luar sewa dan penginapan')
 
 @section('topbar-actions')
-    <a href="{{ route('other-incomes.create') }}" class="btn btn-primary">
-        <i class="bi bi-plus-lg"></i> Tambah Pendapatan
+    <a href="{{ route('system-logs.index', ['menu' => 'Pendapatan Lain']) }}" class="btn btn-secondary btn-sm" style="background-color: var(--surface-2); color: var(--text-primary); border: 1px solid var(--border-color);">
+        <i class="bi bi-clock-history"></i> Log Pendapatan Lain
     </a>
-    <a href="{{ request()->fullUrlWithQuery(['print' => 'all']) }}" class="btn btn-info"><i class="bi bi-printer"></i> Cetak</a>
+    <button onclick="window.print()" class="btn btn-info btn-sm">
+        <i class="bi bi-printer"></i> Cetak Daftar
+    </button>
+    <a href="{{ route('other-incomes.create') }}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg"></i> Tambah Pendapatan Lain</a>
 @endsection
 
 @section('content')

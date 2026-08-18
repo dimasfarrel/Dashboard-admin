@@ -1,8 +1,8 @@
 @extends('layouts.app')
-@section('title', 'Laporan Keuangan')
+@section('title', 'Laporan Omzet Total')
 
-@section('page-title', 'Laporan Keuangan')
-@section('page-subtitle', 'Laporan arus kas (Pemasukan dan Pengeluaran) berdasarkan periode')
+@section('page-title', 'Laporan Omzet Total')
+@section('page-subtitle', 'Rekap Pemasukan Kost (Omzet) dan Hutang')
 
 @section('topbar-actions')
     <button onclick="window.print()" class="btn btn-info"><i class="bi bi-printer"></i> Cetak Laporan</button>
@@ -13,14 +13,20 @@
 {{-- Filter Card (Hidden on Print) --}}
 <div class="card filter-card no-print" style="margin-bottom: 24px;">
     <div class="card-body">
-        <form method="GET" action="{{ route('reports.index') }}" class="flex items-center gap-3 flex-wrap">
+        <form method="GET" action="{{ route('reports.total_omzet') }}" class="flex items-center gap-3 flex-wrap">
             <div style="display:flex; flex-direction:column; gap:4px;">
-                <label for="start_date" style="font-size:12px; font-weight:600; color:var(--text-secondary);">Tanggal Mulai</label>
-                <input type="date" name="start_date" id="start_date" class="form-control" value="{{ $startDate }}" required>
+                <label for="month" style="font-size:12px; font-weight:600; color:var(--text-secondary);">Bulan</label>
+                <select name="month" id="month" class="form-control" style="width:150px;">
+                    @foreach(range(1,12) as $m)
+                        <option value="{{ $m }}" {{ $currentMonth == $m ? 'selected' : '' }}>
+                            {{ \Carbon\Carbon::now()->setMonth((int)($m))->translatedFormat('F') }}
+                        </option>
+                    @endforeach
+                </select>
             </div>
             <div style="display:flex; flex-direction:column; gap:4px;">
-                <label for="end_date" style="font-size:12px; font-weight:600; color:var(--text-secondary);">Tanggal Selesai</label>
-                <input type="date" name="end_date" id="end_date" class="form-control" value="{{ $endDate }}" required>
+                <label for="year" style="font-size:12px; font-weight:600; color:var(--text-secondary);">Tahun</label>
+                <input type="number" name="year" id="year" class="form-control" style="width:100px;" value="{{ $currentYear }}" min="2020">
             </div>
             <div style="display:flex; flex-direction:column; gap:4px; margin-top:20px;">
                 <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Tampilkan</button>
@@ -31,7 +37,7 @@
 
 {{-- Print Header (Only visible on Print) --}}
 <div class="print-header" style="display: none; text-align: center; margin-bottom: 30px; border-bottom: 2px solid #000; padding-bottom: 15px;">
-    <h1 style="margin: 0; font-size: 24px; font-weight: bold; text-transform: uppercase;">Laporan Keuangan Kost Malang</h1>
+    <h1 style="margin: 0; font-size: 24px; font-weight: bold; text-transform: uppercase;">Laporan Omzet Total Kost Malang</h1>
     <p style="margin: 5px 0 0 0; font-size: 14px;">
         Periode: {{ \Carbon\Carbon::parse($startDate)->translatedFormat('d F Y') }} - {{ \Carbon\Carbon::parse($endDate)->translatedFormat('d F Y') }}
     </p>
@@ -46,7 +52,7 @@
 @endphp
 <div class="card" style="margin-bottom: 30px; border:1px solid #10b981;">
     <div class="card-header" style="background-color: rgba(16, 185, 129, 0.1); border-bottom: 1px solid #10b981;">
-        <h2 class="card-title" style="color: #047857; font-weight: 700;"><i class="bi bi-arrow-down-left-circle"></i> 1. Total Pemasukan</h2>
+        <h2 class="card-title" style="color: #047857; font-weight: 700;"><i class="bi bi-arrow-down-left-circle"></i> Omzet Total</h2>
     </div>
     <div class="table-wrapper">
         <table class="table">
@@ -86,71 +92,6 @@
                 </tr>
             </tfoot>
         </table>
-    </div>
-</div>
-
-{{-- 2. TOTAL PENGELUARAN --}}
-@php
-    $sumPengeluaran = $expenses->sum('pengeluaran_amount');
-    $sumPiutang = $expenses->sum('piutang_amount');
-    $sumTotalPengeluaran = $sumPengeluaran + $sumPiutang;
-@endphp
-<div class="card" style="margin-bottom: 30px; border:1px solid #ef4444;">
-    <div class="card-header" style="background-color: rgba(239, 68, 68, 0.1); border-bottom: 1px solid #ef4444;">
-        <h2 class="card-title" style="color: #b91c1c; font-weight: 700;"><i class="bi bi-arrow-up-right-circle"></i> 2. Total Pengeluaran</h2>
-    </div>
-    <div class="table-wrapper">
-        <table class="table">
-            <thead>
-                <tr style="background-color: #f8fafc;">
-                    <th style="width: 100px;">Tanggal</th>
-                    <th style="width: 130px;">Kategori</th>
-                    <th>Deskripsi</th>
-                    <th style="text-align: right; width: 140px;">Nominal Pengeluaran</th>
-                    <th style="text-align: right; width: 140px;">Nominal Piutang</th>
-                    <th style="text-align: right; width: 140px; background-color: #fef2f2;">Total Keluar</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($expenses as $exp)
-                    @php $rowTotalExp = $exp['pengeluaran_amount'] + $exp['piutang_amount']; @endphp
-                    <tr>
-                        <td style="color: #475569;">{{ \Carbon\Carbon::parse($exp['date'])->translatedFormat('d-M-Y') }}</td>
-                        <td><strong>{{ $exp['category'] }}</strong></td>
-                        <td>{{ $exp['description'] }}</td>
-                        <td style="text-align: right; color: #b91c1c;">{{ $exp['pengeluaran_amount'] > 0 ? 'Rp ' . number_format($exp['pengeluaran_amount'], 0, ',', '.') : '-' }}</td>
-                        <td style="text-align: right; color: #1d4ed8;">{{ $exp['piutang_amount'] > 0 ? 'Rp ' . number_format($exp['piutang_amount'], 0, ',', '.') : '-' }}</td>
-                        <td style="text-align: right; font-weight: bold; background-color: rgba(239, 68, 68, 0.05);">Rp {{ number_format($rowTotalExp, 0, ',', '.') }}</td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="6" style="text-align: center; padding: 30px; color: #64748b;">Belum ada data pengeluaran pada periode ini.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-            <tfoot>
-                <tr style="font-weight: bold; background-color: #fef2f2;">
-                    <td colspan="3" style="text-align: right;">TOTAL:</td>
-                    <td style="text-align: right; color: #b91c1c;">Rp {{ number_format($sumPengeluaran, 0, ',', '.') }}</td>
-                    <td style="text-align: right; color: #1d4ed8;">Rp {{ number_format($sumPiutang, 0, ',', '.') }}</td>
-                    <td style="text-align: right; font-size: 15px;">Rp {{ number_format($sumTotalPengeluaran, 0, ',', '.') }}</td>
-                </tr>
-            </tfoot>
-        </table>
-    </div>
-</div>
-
-{{-- SUMMARY / SALDO --}}
-@php
-    $netCashflow = $sumPemasukan - $sumTotalPengeluaran;
-    $netColor = $netCashflow >= 0 ? '#047857' : '#b91c1c';
-@endphp
-<div class="card" style="border: 2px solid {{ $netColor }}; max-width: 500px; margin: 0 auto;">
-    <div class="card-body" style="text-align: center; padding: 20px;">
-        <h3 style="margin: 0; color: #64748b; font-size: 16px; text-transform: uppercase; letter-spacing: 1px;">Saldo Arus Kas (Net)</h3>
-        <p style="margin: 10px 0 0 0; font-size: 28px; font-weight: 800; color: {{ $netColor }};">
-            {{ $netCashflow < 0 ? '-' : '' }} Rp {{ number_format(abs($netCashflow), 0, ',', '.') }}
-        </p>
     </div>
 </div>
 
@@ -219,15 +160,6 @@
     }
     th[style*="background-color"], td[style*="background-color"], tr[style*="background-color"] {
         background-color: transparent !important;
-    }
-
-    /* Saldo akhir di-print juga */
-    .card[style*="max-width: 500px"] {
-        border: 2px solid #000 !important;
-        page-break-inside: avoid;
-    }
-    .card[style*="max-width: 500px"] h3, .card[style*="max-width: 500px"] p {
-        color: #000 !important;
     }
 
     @page {

@@ -15,8 +15,14 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', fn() => redirect()->route('dashboard'));
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+
+// Laporan Keuangan
+Route::get('/reports/omzet', [ReportController::class, 'totalOmzet'])->name('reports.total_omzet');
+Route::get('/reports/pengeluaran', [ReportController::class, 'totalPengeluaran'])->name('reports.total_pengeluaran');
 Route::get('/reports/loans', [ReportController::class, 'loans'])->name('reports.loans');
+
+// System Logs Route
+Route::get('/system-logs', [\App\Http\Controllers\SystemLogController::class, 'index'])->name('system-logs.index');
 
 // Kamar
 Route::resource('rooms', RoomController::class);

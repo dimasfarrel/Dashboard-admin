@@ -16,9 +16,12 @@
         <input type="number" name="year" class="form-control" style="width:85px; padding:6px 10px; font-size:13px;"
             value="{{ $currentYear }}" min="2020" max="{{ now()->year + 1 }}" onchange="document.getElementById('dashMonthForm').submit()">
     </form>
-    <button type="button" onclick="openModal('customPrintModal')" class="btn btn-info btn-sm">
-        <i class="bi bi-printer"></i> Cetak Laporan
-    </button>
+    <a href="{{ route('system-logs.index') }}" class="btn btn-secondary btn-sm" style="background-color: var(--surface-2); color: var(--text-primary); border: 1px solid var(--border-color);">
+        <i class="bi bi-clock-history"></i> Riwayat Aktivitas (Log)
+    </a>
+    <a href="{{ route('reports.total_omzet') }}" class="btn btn-info btn-sm">
+        <i class="bi bi-printer"></i> Cetak Omzet Total
+    </a>
     <a href="{{ route('rooms.create') }}" class="btn btn-primary btn-sm">
         <i class="bi bi-plus-lg"></i> Tambah Kamar
     </a>
@@ -355,60 +358,3 @@ new Chart(oCtx, {
 </script>
 @endpush
 
-{{-- Modal Cetak Laporan Kustom --}}
-<div id="customPrintModal" class="modal-backdrop d-none">
-    <div class="modal-card" style="max-width: 500px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h3 style="margin:0; font-size:18px; font-weight:600;">Cetak Laporan Kustom</h3>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="closeModal('customPrintModal')">
-                <i class="bi bi-x-lg"></i>
-            </button>
-        </div>
-        <form action="{{ route('reports.custom-print') }}" method="GET" target="_blank">
-            <div class="form-group mb-4">
-                <label>Pilih Periode Bulan & Tahun</label>
-                <div class="flex gap-2">
-                    <select name="month" class="form-control" style="flex:1;">
-                        @foreach(range(1,12) as $m)
-                            <option value="{{ $m }}" {{ $currentMonth == $m ? 'selected' : '' }}>
-                                {{ \Carbon\Carbon::now()->setMonth((int)($m))->translatedFormat('F') }}
-                            </option>
-                        @endforeach
-                    </select>
-                    <input type="number" name="year" class="form-control" style="width:100px;" value="{{ $currentYear }}" min="2020">
-                </div>
-            </div>
-            
-            <div class="form-group mb-6">
-                <label>Pilih Data yang Dicetak</label>
-                <div style="display:flex; flex-direction:column; gap:10px; margin-top:8px;">
-                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-                        <input type="checkbox" name="sections[]" value="payments" checked style="width:auto;"> 
-                        <span>Pemasukan Kost & Penginapan</span>
-                    </label>
-                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-                        <input type="checkbox" name="sections[]" value="expenses" checked style="width:auto;"> 
-                        <span>Pengeluaran & Maintenance</span>
-                    </label>
-                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-                        <input type="checkbox" name="sections[]" value="other_incomes" checked style="width:auto;"> 
-                        <span>Pendapatan Lain-lain</span>
-                    </label>
-                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-                        <input type="checkbox" name="sections[]" value="receivables" checked style="width:auto;"> 
-                        <span>Piutang</span>
-                    </label>
-                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-                        <input type="checkbox" name="sections[]" value="payables" checked style="width:auto;"> 
-                        <span>Hutang</span>
-                    </label>
-                </div>
-            </div>
-            
-            <div class="flex justify-between">
-                <button type="button" class="btn btn-secondary" onclick="closeModal('customPrintModal')">Batal</button>
-                <button type="submit" class="btn btn-info" onclick="closeModal('customPrintModal')"><i class="bi bi-printer"></i> Cetak Sekarang</button>
-            </div>
-        </form>
-    </div>
-</div>

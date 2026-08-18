@@ -4,9 +4,10 @@
 @section('page-subtitle', 'Daftar semua penyewa kost aktif dan tidak aktif')
 
 @section('topbar-actions')
-    <a href="{{ route('tenants.create') }}" class="btn btn-primary">
-        <i class="bi bi-person-plus"></i> Tambah Penyewa
+    <a href="{{ route('system-logs.index', ['menu' => 'Penyewa']) }}" class="btn btn-secondary btn-sm" style="background-color: var(--surface-2); color: var(--text-primary); border: 1px solid var(--border-color);">
+        <i class="bi bi-clock-history"></i> Log Penyewa
     </a>
+    <a href="{{ route('tenants.create') }}" class="btn btn-primary btn-sm"><i class="bi bi-person-plus-fill"></i> Tambah Penyewa</a>
 @endsection
 
 @section('content')

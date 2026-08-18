@@ -5,9 +5,13 @@
 
 
 @section('topbar-actions')
-    <a href="{{ route('payments.create') }}" class="btn btn-primary">
-        <i class="bi bi-plus-lg"></i> Catat Pembayaran
+    <a href="{{ route('system-logs.index', ['menu' => 'Sewa Kost']) }}" class="btn btn-secondary btn-sm" style="background-color: var(--surface-2); color: var(--text-primary); border: 1px solid var(--border-color);">
+        <i class="bi bi-clock-history"></i> Log Pembayaran
     </a>
+    <button onclick="window.print()" class="btn btn-info btn-sm">
+        <i class="bi bi-printer"></i> Cetak Daftar Pembayaran
+    </button>
+    <a href="{{ route('payments.create') }}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg"></i> Tambah / Catat Bayar</a>
 @endsection
 
 @section('content')

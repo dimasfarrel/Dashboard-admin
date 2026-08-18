@@ -4,8 +4,13 @@
 @section('page-subtitle', 'Manajemen sewa harian dan penginapan singkat')
 
 @section('topbar-actions')
-    <a href="{{ request()->fullUrlWithQuery(['print' => 'all']) }}" class="btn btn-info"><i class="bi bi-printer"></i> Cetak</a>
-    <a href="{{ route('lodgings.create') }}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Tambah Penginapan</a>
+    <a href="{{ route('system-logs.index', ['menu' => 'Penginapan']) }}" class="btn btn-secondary btn-sm" style="background-color: var(--surface-2); color: var(--text-primary); border: 1px solid var(--border-color);">
+        <i class="bi bi-clock-history"></i> Log Penginapan
+    </a>
+    <button onclick="window.print()" class="btn btn-info btn-sm">
+        <i class="bi bi-printer"></i> Cetak Daftar
+    </button>
+    <a href="{{ route('lodgings.create') }}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg"></i> Tambah Penginapan</a>
 @endsection
 
 @section('content')
