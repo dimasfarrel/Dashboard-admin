@@ -10,6 +10,7 @@ use App\Models\Loan;
 use App\Models\LoanRepayment;
 use App\Models\Expense;
 use App\Models\RoomMaintenance;
+use App\Models\TenantDeposit;
 use Carbon\Carbon;
 
 class ReportController extends Controller
@@ -112,6 +113,24 @@ class ReportController extends Controller
                 ];
             });
         $incomes = $incomes->concat($payables);
+
+        // 6. Deposit Penyewa (TenantDeposit type='credit')
+        $tenantDeposits = TenantDeposit::where('type', 'credit')
+            ->whereBetween('date', [$startDate, $endDate])
+            ->with('tenant')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'date' => Carbon::parse($item->date)->startOfDay(),
+                    'created_at' => $item->created_at,
+                    'category' => 'Deposit Masuk',
+                    'description' => "Deposit - " . ($item->tenant->name ?? 'N/A') . ($item->description ? " ({$item->description})" : ""),
+                    'omzet_amount' => 0,
+                    'hutang_amount' => 0,
+                    'deposit_amount' => (float) $item->amount,
+                ];
+            });
+        $incomes = $incomes->concat($tenantDeposits);
 
         // Sort Pemasukan
         $incomes = $incomes->sortBy(function ($item) {
