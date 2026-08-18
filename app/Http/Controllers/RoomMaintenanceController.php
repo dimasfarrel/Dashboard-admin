@@ -22,7 +22,8 @@ class RoomMaintenanceController extends Controller
         if ($request->filled('month'))     $query->whereMonth('report_date', $request->month);
         if ($request->filled('year'))      $query->whereYear('report_date', $request->year);
 
-        $maintenances = $query->orderByDesc('report_date')->paginate(15);
+        $perPage = request('print') === 'all' ? 999999 : 15;
+        $maintenances = $query->orderByDesc('report_date')->paginate($perPage);
         $rooms        = Room::orderBy('room_number')->get();
         $categories   = MaintenanceCategory::orderBy('name')->get();
 

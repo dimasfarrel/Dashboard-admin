@@ -4,6 +4,7 @@
 @section('page-subtitle', 'Rekap perbaikan dan perawatan per kamar')
 
 @section('topbar-actions')
+    <a href="{{ request()->fullUrlWithQuery(['print' => 'all']) }}" target="_blank" class="btn btn-info"><i class="bi bi-printer"></i> Cetak</a>
     <a href="{{ route('maintenances.create') }}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Laporkan Maintenance</a>
 @endsection
 
@@ -68,7 +69,7 @@
     <div class="table-wrapper">
         <table>
             <thead>
-                <tr><th>Kamar</th><th>Item</th><th>Kategori</th><th>Biaya</th><th>Vendor</th><th>Tgl Lapor</th><th>Selesai</th><th>Status</th><th>Aksi</th></tr>
+                <tr><th>Kamar</th><th>Item</th><th>Kategori</th><th>Biaya</th><th>Vendor</th><th>Tgl Lapor</th><th>Selesai</th><th>Status</th><th class="no-print">Aksi</th></tr>
             </thead>
             <tbody>
                 @foreach($maintenances as $m)
@@ -87,7 +88,7 @@
                         @else                                  <span class="badge badge-secondary">Batal</span>
                         @endif
                     </td>
-                    <td>
+                    <td class="no-print">
                         <div class="flex gap-2">
                             <a href="{{ route('maintenances.show', $m) }}" class="btn btn-info btn-sm btn-icon"><i class="bi bi-eye"></i></a>
                             <a href="{{ route('maintenances.edit', $m) }}" class="btn btn-warning btn-sm btn-icon"><i class="bi bi-pencil"></i></a>
@@ -102,7 +103,7 @@
             </tbody>
         </table>
     </div>
-    <div class="pagination">{{ $maintenances->links('components.pagination') }}</div>
+    <div class="pagination">{{ $maintenances->appends(request()->query())->links('components.pagination') }}</div>
     @else
     <div class="empty-state">
         <i class="bi bi-tools"></i>
