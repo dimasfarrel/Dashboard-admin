@@ -165,30 +165,6 @@ class ReportController extends Controller
             });
         $expenses = $expenses->concat($expenseItems);
 
-        // 2. Maintenance Kamar
-        $maintenances = RoomMaintenance::where('cost', '>', 0)
-            ->where(function($q) use ($startDate, $endDate) {
-                $q->whereBetween('done_date', [$startDate, $endDate])
-                  ->orWhere(function($subQ) use ($startDate, $endDate) {
-                      $subQ->whereNull('done_date')
-                           ->whereBetween('report_date', [$startDate, $endDate]);
-                  });
-            })
-            ->with('room')
-            ->get()
-            ->map(function ($item) {
-                $date = $item->done_date ? $item->done_date : $item->report_date;
-                return [
-                    'date' => Carbon::parse($date)->startOfDay(),
-                    'created_at' => $item->created_at,
-                    'category' => 'Maintenance',
-                    'description' => "Kamar " . ($item->room->room_number ?? 'N/A') . " - " . $item->item_name,
-                    'pengeluaran_amount' => (float) $item->cost,
-                    'piutang_amount' => 0,
-                ];
-            });
-        $expenses = $expenses->concat($maintenances);
-
         // 3. Pembayaran Hutang (Pelunasan Hutang keluar kas)
         $payableRepayments = LoanRepayment::where('type', 'payable')
             ->whereBetween('repayment_date', [$startDate, $endDate])

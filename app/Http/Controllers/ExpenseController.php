@@ -67,50 +67,8 @@ class ExpenseController extends Controller
             });
         }
 
-        // --- 2.5 Get Maintenance ---
-        $maintenancesList = collect([]);
-        if (!$selectedCategory || $selectedCategory === 'maintenance') {
-            $maintenancesQuery = \App\Models\RoomMaintenance::with('room')->where('cost', '>', 0);
-            if ($request->filled('month')) {
-                $maintenancesQuery->where(function($q) use ($currentMonth) {
-                    $q->whereMonth('done_date', $currentMonth)
-                      ->orWhere(function($subQ) use ($currentMonth) {
-                          $subQ->whereNull('done_date')->whereMonth('report_date', $currentMonth);
-                      });
-                });
-            }
-            if ($request->filled('year')) {
-                $maintenancesQuery->where(function($q) use ($currentYear) {
-                    $q->whereYear('done_date', $currentYear)
-                      ->orWhere(function($subQ) use ($currentYear) {
-                          $subQ->whereNull('done_date')->whereYear('report_date', $currentYear);
-                      });
-                });
-            }
-
-            $maintenancesList = $maintenancesQuery->get()->map(function($m) {
-                $date = $m->done_date ? $m->done_date : $m->report_date;
-                return (object) [
-                    'id'            => $m->id,
-                    'is_deposit'    => false,
-                    'is_maintenance'=> true,
-                    'expense_date'  => \Carbon\Carbon::parse($date)->startOfDay(),
-                    'category'      => 'maintenance',
-                    'category_label'=> 'Maintenance Kamar',
-                    'category_icon' => 'bi-tools',
-                    'title'         => '[Maintenance] ' . $m->item_name . ' — Kamar ' . ($m->room->room_number ?? 'N/A'),
-                    'description'   => $m->notes,
-                    'period_month'  => \Carbon\Carbon::parse($date)->month,
-                    'period_year'   => \Carbon\Carbon::parse($date)->year,
-                    'amount'        => $m->cost,
-                    'notes'         => 'Vendor: ' . $m->vendor_name,
-                    'receipt_photo' => null,
-                ];
-            });
-        }
-
         // --- 3. Merge & Paginate ---
-        $allExpenses = $expensesList->concat($depositsList)->concat($maintenancesList)->sortByDesc('expense_date')->values();
+        $allExpenses = $expensesList->concat($depositsList)->sortByDesc('expense_date')->values();
         
         $perPage = request('print') === 'all' ? 999999 : 15;
         $currentPage = \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPage();
@@ -138,14 +96,6 @@ class ExpenseController extends Controller
             $categoryTotals->push((object)[
                 'category' => 'deposit_deduction',
                 'total' => $depositTotal
-            ]);
-        }
-        
-        $maintenanceTotal = $maintenancesList->sum('amount');
-        if ($maintenanceTotal > 0) {
-            $categoryTotals->push((object)[
-                'category' => 'maintenance',
-                'total' => $maintenanceTotal
             ]);
         }
         

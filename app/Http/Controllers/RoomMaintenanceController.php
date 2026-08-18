@@ -165,7 +165,7 @@ class RoomMaintenanceController extends Controller
         // Cek apakah kategori 'renovasi' ada di expense_categories
         $categorySlug = \App\Models\ExpenseCategory::where('slug', 'renovasi')->exists()
             ? 'renovasi'
-            : (\App\Models\ExpenseCategory::first()?->slug ?? 'lain-lain');
+            : 'lain-lain';
 
         $expenseDate = $maintenance->done_date ?? $maintenance->report_date;
 
