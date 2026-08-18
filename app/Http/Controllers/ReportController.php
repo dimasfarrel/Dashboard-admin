@@ -223,6 +223,23 @@ class ReportController extends Controller
             });
         $expenses = $expenses->concat($receivables);
 
+        // 5. Pengembalian Deposit (TenantDeposit type='debit') -> uang keluar
+        $depositDeductions = \App\Models\TenantDeposit::where('type', 'debit')
+            ->whereBetween('date', [$startDate, $endDate])
+            ->with('tenant')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'date' => Carbon::parse($item->date)->startOfDay(),
+                    'created_at' => $item->created_at,
+                    'category' => 'Pengembalian Deposit',
+                    'description' => "Pengembalian Deposit - " . ($item->tenant->name ?? 'N/A') . ($item->description ? " ({$item->description})" : ""),
+                    'pengeluaran_amount' => (float) $item->amount,
+                    'piutang_amount' => 0,
+                ];
+            });
+        $expenses = $expenses->concat($depositDeductions);
+
         // Sort Pengeluaran
         $expenses = $expenses->sortBy(function ($item) {
             return sprintf('%010d_%010d', $item['date']->timestamp, $item['created_at'] ? $item['created_at']->timestamp : 0);
