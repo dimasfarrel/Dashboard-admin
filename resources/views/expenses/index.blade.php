@@ -36,9 +36,9 @@
             @foreach($categoryTotals as $cat)
             @php
             $pct = $totalThisMonth > 0 ? ($cat->total / $totalThisMonth * 100) : 0;
-            $icons = ['listrik'=>'bi-lightning-charge','air'=>'bi-droplet','internet'=>'bi-wifi','kebersihan'=>'bi-trash','keamanan'=>'bi-shield-check','pajak'=>'bi-receipt','renovasi'=>'bi-tools','perlengkapan'=>'bi-box','lain-lain'=>'bi-three-dots'];
+            $icons = ['listrik'=>'bi-lightning-charge','air'=>'bi-droplet','internet'=>'bi-wifi','kebersihan'=>'bi-trash','keamanan'=>'bi-shield-check','pajak'=>'bi-receipt','renovasi'=>'bi-tools','perlengkapan'=>'bi-box','lain-lain'=>'bi-three-dots','maintenance'=>'bi-tools'];
             $icon = $icons[$cat->category] ?? 'bi-cash';
-            $labels = ['listrik'=>'Listrik','air'=>'Air/PDAM','internet'=>'Internet/WiFi','kebersihan'=>'Kebersihan','keamanan'=>'Keamanan','pajak'=>'Pajak & Admin','renovasi'=>'Renovasi','perlengkapan'=>'Perlengkapan','lain-lain'=>'Lain-lain'];
+            $labels = ['listrik'=>'Listrik','air'=>'Air/PDAM','internet'=>'Internet/WiFi','kebersihan'=>'Kebersihan','keamanan'=>'Keamanan','pajak'=>'Pajak & Admin','renovasi'=>'Renovasi','perlengkapan'=>'Perlengkapan','lain-lain'=>'Lain-lain','maintenance'=>'Maintenance Kamar'];
             @endphp
             <div>
                 <div class="flex items-center justify-between" style="margin-bottom:5px;">
@@ -127,10 +127,14 @@
                     <td class="text-sm text-muted">{{ Str::limit($exp->notes, 50) ?: '-' }}</td>
                     <td class="no-print">
                         <div class="flex gap-2">
-                            @if($exp->is_deposit)
+                            @if(isset($exp->is_deposit) && $exp->is_deposit)
                             <a href="{{ route('tenants.show', $exp->tenant_id) }}" class="btn btn-info btn-sm btn-icon" title="Lihat di Data Penyewa"><i class="bi bi-eye"></i></a>
                             <button disabled class="btn btn-secondary btn-sm btn-icon" style="opacity:0.5; cursor:not-allowed;" title="Edit via Data Penyewa"><i class="bi bi-pencil"></i></button>
                             <button disabled class="btn btn-secondary btn-sm btn-icon" style="opacity:0.5; cursor:not-allowed;" title="Hapus via Data Penyewa"><i class="bi bi-trash"></i></button>
+                            @elseif(isset($exp->is_maintenance) && $exp->is_maintenance)
+                            <a href="{{ route('maintenances.index') }}" class="btn btn-info btn-sm btn-icon" title="Lihat di Data Maintenance"><i class="bi bi-eye"></i></a>
+                            <button disabled class="btn btn-secondary btn-sm btn-icon" style="opacity:0.5; cursor:not-allowed;" title="Edit via Data Maintenance"><i class="bi bi-pencil"></i></button>
+                            <button disabled class="btn btn-secondary btn-sm btn-icon" style="opacity:0.5; cursor:not-allowed;" title="Hapus via Data Maintenance"><i class="bi bi-trash"></i></button>
                             @else
                             <a href="{{ route('expenses.show', $exp->id) }}" class="btn btn-info btn-sm btn-icon"><i class="bi bi-eye"></i></a>
                             <a href="{{ route('expenses.edit', $exp->id) }}" class="btn btn-warning btn-sm btn-icon"><i class="bi bi-pencil"></i></a>
@@ -165,7 +169,7 @@ const catData = @json($categoryTotals);
 const labels = {
     listrik: 'Listrik', air: 'Air/PDAM', internet: 'Internet', kebersihan: 'Kebersihan',
     keamanan: 'Keamanan', pajak: 'Pajak', renovasi: 'Renovasi', perlengkapan: 'Perlengkapan', 'lain-lain': 'Lain-lain',
-    deposit_deduction: 'Pengembalian Deposit'
+    deposit_deduction: 'Pengembalian Deposit', maintenance: 'Maintenance Kamar'
 };
 const colors = ['#00d4aa','#3b82f6','#7c3aed','#f97316','#eab308','#ef4444','#22c55e','#06b6d4','#94a3b8'];
 
