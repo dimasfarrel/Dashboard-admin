@@ -210,7 +210,15 @@
                         @endif
                     </td>
                     <td><strong>Kamar {{ $trx['room'] }}</strong></td>
-                    <td>{{ $trx['name'] }}</td>
+                    <td>
+                        @if(isset($trx['tenant_url']) && $trx['tenant_url'] !== '#')
+                            <a href="{{ $trx['tenant_url'] }}" style="color: var(--primary-color); text-decoration: none; font-weight: 500;">
+                                {{ $trx['name'] }}
+                            </a>
+                        @else
+                            {{ $trx['name'] }}
+                        @endif
+                    </td>
                     <td class="text-sm">
                         @if($trx['date'])
                             {{ \Carbon\Carbon::parse($trx['date'])->translatedFormat('d-M-Y') }}

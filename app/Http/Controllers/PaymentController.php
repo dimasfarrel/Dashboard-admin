@@ -75,6 +75,7 @@ class PaymentController extends Controller
                 'due_date'  => $p->due_date,
                 'link'      => route('payments.show', $p),
                 'edit_link' => route('payments.edit', $p),
+                'tenant_url'=> $p->tenant ? route('tenants.show', $p->tenant->id) : '#',
                 'is_virtual'=> false,
             ];
         });
@@ -92,6 +93,16 @@ class PaymentController extends Controller
             $today = now();
             foreach ($activeTenants as $tenant) {
                 if (!in_array($tenant->id, $existingTenantIds)) {
+                    // Check if selected period is BEFORE the tenant's start_date
+                    if ($tenant->start_date) {
+                        $periodDate = Carbon::createFromDate($selectedPeriodYear, $selectedPeriodMonth, 1)->endOfMonth();
+                        $startDate = $tenant->start_date->copy()->startOfMonth();
+                        
+                        if ($periodDate->lt($startDate)) {
+                            continue; // Skip because the tenant hasn't entered the kost yet
+                        }
+                    }
+
                     // Check if it should be overdue
                     $tDueDay = $dueDay;
                     $dueDate = Carbon::createFromDate($selectedPeriodYear, $selectedPeriodMonth, min($tDueDay, 28));
@@ -121,6 +132,7 @@ class PaymentController extends Controller
                         'due_date'  => $dueDate->toDateString(),
                         'link'      => route('payments.create', ['tenant_id' => $tenant->id, 'period_month' => $selectedPeriodMonth, 'period_year' => $selectedPeriodYear]),
                         'edit_link' => route('payments.create', ['tenant_id' => $tenant->id, 'period_month' => $selectedPeriodMonth, 'period_year' => $selectedPeriodYear]),
+                        'tenant_url'=> route('tenants.show', $tenant->id),
                         'is_virtual'=> true,
                     ]);
                 }
