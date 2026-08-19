@@ -91,6 +91,16 @@
                     <input type="text" name="emergency_contact_phone" class="form-control"
                         value="{{ old('emergency_contact_phone', $tenant->emergency_contact_phone) }}">
                 </div>
+                <div class="form-group mt-3">
+                    <label>Kontak Darurat 2 <small class="text-muted">(Opsional)</small></label>
+                    <input type="text" name="emergency_contact_name_2" class="form-control"
+                        value="{{ old('emergency_contact_name_2', $tenant->emergency_contact_name_2) }}">
+                </div>
+                <div class="form-group mt-3">
+                    <label>HP Darurat 2 <small class="text-muted">(Opsional)</small></label>
+                    <input type="text" name="emergency_contact_phone_2" class="form-control"
+                        value="{{ old('emergency_contact_phone_2', $tenant->emergency_contact_phone_2) }}">
+                </div>
                 <div class="form-group">
                     <label>Kamar <span class="required">*</span></label>
                     <select name="room_id" class="form-control" required>

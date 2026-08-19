@@ -14,6 +14,7 @@ class Tenant extends Model
     protected $fillable = [
         'room_id', 'name', 'nickname', 'nik', 'phone_wa',
         'emergency_contact_name', 'emergency_contact_phone',
+        'emergency_contact_name_2', 'emergency_contact_phone_2',
         'occupation', 'origin_city', 'gender', 'birth_date',
         'start_date', 'end_date', 'ktp_photo', 'selfie_photo',
         'status', 'notes'

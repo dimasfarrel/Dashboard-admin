@@ -129,6 +129,27 @@
             </div>
             @endif
 
+            @if($tenant->emergency_contact_name_2 || $tenant->emergency_contact_phone_2)
+            <div class="card-title mb-4 mt-4" style="font-size:13px;"><i class="bi bi-telephone-fill" style="color:var(--accent-orange);"></i> Kontak Darurat 2</div>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <span class="detail-label">Nama</span>
+                    <span class="detail-value">{{ $tenant->emergency_contact_name_2 ?? '—' }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Nomor HP</span>
+                    @if($tenant->emergency_contact_phone_2)
+                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $tenant->emergency_contact_phone_2) }}" target="_blank"
+                       style="color:#25D366; text-decoration:none;">
+                        <i class="bi bi-whatsapp"></i> {{ $tenant->emergency_contact_phone_2 }}
+                    </a>
+                    @else
+                    <span class="detail-value">—</span>
+                    @endif
+                </div>
+            </div>
+            @endif
+
             @if($tenant->notes)
             <hr class="section-divider">
             <div class="detail-label" style="margin-bottom:6px;">Catatan</div>

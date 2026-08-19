@@ -149,6 +149,18 @@
                         value="{{ old('emergency_contact_phone') }}" placeholder="08xx-xxxx-xxxx">
                 </div>
             </div>
+            <div class="form-grid mt-3">
+                <div class="form-group">
+                    <label>Nama Kontak Darurat 2 <small class="text-muted">(Opsional)</small></label>
+                    <input type="text" name="emergency_contact_name_2" class="form-control"
+                        value="{{ old('emergency_contact_name_2') }}" placeholder="Nama keluarga/kerabat 2">
+                </div>
+                <div class="form-group">
+                    <label>Nomor HP Kontak Darurat 2 <small class="text-muted">(Opsional)</small></label>
+                    <input type="text" name="emergency_contact_phone_2" class="form-control"
+                        value="{{ old('emergency_contact_phone_2') }}" placeholder="08xx-xxxx-xxxx">
+                </div>
+            </div>
         </div>
 
         {{-- Data Sewa --}}

@@ -103,6 +103,16 @@ class PaymentController extends Controller
                         }
                     }
 
+                    // Check if selected period is AFTER the tenant's end_date
+                    if ($tenant->end_date) {
+                        $periodStart = Carbon::createFromDate($selectedPeriodYear, $selectedPeriodMonth, 1)->startOfMonth();
+                        $endDate = $tenant->end_date->copy()->endOfMonth();
+                        
+                        if ($periodStart->gt($endDate)) {
+                            continue; // Skip because the tenant's contract has already ended
+                        }
+                    }
+
                     // Check if it should be overdue
                     $tDueDay = $dueDay;
                     $dueDate = Carbon::createFromDate($selectedPeriodYear, $selectedPeriodMonth, min($tDueDay, 28));
