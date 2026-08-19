@@ -107,7 +107,7 @@
                         @endforeach
                     </select>
                     <input type="number" name="pay_year" class="form-control" style="width:90px;"
-                        value="{{ request('pay_year', date('Y')) }}" placeholder="Tahun">
+                        value="{{ request('pay_year') }}" placeholder="Tahun">
                 </div>
             </div>
 

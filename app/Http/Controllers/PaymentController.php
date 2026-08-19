@@ -93,7 +93,7 @@ class PaymentController extends Controller
             foreach ($activeTenants as $tenant) {
                 if (!in_array($tenant->id, $existingTenantIds)) {
                     // Check if it should be overdue
-                    $tDueDay = $tenant->start_date ? Carbon::parse($tenant->start_date)->day : $dueDay;
+                    $tDueDay = $dueDay;
                     $dueDate = Carbon::createFromDate($selectedPeriodYear, $selectedPeriodMonth, min($tDueDay, 28));
                     
                     $vStatus = $today->gt($dueDate) ? 'overdue' : 'pending';
@@ -315,8 +315,7 @@ class PaymentController extends Controller
 
         // Auto-fill due_date if not provided
         if (empty($validated['due_date'])) {
-            $tenant = Tenant::find($validated['tenant_id']);
-            $dueDay = $tenant ? $tenant->start_date->day : (int) AppSetting::get('payment_due_day', 10);
+            $dueDay = (int) AppSetting::get('payment_due_day', 10);
             $validated['due_date'] = Carbon::createFromDate(
                 $validated['period_year'],
                 $validated['period_month'],

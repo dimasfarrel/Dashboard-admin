@@ -12,6 +12,28 @@
 
 @section('content')
 
+<!-- Filter Bar -->
+<div class="filter-bar" style="margin-bottom: 20px; background: var(--bg-card); padding: 15px; border-radius: 12px; border: 1px solid var(--border-accent, #334155);">
+    <form method="GET" action="{{ route('tenants.index') }}" style="display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;">
+        <div>
+            <label style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px; display: block;">Status Penyewa</label>
+            <select name="status" class="form-control" style="width: 150px;">
+                <option value="">Semua Status</option>
+                <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Aktif</option>
+                <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Tidak Aktif</option>
+            </select>
+        </div>
+        <div>
+            <label style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px; display: block;">Cari Nama/Kamar</label>
+            <input type="text" name="search" class="form-control" style="width: 250px;" value="{{ request('search') }}" placeholder="Ketik nama atau nomor kamar...">
+        </div>
+        <div style="display: flex; gap: 8px;">
+            <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Filter</button>
+            <a href="{{ route('tenants.index') }}" class="btn btn-secondary">Reset</a>
+        </div>
+    </form>
+</div>
+
 <div class="card">
     <div class="card-header">
         <div class="card-title"><i class="bi bi-people"></i> Semua Penyewa ({{ $tenants->total() }})</div>

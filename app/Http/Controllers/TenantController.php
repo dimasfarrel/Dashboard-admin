@@ -12,9 +12,25 @@ use Illuminate\Support\Facades\DB;
 
 class TenantController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $tenants = Tenant::with(['room', 'deposits'])->orderBy('name')->paginate(15);
+        $query = Tenant::with(['room', 'deposits']);
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhereHas('room', function ($q2) use ($search) {
+                      $q2->where('room_number', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        $tenants = $query->orderBy('name')->paginate(15)->withQueryString();
         return view('tenants.index', compact('tenants'));
     }
 
