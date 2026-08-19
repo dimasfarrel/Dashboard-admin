@@ -7,6 +7,10 @@
     <a href="{{ route('system-logs.index', ['menu' => 'Kamar']) }}" class="btn btn-secondary btn-sm" style="background-color: var(--surface-2); color: var(--text-primary); border: 1px solid var(--border-color);">
         <i class="bi bi-clock-history"></i> Log Kamar
     </a>
+    <a href="{{ route('rooms.vacant-forecast') }}" class="btn btn-info btn-sm" style="color: white; border: 1px solid var(--border-color);">
+        <i class="bi bi-calendar-check"></i> Perkiraan Kamar Kosong
+    </a>
+
     <a href="{{ route('rooms.create') }}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg"></i> Tambah Kamar</a>
 @endsection
 
@@ -182,6 +186,10 @@
     <div class="empty-state">
         <i class="bi bi-door-closed"></i>
         <p>Belum ada data kamar. Mulai tambahkan kamar pertama Anda!</p>
+    <a href="{{ route('rooms.vacant-forecast') }}" class="btn btn-info btn-sm" style="color: white; border: 1px solid var(--border-color);">
+        <i class="bi bi-calendar-check"></i> Perkiraan Kamar Kosong
+    </a>
+
         <a href="{{ route('rooms.create') }}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Tambah Kamar Pertama</a>
     </div>
 </div>

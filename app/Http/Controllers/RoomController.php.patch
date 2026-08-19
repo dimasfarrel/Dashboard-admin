@@ -1,0 +1,28 @@
+--- app/Http/Controllers/RoomController.php
++++ app/Http/Controllers/RoomController.php
+@@ -8,6 +8,8 @@
+ use App\Models\Floor;
+ use App\Models\RoomType;
++use App\Models\Tenant;
++use Carbon\Carbon;
+ use Illuminate\Http\Request;
+ use Illuminate\Support\Facades\Storage;
+ 
+ class RoomController extends Controller
+ {
++    public function vacantForecast(Request $request)
++    {
++        $currentMonth = $request->input('month', date('n'));
++        $currentYear = $request->input('year', date('Y'));
++        
++        $tenants = Tenant::with('room')
++            ->where('status', 'active')
++            ->whereNotNull('end_date')
++            ->whereMonth('end_date', $currentMonth)
++            ->whereYear('end_date', $currentYear)
++            ->get();
++            
++        return view('rooms.vacant_forecast', compact('tenants', 'currentMonth', 'currentYear'));
++    }
++
+     public function index(Request $request)

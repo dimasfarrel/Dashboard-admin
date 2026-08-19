@@ -6,30 +6,11 @@ use App\Models\Room;
 use App\Models\Facility;
 use App\Models\Floor;
 use App\Models\RoomType;
-use App\Models\Tenant;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class RoomController extends Controller
 {
-    public function vacantForecast(Request $request)
-    {
-        $currentMonth = $request->input('month', date('n'));
-        $currentYear = $request->input('year', date('Y'));
-        
-        $selectedDate = \Carbon\Carbon::createFromDate($currentYear, $currentMonth, 1)->endOfMonth();
-        
-        $tenants = Tenant::with('room')
-            ->where('status', 'active')
-            ->whereNotNull('end_date')
-            ->where('end_date', '<=', $selectedDate->toDateString())
-            ->orderBy('end_date', 'desc')
-            ->get();
-            
-        return view('rooms.vacant_forecast', compact('tenants', 'currentMonth', 'currentYear'));
-    }
-
     public function index(Request $request)
     {
         $query = Room::with(['tenant', 'activeLodging', 'facilities']);

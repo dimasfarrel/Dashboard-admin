@@ -25,6 +25,7 @@ Route::get('/reports/arus-kas', [ReportController::class, 'cashFlow'])->name('re
 Route::get('/system-logs', [\App\Http\Controllers\SystemLogController::class, 'index'])->name('system-logs.index');
 
 // Kamar
+Route::get('/rooms/vacant-forecast', [RoomController::class, 'vacantForecast'])->name('rooms.vacant-forecast');
 Route::resource('rooms', RoomController::class);
 Route::patch('/rooms/{room}/status', [RoomController::class, 'updateStatus'])->name('rooms.update-status');
 
