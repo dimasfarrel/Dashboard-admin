@@ -31,6 +31,8 @@ Route::patch('/rooms/{room}/status', [RoomController::class, 'updateStatus'])->n
 // Penyewa
 Route::resource('tenants', TenantController::class);
 // Deposit Penyewa
+Route::get('/tenant-deposits', [\App\Http\Controllers\TenantDepositController::class, 'index'])->name('tenant-deposits.index');
+Route::post('/tenant-deposits/store-global', [\App\Http\Controllers\TenantDepositController::class, 'storeGlobal'])->name('tenant-deposits.store-global');
 Route::post('/tenants/{tenant}/deposits', [\App\Http\Controllers\TenantDepositController::class, 'store'])->name('tenant-deposits.store');
 Route::post('/tenants/{tenant}/deposits/deduct', [\App\Http\Controllers\TenantDepositController::class, 'storeDeduction'])->name('tenant-deposits.deduct');
 Route::put('/tenant-deposits/{deposit}', [\App\Http\Controllers\TenantDepositController::class, 'update'])->name('tenant-deposits.update');

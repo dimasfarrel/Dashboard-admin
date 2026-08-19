@@ -53,6 +53,12 @@
                 Data Penyewa
             </a>
 
+            <a href="{{ route('tenant-deposits.index') }}"
+               class="nav-item {{ request()->routeIs('tenant-deposits.*') ? 'active' : '' }}">
+                <i class="bi bi-safe"></i>
+                Laporan Deposit
+            </a>
+
             <div class="nav-section-label" style="margin-top:8px;">Keuangan</div>
 
             <a href="{{ route('payments.index') }}"

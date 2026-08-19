@@ -8,6 +8,49 @@ use Illuminate\Http\Request;
 
 class TenantDepositController extends Controller
 {
+
+    /**
+     * Laporan Deposit
+     */
+    public function index(Request $request)
+    {
+        $deposits = TenantDeposit::with('tenant')->orderBy('date', 'desc')->paginate(20);
+        $tenants = Tenant::whereIn('status', ['active', 'inactive'])->get(); // Active and inactive might have deposits
+        return view('tenant-deposits.index', compact('deposits', 'tenants'));
+    }
+
+    /**
+     * Simpan deposit secara global (dari laporan deposit)
+     */
+    public function storeGlobal(Request $request)
+    {
+        if ($request->has('amount')) {
+            $request->merge(['amount' => str_replace('.', '', $request->amount)]);
+        }
+
+        $validated = $request->validate([
+            'tenant_id'   => 'required|exists:tenants,id',
+            'type'        => 'required|in:credit,debit',
+            'amount'      => 'required|integer|min:1',
+            'description' => 'required|string|max:255',
+            'date'        => 'required|date',
+            'notes'       => 'nullable|string',
+        ]);
+
+        if ($validated['type'] === 'debit') {
+            $tenant = Tenant::findOrFail($validated['tenant_id']);
+            if ($validated['amount'] > $tenant->deposit_balance) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', "Jumlah pengurangan melebihi saldo deposit.");
+            }
+        }
+
+        TenantDeposit::create($validated);
+
+        return redirect()->route('tenant-deposits.index')
+            ->with('success', "Data deposit berhasil dicatat.");
+    }
     /**
      * Simpan deposit masuk (credit) dari penyewa.
      */
@@ -30,7 +73,7 @@ class TenantDepositController extends Controller
 
         TenantDeposit::create($validated);
 
-        return redirect()->route('tenants.show', $tenant)
+        return redirect()->back()
             ->with('success', "Deposit Rp " . number_format($validated['amount'], 0, ',', '.') . " berhasil dicatat.");
     }
 
@@ -66,7 +109,7 @@ class TenantDepositController extends Controller
 
         TenantDeposit::create($validated);
 
-        return redirect()->route('tenants.show', $tenant)
+        return redirect()->back()
             ->with('success', "Pengurangan deposit Rp " . number_format($validated['amount'], 0, ',', '.') . " berhasil dicatat.");
     }
 
@@ -88,7 +131,7 @@ class TenantDepositController extends Controller
 
         $deposit->update($validated);
 
-        return redirect()->route('tenants.show', $deposit->tenant_id)
+        return redirect()->back()
             ->with('success', "Transaksi deposit berhasil diupdate.");
     }
 
@@ -100,7 +143,7 @@ class TenantDepositController extends Controller
         $tenant = $deposit->tenant;
         $deposit->delete();
 
-        return redirect()->route('tenants.show', $tenant)
+        return redirect()->back()
             ->with('success', "Transaksi deposit berhasil dihapus.");
     }
 }
