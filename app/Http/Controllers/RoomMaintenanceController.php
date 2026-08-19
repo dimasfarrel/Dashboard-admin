@@ -8,6 +8,7 @@ use App\Models\MaintenanceCategory;
 use App\Models\Expense;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class RoomMaintenanceController extends Controller
 {
@@ -78,12 +79,17 @@ class RoomMaintenanceController extends Controller
         }
 
         $validated['cost'] = $validated['cost'] ?? 0;
-        $maintenance = RoomMaintenance::create($validated);
 
-        // Otomatis catat ke pengeluaran kost jika ada biaya
-        if ($maintenance->cost > 0) {
-            $this->syncExpense($maintenance);
-        }
+        $maintenance = DB::transaction(function () use ($validated) {
+            $maintenance = RoomMaintenance::create($validated);
+
+            // Otomatis catat ke pengeluaran kost jika ada biaya
+            if ($maintenance->cost > 0) {
+                $this->syncExpense($maintenance);
+            }
+
+            return $maintenance;
+        });
 
         return redirect()->route('maintenances.index')
             ->with('success', "Data maintenance berhasil dicatat!");
@@ -130,14 +136,17 @@ class RoomMaintenanceController extends Controller
         }
 
         $validated['cost'] = $validated['cost'] ?? 0;
-        $maintenance->update($validated);
 
-        // Sync pengeluaran kost: update jika ada biaya, hapus jika biaya 0
-        if ($maintenance->cost > 0) {
-            $this->syncExpense($maintenance);
-        } else {
-            Expense::where('room_maintenance_id', $maintenance->id)->delete();
-        }
+        DB::transaction(function () use ($maintenance, $validated) {
+            $maintenance->update($validated);
+
+            // Sync pengeluaran kost: update jika ada biaya, hapus jika biaya 0
+            if ($maintenance->cost > 0) {
+                $this->syncExpense($maintenance);
+            } else {
+                Expense::where('room_maintenance_id', $maintenance->id)->delete();
+            }
+        });
 
         return redirect()->route('maintenances.show', $maintenance)
             ->with('success', "Data maintenance berhasil diperbarui!");

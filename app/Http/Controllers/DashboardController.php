@@ -43,7 +43,7 @@ class DashboardController extends Controller
             ->where('period_year', $currentYear)
             ->sum('amount');
 
-        // Omzet dari deposit jaminan bulan ini
+        // Deposit jaminan bulan ini (BUKAN OMZET, ini kewajiban/titipan — ditampilkan terpisah)
         $depositRevenue = TenantDeposit::where('type', 'credit')
             ->whereMonth('date', $currentMonth)
             ->whereYear('date', $currentYear)
@@ -95,7 +95,7 @@ class DashboardController extends Controller
                 ->whereYear('date', $year)
                 ->sum('amount');
 
-            $rev = $revPayments + $revLodgings + $revOther + $revDeposit;
+            $rev = $revPayments + $revLodgings + $revOther;
 
             $exp = Expense::where('period_month', $month)
                 ->where('period_year', $year)

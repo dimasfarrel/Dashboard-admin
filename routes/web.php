@@ -19,7 +19,7 @@ Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard
 // Laporan Keuangan
 Route::get('/reports/omzet', [ReportController::class, 'totalOmzet'])->name('reports.total_omzet');
 Route::get('/reports/pengeluaran', [ReportController::class, 'totalPengeluaran'])->name('reports.total_pengeluaran');
-Route::get('/reports/loans', [ReportController::class, 'loans'])->name('reports.loans');
+Route::get('/reports/arus-kas', [ReportController::class, 'cashFlow'])->name('reports.cash_flow');
 
 // System Logs Route
 Route::get('/system-logs', [\App\Http\Controllers\SystemLogController::class, 'index'])->name('system-logs.index');

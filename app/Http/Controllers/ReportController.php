@@ -9,12 +9,15 @@ use App\Models\Lodging;
 use App\Models\Loan;
 use App\Models\LoanRepayment;
 use App\Models\Expense;
-use App\Models\RoomMaintenance;
 use App\Models\TenantDeposit;
 use Carbon\Carbon;
 
 class ReportController extends Controller
 {
+    /**
+     * Laporan Omzet Total — Hanya pendapatan operasional riil.
+     * TIDAK termasuk: Hutang masuk, Deposit penyewa.
+     */
     public function totalOmzet(Request $request)
     {
         $currentMonth = $request->input('month', Carbon::now()->month);
@@ -25,9 +28,10 @@ class ReportController extends Controller
 
         $incomes = collect();
 
-        // 1. Omzet Kost (Payment)
+        // 1. Sewa Kost (Payment status=paid)
         $payments = Payment::where('status', 'paid')
-            ->whereBetween('paid_at', [$startDate, $endDate])
+            ->where('period_month', $currentMonth)
+            ->where('period_year', $currentYear)
             ->with(['tenant', 'room'])
             ->get()
             ->map(function ($item) {
@@ -36,17 +40,16 @@ class ReportController extends Controller
                     'created_at' => $item->created_at,
                     'category' => 'Sewa Kost',
                     'description' => "Kamar " . ($item->room->room_number ?? 'N/A') . " (" . ($item->tenant->name ?? 'N/A') . ")",
-                    'omzet_amount' => (float) $item->amount,
-                    'hutang_amount' => 0,
-                    'deposit_amount' => 0,
+                    'amount' => (float) $item->amount,
                 ];
             });
         $incomes = $incomes->concat($payments);
 
-        // 2. Penginapan (Lodging)
+        // 2. Penginapan (Lodging status=paid)
         $lodgings = Lodging::where('payment_status', 'paid')
             ->whereNotNull('paid_at')
-            ->whereBetween('paid_at', [$startDate, $endDate])
+            ->whereMonth('paid_at', $currentMonth)
+            ->whereYear('paid_at', $currentYear)
             ->with('room')
             ->get()
             ->map(function ($item) {
@@ -55,15 +58,14 @@ class ReportController extends Controller
                     'created_at' => $item->created_at,
                     'category' => 'Penginapan',
                     'description' => "Harian - Kamar " . ($item->room->room_number ?? 'N/A') . " (" . $item->pic_name . ")",
-                    'omzet_amount' => (float) $item->calculateTotal(),
-                    'hutang_amount' => 0,
-                    'deposit_amount' => (float) $item->deposit,
+                    'amount' => (float) $item->calculateTotal(),
                 ];
             });
         $incomes = $incomes->concat($lodgings);
 
         // 3. Pendapatan Lain (OtherIncome)
-        $otherIncomes = OtherIncome::whereBetween('income_date', [$startDate, $endDate])
+        $otherIncomes = OtherIncome::where('period_month', $currentMonth)
+            ->where('period_year', $currentYear)
             ->get()
             ->map(function ($item) {
                 return [
@@ -71,16 +73,15 @@ class ReportController extends Controller
                     'created_at' => $item->created_at,
                     'category' => 'Lain-lain',
                     'description' => $item->title,
-                    'omzet_amount' => (float) $item->amount,
-                    'hutang_amount' => 0,
-                    'deposit_amount' => 0,
+                    'amount' => (float) $item->amount,
                 ];
             });
         $incomes = $incomes->concat($otherIncomes);
 
-        // 4. Pelunasan Piutang (Masuk ke Omzet karena nambah kas)
+        // 4. Pelunasan Piutang (uang kembali masuk ke kas)
         $receivableRepayments = LoanRepayment::where('type', 'receivable')
-            ->whereBetween('repayment_date', [$startDate, $endDate])
+            ->whereMonth('repayment_date', $currentMonth)
+            ->whereYear('repayment_date', $currentYear)
             ->with('loan')
             ->get()
             ->map(function ($item) {
@@ -88,51 +89,14 @@ class ReportController extends Controller
                 return [
                     'date' => Carbon::parse($item->repayment_date)->startOfDay(),
                     'created_at' => $item->created_at,
-                    'category' => 'Pelunasan',
+                    'category' => 'Pelunasan Piutang',
                     'description' => $desc,
-                    'omzet_amount' => (float) $item->amount,
-                    'hutang_amount' => 0,
-                    'deposit_amount' => 0,
+                    'amount' => (float) $item->amount,
                 ];
             });
         $incomes = $incomes->concat($receivableRepayments);
 
-        // 5. Hutang (Loan type='payable') -> uang masuk
-        $payables = Loan::where('type', 'payable')
-            ->whereBetween('loan_date', [$startDate, $endDate])
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'date' => Carbon::parse($item->loan_date)->startOfDay(),
-                    'created_at' => $item->created_at,
-                    'category' => 'Hutang Masuk',
-                    'description' => "Pinjaman dari " . $item->name,
-                    'omzet_amount' => 0,
-                    'hutang_amount' => (float) $item->total_amount,
-                    'deposit_amount' => 0,
-                ];
-            });
-        $incomes = $incomes->concat($payables);
-
-        // 6. Deposit Penyewa (TenantDeposit type='credit')
-        $tenantDeposits = TenantDeposit::where('type', 'credit')
-            ->whereBetween('date', [$startDate, $endDate])
-            ->with('tenant')
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'date' => Carbon::parse($item->date)->startOfDay(),
-                    'created_at' => $item->created_at,
-                    'category' => 'Deposit Masuk',
-                    'description' => "Deposit - " . ($item->tenant->name ?? 'N/A') . ($item->description ? " ({$item->description})" : ""),
-                    'omzet_amount' => 0,
-                    'hutang_amount' => 0,
-                    'deposit_amount' => (float) $item->amount,
-                ];
-            });
-        $incomes = $incomes->concat($tenantDeposits);
-
-        // Sort Pemasukan
+        // Sort
         $incomes = $incomes->sortBy(function ($item) {
             return sprintf('%010d_%010d', $item['date']->timestamp, $item['created_at'] ? $item['created_at']->timestamp : 0);
         })->values();
@@ -140,6 +104,10 @@ class ReportController extends Controller
         return view('reports.total_omzet', compact('incomes', 'startDate', 'endDate', 'currentMonth', 'currentYear'));
     }
 
+    /**
+     * Laporan Pengeluaran Total — Hanya beban operasional riil.
+     * TIDAK termasuk: Piutang keluar, Pelunasan hutang.
+     */
     public function totalPengeluaran(Request $request)
     {
         $currentMonth = $request->input('month', Carbon::now()->month);
@@ -150,8 +118,9 @@ class ReportController extends Controller
 
         $expenses = collect();
 
-        // 1. Pengeluaran Kost (Expense)
-        $expenseItems = Expense::whereBetween('expense_date', [$startDate, $endDate])
+        // 1. Pengeluaran Kost (Expense) — sudah termasuk maintenance via syncExpense
+        $expenseItems = Expense::where('period_month', $currentMonth)
+            ->where('period_year', $currentYear)
             ->get()
             ->map(function ($item) {
                 return [
@@ -159,49 +128,15 @@ class ReportController extends Controller
                     'created_at' => $item->created_at,
                     'category' => 'Pengeluaran',
                     'description' => $item->title,
-                    'pengeluaran_amount' => (float) $item->amount,
-                    'piutang_amount' => 0,
+                    'amount' => (float) $item->amount,
                 ];
             });
         $expenses = $expenses->concat($expenseItems);
 
-        // 3. Pembayaran Hutang (Pelunasan Hutang keluar kas)
-        $payableRepayments = LoanRepayment::where('type', 'payable')
-            ->whereBetween('repayment_date', [$startDate, $endDate])
-            ->with('loan')
-            ->get()
-            ->map(function ($item) {
-                $desc = "Pelunasan Hutang" . ($item->loan ? " (" . $item->loan->name . ")" : "");
-                return [
-                    'date' => Carbon::parse($item->repayment_date)->startOfDay(),
-                    'created_at' => $item->created_at,
-                    'category' => 'Pelunasan',
-                    'description' => $desc,
-                    'pengeluaran_amount' => (float) $item->amount,
-                    'piutang_amount' => 0,
-                ];
-            });
-        $expenses = $expenses->concat($payableRepayments);
-
-        // 4. Piutang (Loan type='receivable') -> uang keluar
-        $receivables = Loan::where('type', 'receivable')
-            ->whereBetween('loan_date', [$startDate, $endDate])
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'date' => Carbon::parse($item->loan_date)->startOfDay(),
-                    'created_at' => $item->created_at,
-                    'category' => 'Piutang Keluar',
-                    'description' => "Pinjaman ke " . $item->name,
-                    'pengeluaran_amount' => 0,
-                    'piutang_amount' => (float) $item->total_amount,
-                ];
-            });
-        $expenses = $expenses->concat($receivables);
-
-        // 5. Pengembalian Deposit (TenantDeposit type='debit') -> uang keluar
-        $depositDeductions = \App\Models\TenantDeposit::where('type', 'debit')
-            ->whereBetween('date', [$startDate, $endDate])
+        // 2. Pengembalian Deposit (uang keluar dari kas)
+        $depositDeductions = TenantDeposit::where('type', 'debit')
+            ->whereMonth('date', $currentMonth)
+            ->whereYear('date', $currentYear)
             ->with('tenant')
             ->get()
             ->map(function ($item) {
@@ -210,13 +145,12 @@ class ReportController extends Controller
                     'created_at' => $item->created_at,
                     'category' => 'Pengembalian Deposit',
                     'description' => "Pengembalian Deposit - " . ($item->tenant->name ?? 'N/A') . ($item->description ? " ({$item->description})" : ""),
-                    'pengeluaran_amount' => (float) $item->amount,
-                    'piutang_amount' => 0,
+                    'amount' => (float) $item->amount,
                 ];
             });
         $expenses = $expenses->concat($depositDeductions);
 
-        // Sort Pengeluaran
+        // Sort
         $expenses = $expenses->sortBy(function ($item) {
             return sprintf('%010d_%010d', $item['date']->timestamp, $item['created_at'] ? $item['created_at']->timestamp : 0);
         })->values();
@@ -224,81 +158,218 @@ class ReportController extends Controller
         return view('reports.total_pengeluaran', compact('expenses', 'startDate', 'endDate', 'currentMonth', 'currentYear'));
     }
 
-    public function loans(Request $request)
+    /**
+     * Laporan Arus Kas — Seluruh pergerakan uang masuk & keluar.
+     * Menggantikan laporan hutang/piutang yang sebelumnya terlalu sempit.
+     */
+    public function cashFlow(Request $request)
     {
         $currentMonth = $request->input('month', Carbon::now()->month);
         $currentYear = $request->input('year', Carbon::now()->year);
         
         $startDate = Carbon::createFromDate($currentYear, $currentMonth, 1)->startOfMonth()->toDateString();
         $endDate = Carbon::createFromDate($currentYear, $currentMonth, 1)->endOfMonth()->toDateString();
-        
-        $typeFilter = $request->input('type', 'all'); // 'all', 'receivable', 'payable'
 
         $transactions = collect();
 
-        // Pemasukan: Pelunasan Piutang (LoanRepayment receivable)
-        if (in_array($typeFilter, ['all', 'receivable'])) {
-            $receivableRepayments = LoanRepayment::where('type', 'receivable')
-                ->whereBetween('repayment_date', [$startDate, $endDate])
-                ->with('loan')
-                ->get()
-                ->map(function ($item) {
-                    $desc = "Pelunasan Piutang";
-                    if ($item->loan) {
-                        $desc .= " (" . $item->loan->name . ")";
-                    }
-                    return [
-                        'date' => Carbon::parse($item->repayment_date)->startOfDay(),
-                        'created_at' => $item->created_at,
-                        'category' => 'Pelunasan Piutang',
-                        'description' => $desc,
-                        'notes' => $item->notes,
-                        'type' => 'receivable', // Masuk
-                        'amount' => (float) $item->amount,
-                        'route' => $item->loan ? route('receivables.show', $item->loan_id) : route('receivables.index')
-                    ];
-                });
-            $transactions = $transactions->concat($receivableRepayments);
-        }
+        // =====================
+        // KAS MASUK
+        // =====================
 
-        // Pengeluaran: Pembayaran Hutang (LoanRepayment payable)
-        if (in_array($typeFilter, ['all', 'payable'])) {
-            $payableRepayments = LoanRepayment::where('type', 'payable')
-                ->whereBetween('repayment_date', [$startDate, $endDate])
-                ->with('loan')
-                ->get()
-                ->map(function ($item) {
-                    $desc = "Pembayaran Hutang";
-                    if ($item->loan) {
-                        $desc .= " (" . $item->loan->name . ")";
-                    }
-                    return [
-                        'date' => Carbon::parse($item->repayment_date)->startOfDay(),
-                        'created_at' => $item->created_at,
-                        'category' => 'Pembayaran Hutang',
-                        'description' => $desc,
-                        'notes' => $item->notes,
-                        'type' => 'payable', // Keluar
-                        'amount' => (float) $item->amount,
-                        'route' => $item->loan ? route('payables.show', $item->loan_id) : route('payables.index')
-                    ];
-                });
-            $transactions = $transactions->concat($payableRepayments);
-        }
+        // 1. Sewa Kost
+        $payments = Payment::where('status', 'paid')
+            ->where('period_month', $currentMonth)
+            ->where('period_year', $currentYear)
+            ->with(['tenant', 'room'])
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'date' => Carbon::parse($item->paid_at)->startOfDay(),
+                    'created_at' => $item->created_at,
+                    'category' => 'Sewa Kost',
+                    'description' => "Kamar " . ($item->room->room_number ?? 'N/A') . " (" . ($item->tenant->name ?? 'N/A') . ")",
+                    'kas_masuk' => (float) $item->amount,
+                    'kas_keluar' => 0,
+                ];
+            });
+        $transactions = $transactions->concat($payments);
 
-        // Sort by date descending, then by created_at descending
-        $transactions = $transactions->sortByDesc(function ($item) {
+        // 2. Penginapan
+        $lodgings = Lodging::where('payment_status', 'paid')
+            ->whereNotNull('paid_at')
+            ->whereMonth('paid_at', $currentMonth)
+            ->whereYear('paid_at', $currentYear)
+            ->with('room')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'date' => Carbon::parse($item->paid_at)->startOfDay(),
+                    'created_at' => $item->created_at,
+                    'category' => 'Penginapan',
+                    'description' => "Harian - Kamar " . ($item->room->room_number ?? 'N/A') . " (" . $item->pic_name . ")",
+                    'kas_masuk' => (float) $item->calculateTotal(),
+                    'kas_keluar' => 0,
+                ];
+            });
+        $transactions = $transactions->concat($lodgings);
+
+        // 3. Pendapatan Lain
+        $otherIncomes = OtherIncome::where('period_month', $currentMonth)
+            ->where('period_year', $currentYear)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'date' => Carbon::parse($item->income_date)->startOfDay(),
+                    'created_at' => $item->created_at,
+                    'category' => 'Pendapatan Lain',
+                    'description' => $item->title,
+                    'kas_masuk' => (float) $item->amount,
+                    'kas_keluar' => 0,
+                ];
+            });
+        $transactions = $transactions->concat($otherIncomes);
+
+        // 4. Pelunasan Piutang (uang kembali masuk)
+        $receivableRepayments = LoanRepayment::where('type', 'receivable')
+            ->whereMonth('repayment_date', $currentMonth)
+            ->whereYear('repayment_date', $currentYear)
+            ->with('loan')
+            ->get()
+            ->map(function ($item) {
+                $desc = "Pelunasan Piutang" . ($item->loan ? " (" . $item->loan->name . ")" : "");
+                return [
+                    'date' => Carbon::parse($item->repayment_date)->startOfDay(),
+                    'created_at' => $item->created_at,
+                    'category' => 'Pelunasan Piutang',
+                    'description' => $desc,
+                    'kas_masuk' => (float) $item->amount,
+                    'kas_keluar' => 0,
+                ];
+            });
+        $transactions = $transactions->concat($receivableRepayments);
+
+        // 5. Hutang Masuk (pinjaman diterima → kas bertambah)
+        $payables = Loan::where('type', 'payable')
+            ->whereMonth('loan_date', $currentMonth)
+            ->whereYear('loan_date', $currentYear)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'date' => Carbon::parse($item->loan_date)->startOfDay(),
+                    'created_at' => $item->created_at,
+                    'category' => 'Hutang Masuk',
+                    'description' => "Pinjaman dari " . $item->name,
+                    'kas_masuk' => (float) $item->total_amount,
+                    'kas_keluar' => 0,
+                ];
+            });
+        $transactions = $transactions->concat($payables);
+
+        // 6. Deposit Masuk (titipan dari penyewa → kas bertambah)
+        $depositCredits = TenantDeposit::where('type', 'credit')
+            ->whereMonth('date', $currentMonth)
+            ->whereYear('date', $currentYear)
+            ->with('tenant')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'date' => Carbon::parse($item->date)->startOfDay(),
+                    'created_at' => $item->created_at,
+                    'category' => 'Deposit Masuk',
+                    'description' => "Deposit - " . ($item->tenant->name ?? 'N/A') . ($item->description ? " ({$item->description})" : ""),
+                    'kas_masuk' => (float) $item->amount,
+                    'kas_keluar' => 0,
+                ];
+            });
+        $transactions = $transactions->concat($depositCredits);
+
+        // =====================
+        // KAS KELUAR
+        // =====================
+
+        // 7. Pengeluaran Kost (termasuk maintenance via syncExpense)
+        $expenseItems = Expense::where('period_month', $currentMonth)
+            ->where('period_year', $currentYear)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'date' => Carbon::parse($item->expense_date)->startOfDay(),
+                    'created_at' => $item->created_at,
+                    'category' => 'Pengeluaran',
+                    'description' => $item->title,
+                    'kas_masuk' => 0,
+                    'kas_keluar' => (float) $item->amount,
+                ];
+            });
+        $transactions = $transactions->concat($expenseItems);
+
+        // 8. Piutang Keluar (uang dipinjamkan → kas berkurang)
+        $receivables = Loan::where('type', 'receivable')
+            ->whereMonth('loan_date', $currentMonth)
+            ->whereYear('loan_date', $currentYear)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'date' => Carbon::parse($item->loan_date)->startOfDay(),
+                    'created_at' => $item->created_at,
+                    'category' => 'Piutang Keluar',
+                    'description' => "Pinjaman ke " . $item->name,
+                    'kas_masuk' => 0,
+                    'kas_keluar' => (float) $item->total_amount,
+                ];
+            });
+        $transactions = $transactions->concat($receivables);
+
+        // 9. Pelunasan Hutang (bayar hutang → kas berkurang)
+        $payableRepayments = LoanRepayment::where('type', 'payable')
+            ->whereMonth('repayment_date', $currentMonth)
+            ->whereYear('repayment_date', $currentYear)
+            ->with('loan')
+            ->get()
+            ->map(function ($item) {
+                $desc = "Pelunasan Hutang" . ($item->loan ? " (" . $item->loan->name . ")" : "");
+                return [
+                    'date' => Carbon::parse($item->repayment_date)->startOfDay(),
+                    'created_at' => $item->created_at,
+                    'category' => 'Pelunasan Hutang',
+                    'description' => $desc,
+                    'kas_masuk' => 0,
+                    'kas_keluar' => (float) $item->amount,
+                ];
+            });
+        $transactions = $transactions->concat($payableRepayments);
+
+        // 10. Pengembalian Deposit (kas berkurang)
+        $depositDebits = TenantDeposit::where('type', 'debit')
+            ->whereMonth('date', $currentMonth)
+            ->whereYear('date', $currentYear)
+            ->with('tenant')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'date' => Carbon::parse($item->date)->startOfDay(),
+                    'created_at' => $item->created_at,
+                    'category' => 'Pengembalian Deposit',
+                    'description' => "Pengembalian Deposit - " . ($item->tenant->name ?? 'N/A') . ($item->description ? " ({$item->description})" : ""),
+                    'kas_masuk' => 0,
+                    'kas_keluar' => (float) $item->amount,
+                ];
+            });
+        $transactions = $transactions->concat($depositDebits);
+
+        // Sort by date
+        $transactions = $transactions->sortBy(function ($item) {
             return sprintf('%010d_%010d', $item['date']->timestamp, $item['created_at'] ? $item['created_at']->timestamp : 0);
         })->values();
 
-        // Calculate Totals
-        $totalReceivable = $transactions->where('type', 'receivable')->sum('amount');
-        $totalPayable = $transactions->where('type', 'payable')->sum('amount');
-        $netCashflow = $totalReceivable - $totalPayable;
+        // Totals
+        $totalKasMasuk = $transactions->sum('kas_masuk');
+        $totalKasKeluar = $transactions->sum('kas_keluar');
+        $saldoBersih = $totalKasMasuk - $totalKasKeluar;
 
-        return view('reports.loans', compact(
-            'transactions', 'startDate', 'endDate', 'typeFilter',
-            'totalReceivable', 'totalPayable', 'netCashflow', 'currentMonth', 'currentYear'
+        return view('reports.cash_flow', compact(
+            'transactions', 'startDate', 'endDate', 'currentMonth', 'currentYear',
+            'totalKasMasuk', 'totalKasKeluar', 'saldoBersih'
         ));
     }
 }

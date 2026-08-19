@@ -71,9 +71,9 @@
                 Laporan Pengeluaran Total
             </a>
 
-            <a href="{{ route('reports.loans') }}" class="nav-item {{ request()->routeIs('reports.loans') ? 'active' : '' }}">
-                <i class="bi bi-journal-arrow-up"></i>
-                Lap. Hutang & Piutang
+            <a href="{{ route('reports.cash_flow') }}" class="nav-item {{ request()->routeIs('reports.cash_flow') ? 'active' : '' }}">
+                <i class="bi bi-arrow-left-right"></i>
+                Laporan Arus Kas
             </a>
 
             <a href="{{ route('maintenances.index') }}"

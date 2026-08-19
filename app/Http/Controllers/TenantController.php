@@ -8,6 +8,7 @@ use App\Models\TenantCustomField;
 use App\Models\TenantFieldValue;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class TenantController extends Controller
 {
@@ -55,6 +56,16 @@ class TenantController extends Controller
             'notes'                     => 'nullable|string',
         ], $customRules));
 
+        // Validasi: cegah double-booking kamar untuk penyewa aktif
+        if ($validated['status'] === 'active') {
+            $existingActive = Tenant::where('room_id', $validated['room_id'])
+                ->where('status', 'active')
+                ->exists();
+            if ($existingActive) {
+                return back()->withInput()->withErrors(['room_id' => 'Kamar ini sudah ditempati oleh penyewa aktif lain.']);
+            }
+        }
+
         if ($request->hasFile('ktp_photo')) {
             $validated['ktp_photo'] = $request->file('ktp_photo')->store('tenants/ktp', 'public');
         }
@@ -66,22 +77,26 @@ class TenantController extends Controller
         $customFieldData = $request->input('custom_field', []);
         unset($validated['custom_field']);
 
-        $tenant = Tenant::create($validated);
+        $tenant = DB::transaction(function () use ($validated, $customFieldData) {
+            $tenant = Tenant::create($validated);
 
-        // Save custom field values
-        foreach ($customFieldData as $key => $value) {
-            if ($value !== null && $value !== '') {
-                TenantFieldValue::updateOrCreate(
-                    ['tenant_id' => $tenant->id, 'field_key' => $key],
-                    ['value' => $value]
-                );
+            // Save custom field values
+            foreach ($customFieldData as $key => $value) {
+                if ($value !== null && $value !== '') {
+                    TenantFieldValue::updateOrCreate(
+                        ['tenant_id' => $tenant->id, 'field_key' => $key],
+                        ['value' => $value]
+                    );
+                }
             }
-        }
 
-        // Update room status to occupied only if active
-        if ($validated['status'] === 'active') {
-            Room::where('id', $validated['room_id'])->update(['status' => 'occupied']);
-        }
+            // Update room status to occupied only if active
+            if ($validated['status'] === 'active') {
+                Room::where('id', $validated['room_id'])->update(['status' => 'occupied']);
+            }
+
+            return $tenant;
+        });
 
         return redirect()->route('tenants.show', $tenant)
             ->with('success', "Data penyewa {$tenant->name} berhasil ditambahkan!");
@@ -150,6 +165,17 @@ class TenantController extends Controller
             'notes'                     => 'nullable|string',
         ], $customRules));
 
+        // Validasi: cegah double-booking kamar jika pindah kamar & status aktif
+        if ($validated['status'] === 'active') {
+            $existingActive = Tenant::where('room_id', $validated['room_id'])
+                ->where('status', 'active')
+                ->where('id', '!=', $tenant->id)
+                ->exists();
+            if ($existingActive) {
+                return back()->withInput()->withErrors(['room_id' => 'Kamar ini sudah ditempati oleh penyewa aktif lain.']);
+            }
+        }
+
         if ($request->hasFile('ktp_photo')) {
             if ($tenant->ktp_photo) Storage::disk('public')->delete($tenant->ktp_photo);
             $validated['ktp_photo'] = $request->file('ktp_photo')->store('tenants/ktp', 'public');
@@ -162,28 +188,30 @@ class TenantController extends Controller
         $customFieldData = $request->input('custom_field', []);
         unset($validated['custom_field']);
 
-        $oldRoomId = $tenant->room_id;
-        $tenant->update($validated);
+        DB::transaction(function () use ($tenant, $validated, $customFieldData) {
+            $oldRoomId = $tenant->room_id;
+            $tenant->update($validated);
 
-        // Update room statuses if room changed
-        if ($oldRoomId !== $validated['room_id']) {
-            Room::where('id', $oldRoomId)->update(['status' => 'available']);
-        }
+            // Update room statuses if room changed
+            if ($oldRoomId !== $validated['room_id']) {
+                Room::where('id', $oldRoomId)->update(['status' => 'available']);
+            }
 
-        // Set new room status based on tenant status
-        if ($validated['status'] === 'active') {
-            Room::where('id', $validated['room_id'])->update(['status' => 'occupied']);
-        } else {
-            Room::where('id', $validated['room_id'])->update(['status' => 'available']);
-        }
+            // Set new room status based on tenant status
+            if ($validated['status'] === 'active') {
+                Room::where('id', $validated['room_id'])->update(['status' => 'occupied']);
+            } else {
+                Room::where('id', $validated['room_id'])->update(['status' => 'available']);
+            }
 
-        // Save custom field values
-        foreach ($customFieldData as $key => $value) {
-            TenantFieldValue::updateOrCreate(
-                ['tenant_id' => $tenant->id, 'field_key' => $key],
-                ['value' => $value ?? '']
-            );
-        }
+            // Save custom field values
+            foreach ($customFieldData as $key => $value) {
+                TenantFieldValue::updateOrCreate(
+                    ['tenant_id' => $tenant->id, 'field_key' => $key],
+                    ['value' => $value ?? '']
+                );
+            }
+        });
 
         return redirect()->route('tenants.show', $tenant)
             ->with('success', "Data penyewa {$tenant->name} berhasil diperbarui!");

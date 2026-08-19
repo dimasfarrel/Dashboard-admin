@@ -21,18 +21,16 @@ class PaymentController extends Controller
     private function autoMarkOverdue(): void
     {
         $dueDay = (int) AppSetting::get('payment_due_day', 10);
-        $today  = now();
+        $safeDueDay = min($dueDay, 28);
+        $today = now()->toDateString();
 
-        // Find all pending payments whose due date has passed
+        // Batch update: 1 query instead of N queries
         Payment::where('status', 'pending')
-            ->get()
-            ->each(function (Payment $p) use ($dueDay, $today) {
-                // Due date is the $dueDay of period_month/period_year
-                $dueDate = Carbon::createFromDate($p->period_year, $p->period_month, min($dueDay, 28));
-                if ($today->gt($dueDate)) {
-                    $p->update(['status' => 'overdue', 'due_date' => $dueDate->toDateString()]);
-                }
-            });
+            ->whereRaw("DATE(CONCAT(period_year, '-', LPAD(period_month, 2, '0'), '-', LPAD(?, 2, '0'))) < ?", [$safeDueDay, $today])
+            ->update([
+                'status' => 'overdue',
+                'due_date' => \DB::raw("CONCAT(period_year, '-', LPAD(period_month, 2, '0'), '-', LPAD({$safeDueDay}, 2, '0'))"),
+            ]);
     }
 
     public function index(Request $request)

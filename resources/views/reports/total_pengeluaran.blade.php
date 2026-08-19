@@ -2,7 +2,7 @@
 @section('title', 'Laporan Pengeluaran Total')
 
 @section('page-title', 'Laporan Pengeluaran Total')
-@section('page-subtitle', 'Rekap Pengeluaran Kost dan Piutang')
+@section('page-subtitle', 'Rekap Beban Operasional Kost')
 
 @push('styles')
 <style>
@@ -32,8 +32,6 @@
     margin-right: 16px;
 }
 .icon-expense { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
-.icon-receivable { background: rgba(14, 165, 233, 0.15); color: #0ea5e9; }
-.icon-net { background: rgba(168, 85, 247, 0.15); color: #a855f7; }
 .summary-content { flex: 1; }
 .summary-label {
     font-size: 13px;
@@ -46,7 +44,6 @@
     font-weight: 700;
     color: var(--text-primary, #f8fafc);
 }
-/* Ensure table cells don't wrap and have enough space */
 .table th, .table td {
     white-space: nowrap;
 }
@@ -59,7 +56,7 @@
 
 @section('content')
 
-{{-- Filter Card (Hidden on Print) --}}
+{{-- Filter Card --}}
 <div class="card filter-card no-print" style="margin-bottom: 24px;">
     <div class="card-body">
         <form method="GET" action="{{ route('reports.total_pengeluaran') }}" class="flex items-center gap-3 flex-wrap">
@@ -84,7 +81,7 @@
     </div>
 </div>
 
-{{-- Print Header (Only visible on Print) --}}
+{{-- Print Header --}}
 <div class="print-header" style="display: none; text-align: center; margin-bottom: 30px; border-bottom: 2px solid #000; padding-bottom: 15px;">
     <h1 style="margin: 0; font-size: 24px; font-weight: bold; text-transform: uppercase;">Laporan Pengeluaran Total Kost Malang</h1>
     <p style="margin: 5px 0 0 0; font-size: 14px;">
@@ -93,43 +90,24 @@
     <p style="margin: 2px 0 0 0; font-size: 12px; color: #555;">Dicetak pada: {{ now()->translatedFormat('d F Y H:i') }}</p>
 </div>
 
-{{-- 2. TOTAL PENGELUARAN --}}
 @php
-    $sumPengeluaran = $expenses->sum('pengeluaran_amount');
-    $sumPiutang = $expenses->sum('piutang_amount');
-    $sumTotalPengeluaran = $sumPengeluaran + $sumPiutang;
+    $sumPengeluaran = $expenses->sum('amount');
 @endphp
 
-{{-- Summary Cards --}}
+{{-- Summary Card --}}
 <div class="summary-cards no-print">
     <div class="summary-card">
         <div class="summary-icon icon-expense">
             <i class="bi bi-cart-dash"></i>
         </div>
         <div class="summary-content">
-            <div class="summary-label">Total Pengeluaran</div>
+            <div class="summary-label">Total Pengeluaran (Beban Operasional)</div>
             <div class="summary-value">Rp {{ number_format($sumPengeluaran, 0, ',', '.') }}</div>
         </div>
     </div>
-    <div class="summary-card">
-        <div class="summary-icon icon-receivable">
-            <i class="bi bi-journal-minus"></i>
-        </div>
-        <div class="summary-content">
-            <div class="summary-label">Total Piutang</div>
-            <div class="summary-value">Rp {{ number_format($sumPiutang, 0, ',', '.') }}</div>
-        </div>
-    </div>
-    <div class="summary-card">
-        <div class="summary-icon icon-net">
-            <i class="bi bi-box-arrow-up-right"></i>
-        </div>
-        <div class="summary-content">
-            <div class="summary-label">Total Pengeluaran Keseluruhan</div>
-            <div class="summary-value">Rp {{ number_format($sumTotalPengeluaran, 0, ',', '.') }}</div>
-        </div>
-    </div>
 </div>
+
+{{-- Tabel Pengeluaran --}}
 <div class="card" style="margin-bottom: 30px; border:1px solid #ef4444;">
     <div class="card-header" style="background-color: rgba(239, 68, 68, 0.1); border-bottom: 1px solid #ef4444;">
         <h2 class="card-title" style="color: #b91c1c; font-weight: 700;"><i class="bi bi-arrow-up-right-circle"></i> Pengeluaran Total</h2>
@@ -139,36 +117,29 @@
             <thead>
                 <tr style="background-color: #f8fafc;">
                     <th style="width: 100px;">Tanggal</th>
-                    <th style="width: 130px;">Kategori</th>
+                    <th style="width: 150px;">Kategori</th>
                     <th>Deskripsi</th>
-                    <th style="text-align: right; width: 140px;">Nominal Pengeluaran</th>
-                    <th style="text-align: right; width: 140px;">Nominal Piutang</th>
-                    <th style="text-align: right; width: 140px; background-color: #fef2f2;">Total Keluar</th>
+                    <th style="text-align: right; width: 160px;">Nominal</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($expenses as $exp)
-                    @php $rowTotalExp = $exp['pengeluaran_amount'] + $exp['piutang_amount']; @endphp
                     <tr>
                         <td style="color: #475569;">{{ \Carbon\Carbon::parse($exp['date'])->translatedFormat('d-M-Y') }}</td>
                         <td><strong>{{ $exp['category'] }}</strong></td>
                         <td>{{ $exp['description'] }}</td>
-                        <td style="text-align: right; color: #b91c1c;">{{ $exp['pengeluaran_amount'] > 0 ? 'Rp ' . number_format($exp['pengeluaran_amount'], 0, ',', '.') : '-' }}</td>
-                        <td style="text-align: right; color: #1d4ed8;">{{ $exp['piutang_amount'] > 0 ? 'Rp ' . number_format($exp['piutang_amount'], 0, ',', '.') : '-' }}</td>
-                        <td style="text-align: right; font-weight: bold; background-color: rgba(239, 68, 68, 0.05);">Rp {{ number_format($rowTotalExp, 0, ',', '.') }}</td>
+                        <td style="text-align: right; color: #b91c1c; font-weight: 600;">Rp {{ number_format($exp['amount'], 0, ',', '.') }}</td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" style="text-align: center; padding: 30px; color: #64748b;">Belum ada data pengeluaran pada periode ini.</td>
+                        <td colspan="4" style="text-align: center; padding: 30px; color: #64748b;">Belum ada data pengeluaran pada periode ini.</td>
                     </tr>
                 @endforelse
             </tbody>
             <tfoot>
                 <tr style="font-weight: bold; background-color: #fef2f2;">
-                    <td colspan="3" style="text-align: right;">TOTAL:</td>
-                    <td style="text-align: right; color: #b91c1c;">Rp {{ number_format($sumPengeluaran, 0, ',', '.') }}</td>
-                    <td style="text-align: right; color: #1d4ed8;">Rp {{ number_format($sumPiutang, 0, ',', '.') }}</td>
-                    <td style="text-align: right; font-size: 15px;">Rp {{ number_format($sumTotalPengeluaran, 0, ',', '.') }}</td>
+                    <td colspan="3" style="text-align: right;">TOTAL PENGELUARAN:</td>
+                    <td style="text-align: right; font-size: 15px; color: #b91c1c;">Rp {{ number_format($sumPengeluaran, 0, ',', '.') }}</td>
                 </tr>
             </tfoot>
         </table>
@@ -178,25 +149,18 @@
 {{-- CSS KHUSUS PRINT --}}
 <style>
 @media print {
-    /* Sembunyikan elemen UI yang tidak perlu dicetak */
     .sidebar, .topbar, .filter-card, .no-print, .btn {
         display: none !important;
     }
-
-    /* Reset margin dan padding untuk area print */
     body, .main-content, .page-content {
         margin: 0 !important;
         padding: 0 !important;
         background: #fff !important;
         width: 100% !important;
     }
-
-    /* Tampilkan header khusus print */
     .print-header {
         display: block !important;
     }
-
-    /* Gaya tabel agar rapi saat diprint (Hitam Putih / Grayscale) */
     .card {
         border: none !important;
         margin-bottom: 30px !important;
@@ -212,7 +176,6 @@
         color: #000 !important;
         font-size: 18px !important;
     }
-    
     table {
         width: 100% !important;
         border-collapse: collapse !important;
@@ -233,15 +196,12 @@
     tfoot td {
         font-weight: bold !important;
     }
-
-    /* Hapus warna background dan teks warna-warni agar cetakan bersih */
     td[style*="color"] {
         color: #000 !important;
     }
     th[style*="background-color"], td[style*="background-color"], tr[style*="background-color"] {
         background-color: transparent !important;
     }
-
     @page {
         size: A4 portrait;
         margin: 1.5cm;
