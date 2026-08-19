@@ -30,8 +30,8 @@ class ReportController extends Controller
 
         // 1. Sewa Kost (Payment status=paid)
         $payments = Payment::where('status', 'paid')
-            ->where('period_month', $currentMonth)
-            ->where('period_year', $currentYear)
+            ->whereMonth('paid_at', $currentMonth)
+            ->whereYear('paid_at', $currentYear)
             ->with(['tenant', 'room'])
             ->get()
             ->map(function ($item) {
@@ -66,8 +66,8 @@ class ReportController extends Controller
         $incomes = $incomes->concat($lodgings);
 
         // 3. Pendapatan Lain (OtherIncome)
-        $otherIncomes = OtherIncome::where('period_month', $currentMonth)
-            ->where('period_year', $currentYear)
+        $otherIncomes = OtherIncome::whereMonth('income_date', $currentMonth)
+            ->whereYear('income_date', $currentYear)
             ->get()
             ->map(function ($item) {
                 return [
@@ -123,8 +123,8 @@ class ReportController extends Controller
         $expenses = collect();
 
         // 1. Pengeluaran Kost (Expense) — sudah termasuk maintenance via syncExpense
-        $expenseItems = Expense::where('period_month', $currentMonth)
-            ->where('period_year', $currentYear)
+        $expenseItems = Expense::whereMonth('expense_date', $currentMonth)
+            ->whereYear('expense_date', $currentYear)
             ->get()
             ->map(function ($item) {
                 return [
@@ -184,8 +184,8 @@ class ReportController extends Controller
 
         // 1. Sewa Kost
         $payments = Payment::where('status', 'paid')
-            ->where('period_month', $currentMonth)
-            ->where('period_year', $currentYear)
+            ->whereMonth('paid_at', $currentMonth)
+            ->whereYear('paid_at', $currentYear)
             ->with(['tenant', 'room'])
             ->get()
             ->map(function ($item) {
@@ -225,8 +225,8 @@ class ReportController extends Controller
         $transactions = $transactions->concat($lodgings);
 
         // 3. Pendapatan Lain
-        $otherIncomes = OtherIncome::where('period_month', $currentMonth)
-            ->where('period_year', $currentYear)
+        $otherIncomes = OtherIncome::whereMonth('income_date', $currentMonth)
+            ->whereYear('income_date', $currentYear)
             ->get()
             ->map(function ($item) {
                 return [
@@ -303,8 +303,8 @@ class ReportController extends Controller
         // =====================
 
         // 7. Pengeluaran Kost (termasuk maintenance via syncExpense)
-        $expenseItems = Expense::where('period_month', $currentMonth)
-            ->where('period_year', $currentYear)
+        $expenseItems = Expense::whereMonth('expense_date', $currentMonth)
+            ->whereYear('expense_date', $currentYear)
             ->get()
             ->map(function ($item) {
                 return [
