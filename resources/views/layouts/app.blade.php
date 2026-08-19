@@ -61,19 +61,20 @@
                 Penerimaan
             </a>
 
+             <a href="{{ route('other-incomes.index') }}" class="nav-item {{ request()->routeIs('other-incomes.*') ? 'active' : '' }}">
+                <i class="bi bi-wallet-fill"></i> Pendapatan Lain-lain
+            </a>
+
             <a href="{{ route('reports.total_omzet') }}" class="nav-item {{ request()->routeIs('reports.total_omzet') ? 'active' : '' }}">
                 <i class="bi bi-graph-up-arrow"></i>
                 Laporan Omzet Periode
             </a>
 
-            <a href="{{ route('reports.total_pengeluaran') }}" class="nav-item {{ request()->routeIs('reports.total_pengeluaran') ? 'active' : '' }}">
-                <i class="bi bi-graph-down-arrow"></i>
-                Laporan Pengeluaran Periode
-            </a>
 
-            <a href="{{ route('reports.cash_flow') }}" class="nav-item {{ request()->routeIs('reports.cash_flow') ? 'active' : '' }}">
-                <i class="bi bi-arrow-left-right"></i>
-                Laporan Arus Kas
+             <a href="{{ route('expenses.index') }}"
+               class="nav-item {{ request()->routeIs('expenses.*') ? 'active' : '' }}">
+                <i class="bi bi-receipt-cutoff"></i>
+                Pengeluaran Kost
             </a>
 
             <a href="{{ route('maintenances.index') }}"
@@ -82,21 +83,24 @@
                 Maintenance Kamar
             </a>
 
-            <a href="{{ route('expenses.index') }}"
-               class="nav-item {{ request()->routeIs('expenses.*') ? 'active' : '' }}">
-                <i class="bi bi-receipt-cutoff"></i>
-                Pengeluaran Kost
+               <a href="{{ route('reports.total_pengeluaran') }}" class="nav-item {{ request()->routeIs('reports.total_pengeluaran') ? 'active' : '' }}">
+                <i class="bi bi-graph-down-arrow"></i>
+                Laporan Pengeluaran Periode
             </a>
 
-            <a href="{{ route('other-incomes.index') }}" class="nav-item {{ request()->routeIs('other-incomes.*') ? 'active' : '' }}">
-                <i class="bi bi-wallet-fill"></i> Pendapatan Lain-lain
-            </a>
+
             <a href="{{ route('receivables.index') }}" class="nav-item {{ request()->routeIs('receivables.*') ? 'active' : '' }}">
                 <i class="bi bi-box-arrow-in-down-left"></i> Piutang Kost
             </a>
             <a href="{{ route('payables.index') }}" class="nav-item {{ request()->routeIs('payables.*') ? 'active' : '' }}">
                 <i class="bi bi-box-arrow-up-right"></i> Hutang Kost
             </a>
+
+             <a href="{{ route('reports.cash_flow') }}" class="nav-item {{ request()->routeIs('reports.cash_flow') ? 'active' : '' }}">
+                <i class="bi bi-arrow-left-right"></i>
+                Laporan Arus Kas
+            </a>
+        
 
             <div class="nav-section-label" style="margin-top:8px;">Lainnya</div>
 
