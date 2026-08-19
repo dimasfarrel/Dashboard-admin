@@ -138,7 +138,9 @@
                     <th style="width: 160px;">Kategori</th>
                     <th>Deskripsi</th>
                     <th style="text-align: right; width: 150px; background-color: #ecfdf5;">Kas Masuk</th>
+                    <th class="no-print" style="width: 80px; text-align: center;">Aksi</th>
                     <th style="text-align: right; width: 150px; background-color: #fef2f2;">Kas Keluar</th>
+                    <th class="no-print" style="width: 80px; text-align: center;">Aksi</th>
                 </tr>
             </thead>
             <tbody>
@@ -156,7 +158,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" style="text-align: center; padding: 30px; color: #64748b;">Belum ada transaksi pada periode ini.</td>
+                        <td colspan="6" style="text-align: center; padding: 30px; color: #64748b;">Belum ada transaksi pada periode ini.</td>
                     </tr>
                 @endforelse
             </tbody>
@@ -164,7 +166,9 @@
                 <tr style="font-weight: bold; background-color: #f0f9ff;">
                     <td colspan="3" style="text-align: right;">TOTAL:</td>
                     <td style="text-align: right; color: #047857;">Rp {{ number_format($totalKasMasuk, 0, ',', '.') }}</td>
+                    <td class="no-print"></td>
                     <td style="text-align: right; color: #b91c1c;">Rp {{ number_format($totalKasKeluar, 0, ',', '.') }}</td>
+                    <td class="no-print"></td>
                 </tr>
                 <tr style="font-weight: bold; background-color: #eff6ff;">
                     <td colspan="3" style="text-align: right; font-size: 14px;">SALDO KAS BERSIH:</td>
@@ -182,6 +186,9 @@
 @media print {
     .sidebar, .topbar, .filter-card, .no-print, .btn {
         display: none !important;
+    }
+    body, .main-content, .page-content, span, strong, td, th, p, h1, h2, h3, h4, h5, h6, a, div {
+        color: #000 !important;
     }
     body, .main-content, .page-content {
         margin: 0 !important;

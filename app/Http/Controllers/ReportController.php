@@ -41,6 +41,7 @@ class ReportController extends Controller
                     'category' => 'Sewa Kost',
                     'description' => "Kamar " . ($item->room->room_number ?? 'N/A') . " (" . ($item->tenant->name ?? 'N/A') . ")",
                     'amount' => (float) $item->amount,
+                    'url' => route('payments.show', $item->id),
                 ];
             });
         $incomes = $incomes->concat($payments);
@@ -59,6 +60,7 @@ class ReportController extends Controller
                     'category' => 'Penginapan',
                     'description' => "Harian - Kamar " . ($item->room->room_number ?? 'N/A') . " (" . $item->pic_name . ")",
                     'amount' => (float) $item->calculateTotal(),
+                    'url' => route('lodgings.show', $item->id),
                 ];
             });
         $incomes = $incomes->concat($lodgings);
@@ -74,6 +76,7 @@ class ReportController extends Controller
                     'category' => 'Lain-lain',
                     'description' => $item->title,
                     'amount' => (float) $item->amount,
+                    'url' => route('other-incomes.show', $item->id),
                 ];
             });
         $incomes = $incomes->concat($otherIncomes);
@@ -92,6 +95,7 @@ class ReportController extends Controller
                     'category' => 'Pelunasan Piutang',
                     'description' => $desc,
                     'amount' => (float) $item->amount,
+                    'url' => $item->loan_id ? route('receivables.show', $item->loan_id) : '#',
                 ];
             });
         $incomes = $incomes->concat($receivableRepayments);
@@ -129,6 +133,7 @@ class ReportController extends Controller
                     'category' => 'Pengeluaran',
                     'description' => $item->title,
                     'amount' => (float) $item->amount,
+                    'url' => route('expenses.show', $item->id),
                 ];
             });
         $expenses = $expenses->concat($expenseItems);
@@ -146,6 +151,7 @@ class ReportController extends Controller
                     'category' => 'Pengembalian Deposit',
                     'description' => "Pengembalian Deposit - " . ($item->tenant->name ?? 'N/A') . ($item->description ? " ({$item->description})" : ""),
                     'amount' => (float) $item->amount,
+                    'url' => $item->tenant_id ? route('tenants.show', $item->tenant_id) : '#',
                 ];
             });
         $expenses = $expenses->concat($depositDeductions);
@@ -190,6 +196,10 @@ class ReportController extends Controller
                     'description' => "Kamar " . ($item->room->room_number ?? 'N/A') . " (" . ($item->tenant->name ?? 'N/A') . ")",
                     'kas_masuk' => (float) $item->amount,
                     'kas_keluar' => 0,
+                    'url' => $item->loan_id ? route('receivables.show', $item->loan_id) : '#',
+                    'url' => route('lodgings.show', $item->id),
+                    'url' => route('payments.show', $item->id),
+                    'url' => route('payments.show', $item->id),
                 ];
             });
         $transactions = $transactions->concat($payments);
@@ -209,6 +219,7 @@ class ReportController extends Controller
                     'description' => "Harian - Kamar " . ($item->room->room_number ?? 'N/A') . " (" . $item->pic_name . ")",
                     'kas_masuk' => (float) $item->calculateTotal(),
                     'kas_keluar' => 0,
+                    'url' => route('lodgings.show', $item->id),
                 ];
             });
         $transactions = $transactions->concat($lodgings);
@@ -225,6 +236,7 @@ class ReportController extends Controller
                     'description' => $item->title,
                     'kas_masuk' => (float) $item->amount,
                     'kas_keluar' => 0,
+                    'url' => route('other-incomes.show', $item->id),
                 ];
             });
         $transactions = $transactions->concat($otherIncomes);
@@ -244,6 +256,7 @@ class ReportController extends Controller
                     'description' => $desc,
                     'kas_masuk' => (float) $item->amount,
                     'kas_keluar' => 0,
+                    'url' => $item->loan_id ? route('receivables.show', $item->loan_id) : '#',
                 ];
             });
         $transactions = $transactions->concat($receivableRepayments);
@@ -261,6 +274,7 @@ class ReportController extends Controller
                     'description' => "Pinjaman dari " . $item->name,
                     'kas_masuk' => (float) $item->total_amount,
                     'kas_keluar' => 0,
+                    'url' => route('payables.show', $item->id),
                 ];
             });
         $transactions = $transactions->concat($payables);
@@ -279,6 +293,7 @@ class ReportController extends Controller
                     'description' => "Deposit - " . ($item->tenant->name ?? 'N/A') . ($item->description ? " ({$item->description})" : ""),
                     'kas_masuk' => (float) $item->amount,
                     'kas_keluar' => 0,
+                    'url' => $item->tenant_id ? route('tenants.show', $item->tenant_id) : '#',
                 ];
             });
         $transactions = $transactions->concat($depositCredits);
@@ -299,6 +314,9 @@ class ReportController extends Controller
                     'description' => $item->title,
                     'kas_masuk' => 0,
                     'kas_keluar' => (float) $item->amount,
+                    'url' => $item->tenant_id ? route('tenants.show', $item->tenant_id) : '#',
+                    'url' => route('expenses.show', $item->id),
+                    'url' => route('expenses.show', $item->id),
                 ];
             });
         $transactions = $transactions->concat($expenseItems);
@@ -316,6 +334,7 @@ class ReportController extends Controller
                     'description' => "Pinjaman ke " . $item->name,
                     'kas_masuk' => 0,
                     'kas_keluar' => (float) $item->total_amount,
+                    'url' => route('receivables.show', $item->id),
                 ];
             });
         $transactions = $transactions->concat($receivables);
@@ -335,6 +354,7 @@ class ReportController extends Controller
                     'description' => $desc,
                     'kas_masuk' => 0,
                     'kas_keluar' => (float) $item->amount,
+                    'url' => $item->loan_id ? route('payables.show', $item->loan_id) : '#',
                 ];
             });
         $transactions = $transactions->concat($payableRepayments);
@@ -353,6 +373,7 @@ class ReportController extends Controller
                     'description' => "Pengembalian Deposit - " . ($item->tenant->name ?? 'N/A') . ($item->description ? " ({$item->description})" : ""),
                     'kas_masuk' => 0,
                     'kas_keluar' => (float) $item->amount,
+                    'url' => $item->tenant_id ? route('tenants.show', $item->tenant_id) : '#',
                 ];
             });
         $transactions = $transactions->concat($depositDebits);

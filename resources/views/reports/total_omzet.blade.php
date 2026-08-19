@@ -120,6 +120,7 @@
                     <th style="width: 150px;">Kategori</th>
                     <th>Deskripsi</th>
                     <th style="text-align: right; width: 160px;">Nominal</th>
+                    <th class="no-print" style="width: 80px; text-align: center;">Aksi</th>
                 </tr>
             </thead>
             <tbody>
@@ -129,17 +130,23 @@
                         <td><strong>{{ $inc['category'] }}</strong></td>
                         <td>{{ $inc['description'] }}</td>
                         <td style="text-align: right; color: #047857; font-weight: 600;">Rp {{ number_format($inc['amount'], 0, ',', '.') }}</td>
+                        <td class="no-print" style="text-align: center;">
+                            @if(isset($inc['url']) && $inc['url'] !== '#')
+                                <a href="{{ $inc['url'] }}" class="btn btn-sm btn-info" style="padding: 2px 8px; font-size: 12px;"><i class="bi bi-eye"></i> Detail</a>
+                            @endif
+                        </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="4" style="text-align: center; padding: 30px; color: #64748b;">Belum ada data pendapatan pada periode ini.</td>
+                        <td colspan="5" style="text-align: center; padding: 30px; color: #64748b;">Belum ada data pendapatan pada periode ini.</td>
                     </tr>
                 @endforelse
             </tbody>
             <tfoot>
-                <tr style="font-weight: bold; background-color: #ecfdf5;">
+                <tr style="font-weight: bold; background-color: #313533ff;">
                     <td colspan="3" style="text-align: right;">TOTAL OMZET:</td>
                     <td style="text-align: right; font-size: 15px; color: #047857;">Rp {{ number_format($sumOmzet, 0, ',', '.') }}</td>
+                    <td class="no-print"></td>
                 </tr>
             </tfoot>
         </table>
@@ -151,6 +158,9 @@
 @media print {
     .sidebar, .topbar, .filter-card, .no-print, .btn {
         display: none !important;
+    }
+    body, .main-content, .page-content, span, strong, td, th, p, h1, h2, h3, h4, h5, h6, a, div {
+        color: #000 !important;
     }
     body, .main-content, .page-content {
         margin: 0 !important;
