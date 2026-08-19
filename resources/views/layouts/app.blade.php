@@ -58,7 +58,7 @@
             <a href="{{ route('payments.index') }}"
                class="nav-item {{ request()->routeIs('payments.*') ? 'active' : '' }}">
                 <i class="bi bi-cash-coin"></i>
-                Omzet & Pembayaran
+                Penerimaan
             </a>
 
             <a href="{{ route('reports.total_omzet') }}" class="nav-item {{ request()->routeIs('reports.total_omzet') ? 'active' : '' }}">
