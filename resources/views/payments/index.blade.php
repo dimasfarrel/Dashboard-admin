@@ -186,11 +186,11 @@
                     <th>Tipe</th>
                     <th>Kamar</th>
                     <th>Nama Pelanggan</th>
+                    <th>Tgl Bayar</th>
                     <th>Periode / Tgl</th>
                     <th>Nominal</th>
                     <th>Metode</th>
                     <th>Jatuh Tempo</th>
-                    <th>Tgl Bayar</th>
                     <th>Status</th>
                     <th>Aksi</th>
                 </tr>
@@ -211,6 +211,13 @@
                     </td>
                     <td><strong>Kamar {{ $trx['room'] }}</strong></td>
                     <td>{{ $trx['name'] }}</td>
+                    <td class="text-sm">
+                        @if($trx['date'])
+                            {{ \Carbon\Carbon::parse($trx['date'])->translatedFormat('d-M-Y') }}
+                        @else
+                            <span class="text-muted">—</span>
+                        @endif
+                    </td>
                     <td class="text-sm">{{ $trx['period'] }}</td>
                     <td class="money-text">Rp {{ number_format($trx['amount'], 0, ',', '.') }}</td>
                     <td>{{ ucfirst($trx['method']) }}</td>
@@ -221,13 +228,6 @@
                                 {{ $dueDate->translatedFormat('d-M-Y') }}
                                 @if($isPast) <i class="bi bi-exclamation-triangle"></i>@endif
                             </span>
-                        @else
-                            <span class="text-muted">—</span>
-                        @endif
-                    </td>
-                    <td class="text-sm">
-                        @if($trx['date'])
-                            {{ \Carbon\Carbon::parse($trx['date'])->translatedFormat('d-M-Y') }}
                         @else
                             <span class="text-muted">—</span>
                         @endif
