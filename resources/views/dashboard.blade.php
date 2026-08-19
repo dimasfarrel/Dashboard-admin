@@ -20,7 +20,7 @@
         <i class="bi bi-clock-history"></i> Riwayat Aktivitas (Log)
     </a>
     <a href="{{ route('reports.total_omzet') }}" class="btn btn-info btn-sm">
-        <i class="bi bi-printer"></i> Cetak Omzet Total
+        <i class="bi bi-printer"></i> Cetak Omzet Periode
     </a>
     <a href="{{ route('rooms.create') }}" class="btn btn-primary btn-sm">
         <i class="bi bi-plus-lg"></i> Tambah Kamar

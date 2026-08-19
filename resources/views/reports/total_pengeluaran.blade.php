@@ -1,7 +1,7 @@
 @extends('layouts.app')
-@section('title', 'Laporan Pengeluaran Total')
+@section('title', 'Laporan Pengeluaran Periode')
 
-@section('page-title', 'Laporan Pengeluaran Total')
+@section('page-title', 'Laporan Pengeluaran Periode')
 @section('page-subtitle', 'Rekap Beban Operasional Kost')
 
 @push('styles')
@@ -83,7 +83,7 @@
 
 {{-- Print Header --}}
 <div class="print-header" style="display: none; text-align: center; margin-bottom: 30px; border-bottom: 2px solid #000; padding-bottom: 15px;">
-    <h1 style="margin: 0; font-size: 24px; font-weight: bold; text-transform: uppercase;">Laporan Pengeluaran Total Kost Malang</h1>
+    <h1 style="margin: 0; font-size: 24px; font-weight: bold; text-transform: uppercase;">Laporan Pengeluaran Periode Kost Malang</h1>
     <p style="margin: 5px 0 0 0; font-size: 14px;">
         Periode: {{ \Carbon\Carbon::parse($startDate)->translatedFormat('d F Y') }} - {{ \Carbon\Carbon::parse($endDate)->translatedFormat('d F Y') }}
     </p>
@@ -110,7 +110,7 @@
 {{-- Tabel Pengeluaran --}}
 <div class="card" style="margin-bottom: 30px; border:1px solid #ef4444;">
     <div class="card-header" style="background-color: rgba(239, 68, 68, 0.1); border-bottom: 1px solid #ef4444;">
-        <h2 class="card-title" style="color: #b91c1c; font-weight: 700;"><i class="bi bi-arrow-up-right-circle"></i> Pengeluaran Total</h2>
+        <h2 class="card-title" style="color: #b91c1c; font-weight: 700;"><i class="bi bi-arrow-up-right-circle"></i> Pengeluaran Periode</h2>
     </div>
     <div class="table-wrapper">
         <table class="table">
@@ -144,7 +144,7 @@
             </tbody>
             <tfoot>
                 <tr style="font-weight: bold; background-color: #fef2f2;">
-                    <td colspan="3" style="text-align: right;">TOTAL PENGELUARAN:</td>
+                    <td colspan="3" style="text-align: right;">TOTAL PENGELUARAN PERIODE:</td>
                     <td style="text-align: right; font-size: 15px; color: #b91c1c;">Rp {{ number_format($sumPengeluaran, 0, ',', '.') }}</td>
                     <td class="no-print"></td>
                 </tr>

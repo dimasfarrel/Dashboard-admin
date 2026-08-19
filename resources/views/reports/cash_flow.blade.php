@@ -138,7 +138,6 @@
                     <th style="width: 160px;">Kategori</th>
                     <th>Deskripsi</th>
                     <th style="text-align: right; width: 150px; background-color: #ecfdf5;">Kas Masuk</th>
-                    <th class="no-print" style="width: 80px; text-align: center;">Aksi</th>
                     <th style="text-align: right; width: 150px; background-color: #fef2f2;">Kas Keluar</th>
                     <th class="no-print" style="width: 80px; text-align: center;">Aksi</th>
                 </tr>

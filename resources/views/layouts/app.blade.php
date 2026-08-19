@@ -63,12 +63,12 @@
 
             <a href="{{ route('reports.total_omzet') }}" class="nav-item {{ request()->routeIs('reports.total_omzet') ? 'active' : '' }}">
                 <i class="bi bi-graph-up-arrow"></i>
-                Laporan Omzet Total
+                Laporan Omzet Periode
             </a>
 
             <a href="{{ route('reports.total_pengeluaran') }}" class="nav-item {{ request()->routeIs('reports.total_pengeluaran') ? 'active' : '' }}">
                 <i class="bi bi-graph-down-arrow"></i>
-                Laporan Pengeluaran Total
+                Laporan Pengeluaran Periode
             </a>
 
             <a href="{{ route('reports.cash_flow') }}" class="nav-item {{ request()->routeIs('reports.cash_flow') ? 'active' : '' }}">

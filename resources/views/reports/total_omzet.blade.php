@@ -1,7 +1,7 @@
 @extends('layouts.app')
-@section('title', 'Laporan Omzet Total')
+@section('title', 'Laporan Omzet Periode')
 
-@section('page-title', 'Laporan Omzet Total')
+@section('page-title', 'Laporan Omzet Periode')
 @section('page-subtitle', 'Rekap Pendapatan Operasional Kost')
 
 @push('styles')
@@ -83,7 +83,7 @@
 
 {{-- Print Header (Only visible on Print) --}}
 <div class="print-header" style="display: none; text-align: center; margin-bottom: 30px; border-bottom: 2px solid #000; padding-bottom: 15px;">
-    <h1 style="margin: 0; font-size: 24px; font-weight: bold; text-transform: uppercase;">Laporan Omzet Total Kost Malang</h1>
+    <h1 style="margin: 0; font-size: 24px; font-weight: bold; text-transform: uppercase;">Laporan Omzet Periode Kost Malang</h1>
     <p style="margin: 5px 0 0 0; font-size: 14px;">
         Periode: {{ \Carbon\Carbon::parse($startDate)->translatedFormat('d F Y') }} - {{ \Carbon\Carbon::parse($endDate)->translatedFormat('d F Y') }}
     </p>
@@ -110,7 +110,7 @@
 {{-- Tabel Omzet --}}
 <div class="card" style="margin-bottom: 30px; border:1px solid #10b981;">
     <div class="card-header" style="background-color: rgba(16, 185, 129, 0.1); border-bottom: 1px solid #10b981;">
-        <h2 class="card-title" style="color: #047857; font-weight: 700;"><i class="bi bi-arrow-down-left-circle"></i> Omzet Total</h2>
+        <h2 class="card-title" style="color: #047857; font-weight: 700;"><i class="bi bi-arrow-down-left-circle"></i> Omzet Periode</h2>
     </div>
     <div class="table-wrapper">
         <table class="table">
@@ -144,7 +144,7 @@
             </tbody>
             <tfoot>
                 <tr style="font-weight: bold; background-color: #313533ff;">
-                    <td colspan="3" style="text-align: right;">TOTAL OMZET:</td>
+                    <td colspan="3" style="text-align: right;">TOTAL OMZET PERIODE:</td>
                     <td style="text-align: right; font-size: 15px; color: #047857;">Rp {{ number_format($sumOmzet, 0, ',', '.') }}</td>
                     <td class="no-print"></td>
                 </tr>
