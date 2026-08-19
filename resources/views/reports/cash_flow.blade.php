@@ -154,6 +154,13 @@
                         <td style="text-align: right; color: #b91c1c; font-weight: {{ $trx['kas_keluar'] > 0 ? '600' : '400' }};">
                             {{ $trx['kas_keluar'] > 0 ? 'Rp ' . number_format($trx['kas_keluar'], 0, ',', '.') : '-' }}
                         </td>
+                        <td class="no-print" style="text-align: center;">
+                            @if(isset($trx['url']) && $trx['url'] !== '#')
+                                <a href="{{ $trx['url'] }}" class="btn btn-info btn-sm btn-icon" title="Lihat Detail">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            @endif
+                        </td>
                     </tr>
                 @empty
                     <tr>

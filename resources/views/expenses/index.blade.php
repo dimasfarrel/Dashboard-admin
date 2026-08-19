@@ -88,7 +88,7 @@
             </option>
             @endforeach
         </select>
-        <input type="number" name="year" class="form-control" style="width:90px;" value="{{ request('year') }}" placeholder="Tahun">
+        <input type="number" name="year" class="form-control" style="width:90px;" value="{{ request('year', date('Y')) }}" placeholder="Tahun">
         <select name="category" class="form-control" style="width:180px;">
             <option value="">Semua Kategori</option>
             @foreach($categories as $cat)

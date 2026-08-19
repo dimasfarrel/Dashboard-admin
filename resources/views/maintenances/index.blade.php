@@ -60,7 +60,7 @@
                 <option value="{{ $i }}" {{ (isset($month) && $month == $i) ? 'selected' : '' }}>{{ \Carbon\Carbon::now()->setMonth((int)($i))->translatedFormat('F') }}</option>
             @endfor
         </select>
-        <input type="number" name="year" class="form-control" style="width:90px;" value="{{ request('year') }}" placeholder="Tahun">
+        <input type="number" name="year" class="form-control" style="width:90px;" value="{{ request('year', date('Y')) }}" placeholder="Tahun">
         <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-search"></i> Filter</button>
         <a href="{{ route('maintenances.index') }}" class="btn btn-secondary btn-sm">Reset</a>
     </form>

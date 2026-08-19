@@ -25,6 +25,35 @@
 @endpush
 
 @section('content')
+<!-- Filter Bar -->
+<div class="filter-bar" style="margin-bottom: 20px; background: var(--bg-card); padding: 15px; border-radius: 12px; border: 1px solid var(--border-accent, #334155);">
+    <form method="GET" action="{{ route('tenant-deposits.index') }}" style="display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;">
+        <div>
+            <label style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px; display: block;">Bulan</label>
+            <select name="month" class="form-control" style="width: 150px;">
+                <option value="">Semua Bulan</option>
+                @foreach(range(1,12) as $m)
+                    <option value="{{ $m }}" {{ request('month') == $m ? 'selected' : '' }}>
+                        {{ \Carbon\Carbon::now()->setMonth((int)($m))->translatedFormat('F') }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+        <div>
+            <label style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px; display: block;">Tahun</label>
+            <input type="number" name="year" class="form-control" style="width: 100px;" value="{{ request('year', date('Y')) }}" placeholder="Tahun">
+        </div>
+        <div>
+            <label style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px; display: block;">Nama Penyewa</label>
+            <input type="text" name="name" class="form-control" style="width: 200px;" value="{{ request('name') }}" placeholder="Cari nama penyewa...">
+        </div>
+        <div style="display: flex; gap: 8px;">
+            <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Filter</button>
+            <a href="{{ route('tenant-deposits.index') }}" class="btn btn-secondary">Reset</a>
+        </div>
+    </form>
+</div>
+
 <div class="card">
     <div class="card-header">
         <h3 class="card-title">Semua Transaksi Deposit</h3>

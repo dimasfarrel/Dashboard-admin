@@ -48,7 +48,7 @@
             <option value="{{ $m }}" {{ request('month') == $m ? 'selected' : '' }}>{{ \Carbon\Carbon::create()->setMonth($m)->translatedFormat('F') }}</option>
             @endforeach
         </select>
-        <input type="number" name="year" class="form-control" style="width:90px;" value="{{ request('year') }}" placeholder="Tahun">
+        <input type="number" name="year" class="form-control" style="width:90px;" value="{{ request('year', date('Y')) }}" placeholder="Tahun">
         <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-search"></i> Filter</button>
         <a href="{{ route('lodgings.index') }}" class="btn btn-secondary btn-sm">Reset</a>
     </form>

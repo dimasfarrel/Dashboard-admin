@@ -14,7 +14,21 @@ class TenantDepositController extends Controller
      */
     public function index(Request $request)
     {
-        $deposits = TenantDeposit::with('tenant')->orderBy('date', 'desc')->paginate(20);
+        $query = TenantDeposit::with('tenant');
+
+        if ($request->filled('month')) {
+            $query->whereMonth('date', $request->month);
+        }
+        if ($request->filled('year')) {
+            $query->whereYear('date', $request->year);
+        }
+        if ($request->filled('name')) {
+            $query->whereHas('tenant', function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->name . '%');
+            });
+        }
+
+        $deposits = $query->orderBy('date', 'desc')->paginate(20)->withQueryString();
         $tenants = Tenant::whereIn('status', ['active', 'inactive'])->get(); // Active and inactive might have deposits
         return view('tenant-deposits.index', compact('deposits', 'tenants'));
     }

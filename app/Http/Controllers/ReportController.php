@@ -196,9 +196,6 @@ class ReportController extends Controller
                     'description' => "Kamar " . ($item->room->room_number ?? 'N/A') . " (" . ($item->tenant->name ?? 'N/A') . ")",
                     'kas_masuk' => (float) $item->amount,
                     'kas_keluar' => 0,
-                    'url' => $item->loan_id ? route('receivables.show', $item->loan_id) : '#',
-                    'url' => route('lodgings.show', $item->id),
-                    'url' => route('payments.show', $item->id),
                     'url' => route('payments.show', $item->id),
                 ];
             });
@@ -314,8 +311,6 @@ class ReportController extends Controller
                     'description' => $item->title,
                     'kas_masuk' => 0,
                     'kas_keluar' => (float) $item->amount,
-                    'url' => $item->tenant_id ? route('tenants.show', $item->tenant_id) : '#',
-                    'url' => route('expenses.show', $item->id),
                     'url' => route('expenses.show', $item->id),
                 ];
             });

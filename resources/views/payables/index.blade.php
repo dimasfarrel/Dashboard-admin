@@ -75,7 +75,7 @@
             </div>
             <div>
                 <label class="text-xs text-muted" style="display:block; margin-bottom:4px;">Tahun</label>
-                <input type="number" name="year" class="form-control" style="width:100px;" value="{{ request('year') }}" placeholder="Contoh: 2026">
+                <input type="number" name="year" class="form-control" style="width:100px;" value="{{ request('year', date('Y')) }}" placeholder="Contoh: 2026">
             </div>
             <div style="display:flex; gap:8px;">
                 <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Filter</button>
