@@ -24,7 +24,7 @@
             <a href="{{ route('dashboard') }}" class="brand-logo">
                 <div class="brand-icon">🏠</div>
                 <div class="brand-text">
-                    <div class="brand-name">Kost Malang</div>
+                    <div class="brand-name">TBU 4</div>
                     <div class="brand-sub">Admin Panel</div>
                 </div>
             </a>
