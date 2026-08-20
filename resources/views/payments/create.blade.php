@@ -24,7 +24,7 @@
                     @if($activeTenants->count())
                     <optgroup label="Penyewa Aktif">
                         @foreach($activeTenants as $t)
-                        <option value="{{ $t->id }}" data-room="{{ $t->room_id }}" data-price="{{ $t->room?->price }}" data-parent="{{ $t->emergency_contact_name }}" {{ old('tenant_id', request('tenant_id')) == $t->id ? 'selected' : '' }}>
+                        <option value="{{ $t->id }}" data-room="{{ $t->room_id }}" data-price="{{ $t->room?->price }}" data-parent="{{ collect([$t->emergency_contact_name, $t->emergency_contact_name_2])->filter()->join(' / ') }}" {{ old('tenant_id', request('tenant_id')) == $t->id ? 'selected' : '' }}>
                             Kamar {{ $t->room?->room_number }} - {{ $t->name }}{{ $t->nickname ? ' - ' . $t->nickname : '' }} (Rp {{ number_format($t->room?->price, 0, ',', '.') }})
                         </option>
                         @endforeach
@@ -33,7 +33,7 @@
                     @if($inactiveTenants->count())
                     <optgroup label="Penyewa Non-Aktif (Riwayat)">
                         @foreach($inactiveTenants as $t)
-                        <option value="{{ $t->id }}" data-room="{{ $t->room_id }}" data-price="{{ $t->room?->price }}" data-parent="{{ $t->emergency_contact_name }}" {{ old('tenant_id', request('tenant_id')) == $t->id ? 'selected' : '' }}>
+                        <option value="{{ $t->id }}" data-room="{{ $t->room_id }}" data-price="{{ $t->room?->price }}" data-parent="{{ collect([$t->emergency_contact_name, $t->emergency_contact_name_2])->filter()->join(' / ') }}" {{ old('tenant_id', request('tenant_id')) == $t->id ? 'selected' : '' }}>
                             Kamar {{ $t->room?->room_number }} - {{ $t->name }}{{ $t->nickname ? ' - ' . $t->nickname : '' }}
                         </option>
                         @endforeach
