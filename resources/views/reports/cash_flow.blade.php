@@ -84,12 +84,19 @@
 </div>
 
 {{-- Print Header --}}
-<div class="print-header" style="display: none; text-align: center; margin-bottom: 30px; border-bottom: 2px solid #000; padding-bottom: 15px;">
-    <h1 style="margin: 0; font-size: 24px; font-weight: bold; text-transform: uppercase;">Laporan Arus Kas Kost Malang</h1>
-    <p style="margin: 5px 0 0 0; font-size: 14px;">
-        Periode: {{ \Carbon\Carbon::parse($startDate)->translatedFormat('d F Y') }} - {{ \Carbon\Carbon::parse($endDate)->translatedFormat('d F Y') }}
-    </p>
-    <p style="margin: 2px 0 0 0; font-size: 12px; color: #555;">Dicetak pada: {{ now()->translatedFormat('d F Y H:i') }}</p>
+<div class="print-header" style="display: none; margin-bottom: 25px; border-bottom: 2px solid #1e293b; padding-bottom: 15px;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+        <div style="text-align: left;">
+            <h1 style="margin: 0; font-size: 26px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 1px;">LAPORAN ARUS KAS</h1>
+            <h2 style="margin: 4px 0 0 0; font-size: 16px; font-weight: 600; color: #334155;">KOST MALANG</h2>
+        </div>
+        <div style="text-align: right;">
+            <p style="margin: 0; font-size: 14px; font-weight: 600; color: #0f172a;">
+                Periode: {{ \Carbon\Carbon::parse($startDate)->translatedFormat('d M Y') }} - {{ \Carbon\Carbon::parse($endDate)->translatedFormat('d M Y') }}
+            </p>
+            <p style="margin: 4px 0 0 0; font-size: 11px; color: #64748b;">Dicetak pada: {{ now()->translatedFormat('d M Y, H:i') }}</p>
+        </div>
+    </div>
 </div>
 
 {{-- Summary Cards --}}
@@ -134,12 +141,12 @@
         <table class="table">
             <thead>
                 <tr style="background-color: #f8fafc;">
-                    <th style="width: 100px;">Tanggal</th>
-                    <th style="width: 160px;">Kategori</th>
-                    <th>Deskripsi</th>
-                    <th style="text-align: right; width: 150px; background-color: #ecfdf5;">Kas Masuk</th>
-                    <th style="text-align: right; width: 150px; background-color: #fef2f2;">Kas Keluar</th>
-                    <th class="no-print" style="width: 80px; text-align: center;">Aksi</th>
+                    <th class="col-date">Tanggal</th>
+                    <th class="col-category">Kategori</th>
+                    <th class="col-desc">Deskripsi</th>
+                    <th class="col-in" style="text-align: right; background-color: #ecfdf5;">Kas Masuk</th>
+                    <th class="col-out" style="text-align: right; background-color: #fef2f2;">Kas Keluar</th>
+                    <th class="no-print col-action" style="text-align: center;">Aksi</th>
                 </tr>
             </thead>
             <tbody>
@@ -169,86 +176,166 @@
                 @endforelse
             </tbody>
             <tfoot>
-                <tr style="font-weight: bold; background-color: #f0f9ff;">
-                    <td colspan="3" style="text-align: right;">TOTAL:</td>
+                <tr class="total-row" style="font-weight: bold; background-color: #f0f9ff;">
+                    <td colspan="3" style="text-align: right; padding-right: 20px;">TOTAL:</td>
                     <td style="text-align: right; color: #047857;">Rp {{ number_format($totalKasMasuk, 0, ',', '.') }}</td>
-                    <td class="no-print"></td>
                     <td style="text-align: right; color: #b91c1c;">Rp {{ number_format($totalKasKeluar, 0, ',', '.') }}</td>
                     <td class="no-print"></td>
                 </tr>
-                <tr style="font-weight: bold; background-color: #eff6ff;">
-                    <td colspan="3" style="text-align: right; font-size: 14px;">SALDO KAS BERSIH:</td>
+                <tr class="saldo-row" style="font-weight: bold; background-color: #eff6ff;">
+                    <td colspan="3" style="text-align: right; font-size: 14px; padding-right: 20px;">SALDO KAS BERSIH:</td>
                     <td colspan="2" style="text-align: right; font-size: 16px; color: {{ $saldoBersih >= 0 ? '#047857' : '#b91c1c' }};">
                         {{ $saldoBersih >= 0 ? '' : '-' }}Rp {{ number_format(abs($saldoBersih), 0, ',', '.') }}
                     </td>
+                    <td class="no-print"></td>
                 </tr>
             </tfoot>
         </table>
     </div>
 </div>
 
+{{-- Print Footer (Fallback for browsers that don't support @page counters) --}}
+<div class="print-footer-fallback" style="display: none; position: fixed; bottom: 0; width: 100%; text-align: center; font-size: 10px; color: #64748b; padding-top: 5px; border-top: 1px solid #cbd5e1;">
+    Dicetak dari Sistem Admin Kost
+</div>
+
 {{-- CSS KHUSUS PRINT --}}
 <style>
 @media print {
-    .sidebar, .topbar, .filter-card, .no-print, .btn {
+    /* Hide non-printable elements */
+    .sidebar, .topbar, .filter-card, .no-print, .summary-cards {
         display: none !important;
     }
-    body, .main-content, .page-content, span, strong, td, th, p, h1, h2, h3, h4, h5, h6, a, div {
-        color: #000 !important;
-    }
-    body, .main-content, .page-content {
+    
+    /* Reset body for clean slate */
+    body {
+        background: #fff !important;
         margin: 0 !important;
         padding: 0 !important;
-        background: #fff !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
+    .main-content, .page-content {
+        margin: 0 !important;
+        padding: 0 !important;
         width: 100% !important;
     }
-    .print-header {
-        display: block !important;
-    }
+    
     .card {
         border: none !important;
-        margin-bottom: 30px !important;
+        margin-bottom: 0 !important;
         box-shadow: none !important;
     }
-    .card-header {
-        background: transparent !important;
-        border-bottom: 2px solid #000 !important;
-        padding: 0 0 10px 0 !important;
-        margin-bottom: 15px !important;
+    .card-header, .print-footer-fallback {
+        display: none !important;
     }
-    .card-title {
+
+    /* Print Header - Professional Centered */
+    .print-header {
+        display: block !important;
+        text-align: center !important;
+        margin-bottom: 25px !important;
+        border-bottom: none !important;
+        padding-bottom: 0 !important;
+    }
+    .print-header h1 {
+        font-family: "Times New Roman", Times, serif !important;
+        font-size: 20pt !important;
+        font-weight: bold !important;
         color: #000 !important;
-        font-size: 18px !important;
+        margin: 0 0 5px 0 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 2px !important;
+    }
+    .print-header h2 {
+        font-family: "Times New Roman", Times, serif !important;
+        font-size: 14pt !important;
+        font-weight: bold !important;
+        color: #000 !important;
+        margin: 0 0 10px 0 !important;
+    }
+    .print-header p {
+        font-family: "Times New Roman", Times, serif !important;
+        font-size: 11pt !important;
+        color: #000 !important;
+        margin: 2px 0 !important;
+    }
+
+    /* Table - Professional Accounting Standard */
+    .table-wrapper {
+        overflow: visible !important;
     }
     table {
         width: 100% !important;
+        table-layout: auto !important; 
         border-collapse: collapse !important;
+        font-family: "Times New Roman", Times, serif !important;
     }
+    
     th, td {
-        border: 1px solid #333 !important;
-        padding: 8px !important;
+        border: none !important; /* No vertical borders in pro financial reports */
+        padding: 8px 10px !important;
+        font-size: 11pt !important;
         color: #000 !important;
-        font-size: 12px !important;
+        vertical-align: top !important;
     }
-    th {
-        background-color: #f0f0f0 !important;
+    
+    /* Repeat header on every page */
+    thead {
+        display: table-header-group !important;
+    }
+    
+    thead th {
+        border-top: 2px solid #000 !important;
+        border-bottom: 1px solid #000 !important;
         font-weight: bold !important;
-    }
-    tfoot tr {
-        background-color: #f0f0f0 !important;
-    }
-    tfoot td {
-        font-weight: bold !important;
-    }
-    td[style*="color"] {
-        color: #000 !important;
-    }
-    th[style*="background-color"], td[style*="background-color"], tr[style*="background-color"] {
         background-color: transparent !important;
+        text-transform: uppercase !important;
+        font-size: 10pt !important;
     }
+
+    /* Subtle row separators */
+    tbody tr td {
+        border-bottom: 1px dotted #ccc !important;
+    }
+    
+    /* Ensure totals don't repeat */
+    tfoot {
+        display: table-row-group !important;
+    }
+    
+    tfoot tr td {
+        background-color: transparent !important;
+        color: #000 !important;
+    }
+    
+    /* Accounting totals styling */
+    tfoot tr.total-row td {
+        border-top: 1px solid #000 !important;
+        border-bottom: none !important;
+        font-weight: bold !important;
+    }
+    
+    tfoot tr.saldo-row td {
+        border-top: 1px solid #000 !important;
+        border-bottom: 4px double #000 !important; /* Standard double underline */
+        font-weight: bold !important;
+        font-size: 12pt !important;
+    }
+
+    /* Page Configuration */
     @page {
-        size: A4 landscape;
-        margin: 1.5cm;
+        size: landscape;
+        margin: 15mm 20mm;
+        
+        /* Attempt CSS3 page numbering (Supported in modern engines) */
+        @bottom-right {
+            content: "Halaman " counter(page) " dari " counter(pages);
+            font-family: "Times New Roman", Times, serif;
+            font-size: 10pt;
+            color: #000;
+        }
     }
 }
 </style>
