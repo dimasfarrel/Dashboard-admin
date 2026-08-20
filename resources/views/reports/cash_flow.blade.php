@@ -202,6 +202,11 @@
 {{-- CSS KHUSUS PRINT --}}
 <style>
 @media print {
+    /* Force Black & White Print */
+    *, *:before, *:after {
+        color: #000 !important;
+    }
+    
     /* Hide non-printable elements */
     .sidebar, .topbar, .filter-card, .no-print, .summary-cards {
         display: none !important;
@@ -274,11 +279,11 @@
     }
     
     th, td {
-        border: none !important; /* No vertical borders in pro financial reports */
+        border: 1px solid #000 !important; /* Garis pembatas kotak tegas */
         padding: 8px 10px !important;
         font-size: 11pt !important;
         color: #000 !important;
-        vertical-align: top !important;
+        vertical-align: middle !important;
     }
     
     /* Repeat header on every page */
@@ -287,17 +292,16 @@
     }
     
     thead th {
-        border-top: 2px solid #000 !important;
-        border-bottom: 1px solid #000 !important;
         font-weight: bold !important;
         background-color: transparent !important;
         text-transform: uppercase !important;
         font-size: 10pt !important;
+        border-bottom: 2px solid #000 !important; /* Penegas batas bawah header */
     }
 
-    /* Subtle row separators */
+    /* Solid row separators */
     tbody tr td {
-        border-bottom: 1px dotted #ccc !important;
+        border: 1px solid #000 !important;
     }
     
     /* Ensure totals don't repeat */
