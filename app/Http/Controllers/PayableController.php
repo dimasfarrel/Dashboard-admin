@@ -112,6 +112,10 @@ class PayableController extends Controller
 
     public function destroy(Loan $payable)
     {
+        if ($payable->repayments()->exists()) {
+            return redirect()->back()->with('error', 'Peringatan: Tidak dapat menghapus data hutang ini karena masih terdapat riwayat pelunasan. Hapus riwayat pelunasannya terlebih dahulu!');
+        }
+
         $payable->delete();
         return redirect()->route('payables.index')->with('success', 'Data hutang berhasil dihapus!');
     }

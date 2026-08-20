@@ -112,6 +112,10 @@ class ReceivableController extends Controller
 
     public function destroy(Loan $receivable)
     {
+        if ($receivable->repayments()->exists()) {
+            return redirect()->back()->with('error', 'Peringatan: Tidak dapat menghapus data piutang ini karena masih terdapat riwayat pelunasan. Hapus riwayat pelunasannya terlebih dahulu!');
+        }
+
         $receivable->delete();
         return redirect()->route('receivables.index')->with('success', 'Data piutang berhasil dihapus!');
     }
