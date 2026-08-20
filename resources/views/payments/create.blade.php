@@ -24,7 +24,7 @@
                     @if($activeTenants->count())
                     <optgroup label="Penyewa Aktif">
                         @foreach($activeTenants as $t)
-                        <option value="{{ $t->id }}" data-room="{{ $t->room_id }}" data-price="{{ $t->room?->price }}" {{ old('tenant_id', request('tenant_id')) == $t->id ? 'selected' : '' }}>
+                        <option value="{{ $t->id }}" data-room="{{ $t->room_id }}" data-price="{{ $t->room?->price }}" data-parent="{{ $t->emergency_contact_name }}" {{ old('tenant_id', request('tenant_id')) == $t->id ? 'selected' : '' }}>
                             Kamar {{ $t->room?->room_number }} - {{ $t->name }}{{ $t->nickname ? ' - ' . $t->nickname : '' }} (Rp {{ number_format($t->room?->price, 0, ',', '.') }})
                         </option>
                         @endforeach
@@ -33,7 +33,7 @@
                     @if($inactiveTenants->count())
                     <optgroup label="Penyewa Non-Aktif (Riwayat)">
                         @foreach($inactiveTenants as $t)
-                        <option value="{{ $t->id }}" data-room="{{ $t->room_id }}" data-price="{{ $t->room?->price }}" {{ old('tenant_id', request('tenant_id')) == $t->id ? 'selected' : '' }}>
+                        <option value="{{ $t->id }}" data-room="{{ $t->room_id }}" data-price="{{ $t->room?->price }}" data-parent="{{ $t->emergency_contact_name }}" {{ old('tenant_id', request('tenant_id')) == $t->id ? 'selected' : '' }}>
                             Kamar {{ $t->room?->room_number }} - {{ $t->name }}{{ $t->nickname ? ' - ' . $t->nickname : '' }}
                         </option>
                         @endforeach
@@ -99,6 +99,10 @@
                 <label>Tanggal Dibayar</label>
                 <input type="date" name="paid_at" class="form-control" value="{{ old('paid_at', date('Y-m-d')) }}">
             </div>
+            <div class="form-group">
+                <label>Wali / Orang Tua</label>
+                <input type="text" id="parent_name_display" class="form-control" value="-" readonly style="background-color: var(--surface-2); color: var(--text-secondary); cursor: not-allowed;">
+            </div>
 
             <div class="form-group span-full">
                 <label>Catatan</label>
@@ -137,6 +141,12 @@ function fillRoom(sel) {
     const opt = sel.options[sel.selectedIndex];
     document.getElementById('room_id').value = opt.dataset.room || '';
     
+    // Auto fill parent name
+    const parentDisplay = document.getElementById('parent_name_display');
+    if (parentDisplay) {
+        parentDisplay.value = opt.dataset.parent ? opt.dataset.parent : '-';
+    }
+
     // Auto fill price if mode is auto
     const activeMode = document.querySelector('input[name="amount_mode"]:checked').value;
     if (activeMode === 'auto') {
