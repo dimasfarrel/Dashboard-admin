@@ -25,7 +25,11 @@
         </div>
         <div>
             <label style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px; display: block;">Cari Nama/Kamar</label>
-            <input type="text" name="search" class="form-control" style="width: 250px;" value="{{ request('search') }}" placeholder="Ketik nama atau nomor kamar...">
+            <input type="text" name="search" class="form-control" style="width: 200px;" value="{{ request('search') }}" placeholder="Ketik nama atau nomor kamar...">
+        </div>
+        <div>
+            <label style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px; display: block;">Cari Orang Tua / Wali</label>
+            <input type="text" name="parent_search" class="form-control" style="width: 200px;" value="{{ request('parent_search') }}" placeholder="Ketik nama orang tua...">
         </div>
         <div style="display: flex; gap: 8px;">
             <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Filter</button>

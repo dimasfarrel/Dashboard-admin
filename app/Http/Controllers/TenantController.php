@@ -30,6 +30,14 @@ class TenantController extends Controller
             });
         }
 
+        if ($request->filled('parent_search')) {
+            $parentSearch = $request->parent_search;
+            $query->where(function ($q) use ($parentSearch) {
+                $q->where('emergency_contact_name', 'like', "%{$parentSearch}%")
+                  ->orWhere('emergency_contact_name_2', 'like', "%{$parentSearch}%");
+            });
+        }
+
         $tenants = $query->orderBy('name')->paginate(15)->withQueryString();
         return view('tenants.index', compact('tenants'));
     }
