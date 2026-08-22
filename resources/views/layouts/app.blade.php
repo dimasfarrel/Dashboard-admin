@@ -47,6 +47,12 @@
                 Database Kamar
             </a>
 
+            <a href="{{ route('admin.bookings.index') }}"
+               class="nav-item {{ request()->routeIs('admin.bookings.*') ? 'active' : '' }}">
+                <i class="bi bi-journal-bookmark-fill"></i>
+                Booking Online
+            </a>
+
             <a href="{{ route('tenants.index') }}"
                class="nav-item {{ request()->routeIs('tenants.*') ? 'active' : '' }}">
                 <i class="bi bi-person-badge"></i>

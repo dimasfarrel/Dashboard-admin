@@ -65,6 +65,17 @@
                 </div>
 
                 <div class="form-group">
+                    <label>Tampilkan di Website Publik?</label>
+                    <div style="margin-top: 8px;">
+                        <label class="facility-item {{ old('is_published', true) ? 'checked' : '' }}">
+                            <input type="checkbox" name="is_published" value="1" {{ old('is_published', true) ? 'checked' : '' }}>
+                            <i class="bi bi-globe"></i>
+                            <span class="facility-label">Ya, Publikasikan</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
                     <label>Tipe Kamar</label>
                     <select name="type" class="form-control">
                         <option value="">— Pilih Tipe —</option>
@@ -129,18 +140,18 @@
 
         <div class="card">
             <div class="card-header">
-                <div class="card-title"><i class="bi bi-image"></i> Foto Kamar</div>
+                <div class="card-title"><i class="bi bi-images"></i> Galeri Foto (Multiple)</div>
             </div>
             <div class="form-group">
-                <label>Upload Foto (opsional)</label>
-                <div class="photo-upload-area" onclick="document.getElementById('room_photo').click()">
-                    <i class="bi bi-cloud-upload" style="font-size:32px; display:block; margin-bottom:8px;"></i>
-                    <div style="font-size:13px; font-weight:500;">Klik untuk upload foto</div>
-                    <div class="text-sm" style="margin-top:4px;">JPG, PNG, max 2MB</div>
+                <label>Upload Foto Kamar</label>
+                <div class="photo-upload-area" onclick="document.getElementById('room_images').click()">
+                    <i class="bi bi-images" style="font-size:32px; display:block; margin-bottom:8px;"></i>
+                    <div style="font-size:13px; font-weight:500;">Klik untuk upload beberapa foto</div>
+                    <div class="text-sm" style="margin-top:4px;">Bisa pilih lebih dari 1 file (JPG, PNG)</div>
                 </div>
-                <input type="file" id="room_photo" name="photo" accept="image/*"
-                    style="display:none;" onchange="previewPhoto(this)">
-                <img id="photo-preview" class="photo-preview" style="display:none; margin-top:12px; width:100%; max-width:none; height:180px;">
+                <input type="file" id="room_images" name="images[]" accept="image/*" multiple
+                    style="display:none;" onchange="previewImages(this)">
+                <div id="gallery-preview" style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;"></div>
             </div>
         </div>
 
@@ -162,15 +173,23 @@
 
 @push('scripts')
 <script>
-function previewPhoto(input) {
-    const preview = document.getElementById('photo-preview');
-    if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = e => {
-            preview.src = e.target.result;
-            preview.style.display = 'block';
-        };
-        reader.readAsDataURL(input.files[0]);
+function previewImages(input) {
+    const previewContainer = document.getElementById('gallery-preview');
+    previewContainer.innerHTML = ''; // Clear existing
+    if (input.files) {
+        Array.from(input.files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = e => {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.style.width = '80px';
+                img.style.height = '80px';
+                img.style.objectFit = 'cover';
+                img.style.borderRadius = '8px';
+                previewContainer.appendChild(img);
+            };
+            reader.readAsDataURL(file);
+        });
     }
 }
 </script>

@@ -11,7 +11,7 @@ class Room extends Model
     use HasFactory, LogsActivity;
 
     protected $fillable = [
-        'room_number', 'floor', 'price', 'status', 'type', 'size_sqm', 'description', 'photo'
+        'room_number', 'floor', 'price', 'status', 'type', 'size_sqm', 'description', 'photo', 'is_published'
     ];
 
     public function facilities()
@@ -42,6 +42,16 @@ class Room extends Model
     public function lodgings()
     {
         return $this->hasMany(Lodging::class);
+    }
+
+    public function images()
+    {
+        return $this->hasMany(RoomImage::class);
+    }
+
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class);
     }
 
     public function activeLodging()

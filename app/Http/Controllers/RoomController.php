@@ -63,13 +63,18 @@ class RoomController extends Controller
             'type'          => 'nullable|string|max:50',
             'size_sqm'      => 'nullable|integer|min:1',
             'description'   => 'nullable|string',
-            'photo'         => 'nullable|image|max:2048',
+            'is_published'  => 'nullable|boolean',
+            'images'        => 'nullable|array',
+            'images.*'      => 'image|max:2048',
             'facilities'    => 'nullable|array',
             'facilities.*'  => 'exists:facilities,id',
         ]);
 
-        if ($request->hasFile('photo')) {
-            $validated['photo'] = $request->file('photo')->store('rooms', 'public');
+        $validated['is_published'] = $request->has('is_published');
+
+        if ($request->hasFile('images')) {
+            // Save the first image to the 'photo' column for backwards compatibility
+            $validated['photo'] = $request->file('images')[0]->store('rooms', 'public');
         }
 
         $facilityIds = $validated['facilities'] ?? [];
@@ -77,6 +82,16 @@ class RoomController extends Controller
 
         $room = Room::create($validated);
         $room->facilities()->sync($facilityIds);
+
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $index => $image) {
+                $path = $image->store('rooms', 'public');
+                $room->images()->create([
+                    'image_path' => $path,
+                    'is_primary' => $index === 0
+                ]);
+            }
+        }
 
         return redirect()->route('rooms.show', $room)
             ->with('success', "Kamar {$room->room_number} berhasil ditambahkan!");

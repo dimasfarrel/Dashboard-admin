@@ -12,9 +12,31 @@ use App\Http\Controllers\OtherIncomeController;
 use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', fn() => redirect()->route('dashboard'));
+use App\Http\Controllers\PublicController;
+use App\Http\Controllers\PublicBookingController;
+use App\Http\Controllers\AuthController;
 
-Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+// Public Routes
+Route::get('/', [PublicController::class, 'home'])->name('public.home');
+Route::get('/kamar', [PublicController::class, 'rooms'])->name('public.rooms.index');
+Route::get('/kamar/{room}', [PublicController::class, 'showRoom'])->name('public.rooms.show');
+
+// Auth Routes
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+Route::post('/login', [AuthController::class, 'login']);
+Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// Public Booking Routes (Requires Login)
+Route::middleware(['auth'])->group(function () {
+    Route::get('/kamar/{room}/booking', [PublicBookingController::class, 'checkout'])->name('public.booking.checkout');
+    Route::post('/kamar/{room}/booking', [PublicBookingController::class, 'store'])->name('public.booking.store');
+    Route::get('/dashboard-penyewa', [PublicBookingController::class, 'dashboard'])->name('public.tenant.dashboard');
+});
+
+// Admin Dashboard (Changed from '/' redirect)
+Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
 // Laporan Keuangan
 Route::get('/reports/omzet', [ReportController::class, 'totalOmzet'])->name('reports.total_omzet');
@@ -113,3 +135,12 @@ Route::prefix('settings')->name('settings.')->group(function() {
     // Lodging default price
     Route::patch('/lodging-price', [ConfigController::class, 'updateLodgingPrice'])->name('lodging-price.update');
 });
+
+use App\Http\Controllers\AdminBookingController;
+
+// Admin Bookings
+Route::get('/admin/bookings', [AdminBookingController::class, 'index'])->name('admin.bookings.index');
+Route::get('/admin/bookings/{booking}', [AdminBookingController::class, 'show'])->name('admin.bookings.show');
+Route::post('/admin/bookings/{booking}/approve', [AdminBookingController::class, 'approve'])->name('admin.bookings.approve');
+Route::post('/admin/bookings/{booking}/reject', [AdminBookingController::class, 'reject'])->name('admin.bookings.reject');
+
